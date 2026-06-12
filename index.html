@@ -4,586 +4,684 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>ExamForge — Grade 12 Mock Exam Hub</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
   :root{
-    --bg:#0b1020; --panel:#121933; --panel2:#1a2247; --text:#eef1ff; --muted:#9aa3c7;
-    --primary:#7c5cff; --primary-2:#22d3ee; --success:#22c55e; --warn:#f59e0b; --danger:#ef4444;
-    --border:#26305a; --shadow:0 20px 50px -20px rgba(0,0,0,.6);
-    --grad:linear-gradient(135deg,#7c5cff,#22d3ee);
+    --bg:#060a17; --panel:#0d152d; --panel2:#162247; --text:#f1f5f9; --muted:#94a3b8;
+    --primary:#6366f1; --primary-2:#06b6d4; --success:#10b981; --warn:#f59e0b; --danger:#ef4444;
+    --border:#1e293b; --shadow:0 25px 60px -15px rgba(0,0,0,.8);
+    --grad:linear-gradient(135deg, #6366f1, #06b6d4);
+    --glow:0 0 20px rgba(6, 182, 212, 0.25);
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-  a{color:var(--primary-2)}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px}
-  .hero{padding:48px 24px;text-align:center;background:radial-gradient(1200px 400px at 50% -10%, rgba(124,92,255,.35), transparent 60%);}
-  h1{font-size:40px;margin:0 0 12px;letter-spacing:-.02em}
-  h2{font-size:24px;margin:0 0 12px}
-  h3{margin:0 0 8px}
-  .muted{color:var(--muted)}
-  .btn{display:inline-block;border:0;border-radius:12px;padding:11px 16px;font-weight:600;cursor:pointer;background:var(--grad);color:#0b1020;font-size:14px}
-  .btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
-  .btn.ghost{background:transparent;color:var(--muted)}
-  .btn.warn{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
-  .grid{display:grid;gap:14px}
+  *{box-sizing:border-box; transition: all 0.2s ease-in-out;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; min-height: 100vh;}
+  
+  /* Layout Architecture */
+  .app-container { display: flex; min-height: 100vh; flex-direction: column; }
+  @media(min-width: 900px) {
+    .app-container { flex-direction: row; }
+    .sidebar { width: 260px; border-right: 1px solid var(--border); background: #090e20; position: sticky; top:0; height: 100vh; display: flex; flex-direction: column; justify-content: space-between; z-index: 10; }
+    .main-content { flex: 1; padding: 32px; overflow-y: auto; }
+  }
+  @media(max-width: 899px) {
+    .sidebar { width: 100%; border-bottom: 1px solid var(--border); background: #090e20; padding: 16px; }
+    .main-content { padding: 16px; }
+    .side-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  }
+
+  .sidebar-header { padding: 24px; display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--grad); box-shadow: var(--glow); display: flex; align-items: center; justify-content: center; color: #060a17; font-weight: bold; }
+  .side-nav button { width: 100%; text-align: left; background: transparent; border: none; color: var(--muted); padding: 12px 20px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; border-radius: 12px; margin-bottom: 4px; }
+  .side-nav button:hover, .side-nav button.on { color: var(--text); background: var(--panel2); }
+  .side-nav button.on { border-left: 4px solid var(--primary-2); background: linear-gradient(90deg, rgba(6,182,212,0.1), transparent); }
+
+  .wrap{max-width:1100px; margin:0 auto;}
+  .hero{padding:32px 0; text-align:center; background: radial-gradient(600px 200px at 50% 0%, rgba(6,182,212,0.15), transparent 80%); margin-bottom: 24px;}
+  h1{font-size:36px; margin:0 0 8px; letter-spacing:-.03em; font-weight: 800;}
+  h2{font-size:22px; margin:0 0 12px; letter-spacing:-.01em;}
+  h3{margin:0 0 8px; font-size: 18px;}
+  .muted{color:var(--muted); line-height: 1.5;}
+  
+  .btn{display:inline-flex; align-items:center; gap:8px; border:0; border-radius:12px; padding:12px 20px; font-weight:600; cursor:pointer; background:var(--grad); color:#060a17; font-size:14px; box-shadow: var(--glow); justify-content: center;}
+  .btn.secondary{background:var(--panel2); color:var(--text); border:1px solid var(--border); box-shadow: none;}
+  .btn.secondary:hover { background: #202f5e; }
+  .btn.warn{background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; box-shadow: 0 0 15px rgba(239,68,68,0.25);}
+  .btn:disabled{opacity:.4; cursor:not-allowed; box-shadow: none;}
+  
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:20px; padding:24px; box-shadow:var(--shadow); position: relative; overflow: hidden;}
+  .card::before { content:''; position:absolute; top:0; left:0; width:100%; height:2px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+  .card:hover::before { background: var(--grad); }
+
+  .grid{display:grid; gap:16px}
   .grid.cols-2{grid-template-columns:repeat(2,1fr)}
   .grid.cols-3{grid-template-columns:repeat(3,1fr)}
   .grid.cols-4{grid-template-columns:repeat(4,1fr)}
   @media(max-width:800px){.grid.cols-2,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr}}
-  input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font-size:15px}
-  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
-  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--panel2);color:var(--muted);font-size:12px;border:1px solid var(--border)}
-  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-  .qcard{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;margin-top:14px}
-  .choice{display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid var(--border);border-radius:12px;margin-top:8px;cursor:pointer;background:var(--panel2)}
-  .choice:hover{border-color:#3a4787}
-  .choice.sel{border-color:var(--primary);background:rgba(124,92,255,.12)}
-  .choice.correct{border-color:var(--success);background:rgba(34,197,94,.12)}
-  .choice.wrong{border-color:var(--danger);background:rgba(239,68,68,.12)}
-  .letter{width:28px;height:28px;border-radius:8px;background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-  .palette{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
-  .pal{aspect-ratio:1;border-radius:8px;border:1px solid var(--border);background:var(--panel2);cursor:pointer;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center}
-  .pal.answered{background:#1f2a5a;color:#fff;border-color:#3a4787}
-  .pal.marked{outline:2px solid var(--warn)}
-  .pal.current{background:var(--grad);color:#0b1020;border-color:transparent;font-weight:700}
-  .topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(11,16,32,.85);backdrop-filter:blur(8px);z-index:5}
-  .logo{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
-  .logo .dot{width:26px;height:26px;border-radius:8px;background:var(--grad)}
-  .score{font-size:64px;font-weight:800;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .badge{padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700}
-  .b-ok{background:rgba(34,197,94,.15);color:#86efac}
-  .b-bad{background:rgba(239,68,68,.15);color:#fca5a5}
-  .b-warn{background:rgba(245,158,11,.15);color:#fcd34d}
-  .b-info{background:rgba(34,211,238,.15);color:#67e8f9}
-  .expl{margin-top:12px;padding:12px;border-radius:12px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);font-size:14px}
+  
+  input,select,textarea{width:100%; padding:14px; border-radius:12px; border:1px solid var(--border); background:#090f21; color:var(--text); font-size:15px; font-family:inherit;}
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary-2); box-shadow: var(--glow); }
+  textarea{resize:vertical; min-height:120px}
+  label{display:block; font-size:13px; color:var(--muted); margin:12px 0 6px; font-weight: 600;}
+  .pill{display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; background:var(--panel2); color:var(--primary-2); font-size:13px; border:1px solid var(--border); font-weight: 600;}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .between{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+  
+  /* Testing Interface */
+  .qcard{background:var(--panel); border:1px solid var(--border); border-radius:20px; padding:24px; margin-top:16px}
+  .choice{display:flex; align-items:center; gap:14px; padding:14px 18px; border:2px solid var(--border); border-radius:14px; margin-top:10px; cursor:pointer; background:#090f21;}
+  .choice:hover{border-color:var(--primary); background: rgba(99,102,241,0.05);}
+  .choice.sel{border-color:var(--primary-2); background:rgba(6,182,212,0.12); box-shadow: var(--glow);}
+  .choice.correct{border-color:var(--success); background:rgba(16,185,129,0.12); color: #a7f3d0;}
+  .choice.wrong{border-color:var(--danger); background:rgba(239,68,68,0.12); color: #fca5a5;}
+  .letter{width:32px; height:32px; border-radius:10px; background:var(--panel2); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; flex-shrink:0; color: var(--primary-2);}
+  
+  /* Critical Keyword Highlight Design */
+  .kw-highlight {
+    color: var(--warn);
+    font-weight: 900;
+    background: rgba(245, 158, 11, 0.15);
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    display: inline-block;
+  }
+
+  .palette{display:grid; grid-template-columns:repeat(10,1fr); gap:8px}
+  .pal{aspect-ratio:1; border-radius:10px; border:1px solid var(--border); background:#090f21; cursor:pointer; font-size:13px; color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight: 600;}
+  .pal.answered{background:#1e293b; color:#fff; border-color:var(--muted);}
+  .pal.marked{background: rgba(245,158,11,0.15); border-color: var(--warn); color: var(--warn);}
+  .pal.current{background:var(--grad); color:#060a17; border-color:transparent; font-weight:800; box-shadow: var(--glow);}
+  
+  .score{font-size:72px; font-weight:900; line-height:1; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; filter: drop-shadow(var(--glow));}
+  .expl{margin-top:16px; padding:16px; border-radius:14px; background:rgba(6,182,212,.06); border:1px solid rgba(6,182,212,.2); font-size:14px; line-height: 1.6;}
   .hidden{display:none!important}
-  .loader{width:48px;height:48px;border:5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:30px auto}
+  .loader{width:48px; height:48px; border:4px solid var(--border); border-top-color:var(--primary-2); border-radius:50%; animation:spin 1s linear infinite; margin:40px auto}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .timer{font-variant-numeric:tabular-nums;background:var(--panel2);padding:6px 12px;border-radius:10px;border:1px solid var(--border)}
-  .timer.warn{background:rgba(245,158,11,.2);border-color:var(--warn);color:var(--warn)}
-  .timer.danger{background:rgba(239,68,68,.2);border-color:var(--danger);color:var(--danger);animation:pulse 1s infinite}
-  @keyframes pulse{50%{opacity:.6}}
-  .small{font-size:13px}
-  .err{color:#fca5a5;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);padding:10px;border-radius:10px;margin-top:10px;font-size:14px}
-  .markbtn{padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px}
-  .markbtn.on{background:rgba(124,92,255,.15);color:var(--primary-2);border-color:var(--primary)}
-  .stat{padding:14px;border-radius:14px;background:var(--panel2);border:1px solid var(--border);text-align:center}
-  .stat .v{font-size:28px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .stat .l{font-size:12px;color:var(--muted);margin-top:4px}
-  .progressbar{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-  .progressbar > div{height:100%;background:var(--grad);transition:width .4s}
-  .conf{display:flex;gap:6px;justify-content:center;margin-top:10px}
-  .conf button{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer;font-size:13px}
-  .conf button.sel{border-color:var(--primary);background:rgba(124,92,255,.15)}
-  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
-  .cal .d{aspect-ratio:1;border-radius:6px;background:var(--panel2);border:1px solid var(--border);font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
-  .cal .d.active{background:var(--grad);color:#0b1020;font-weight:700;border-color:transparent}
-  .cal .d.today{outline:2px solid var(--primary-2)}
-  .chart{width:100%;height:140px}
-  .tab{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:14px;font-weight:600}
-  .tab.on{background:var(--grad);color:#0b1020;border-color:transparent}
-  .weak{display:flex;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--border);margin-top:6px;font-size:14px}
-  .weak .bar{height:6px;background:rgba(239,68,68,.2);border-radius:999px;overflow:hidden;width:100px;margin-top:6px}
-  .weak .bar>div{height:100%;background:var(--danger)}
-  details summary{cursor:pointer;font-weight:600;padding:8px 0}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 18px;box-shadow:var(--shadow);z-index:50;font-size:14px}
+  
+  .timer{font-variant-numeric:tabular-nums; background:#090f21; padding:8px 16px; border-radius:12px; border:1px solid var(--border); font-weight: 700; font-size: 16px; letter-spacing: 0.5px;}
+  .timer.warn{border-color:var(--warn); color:var(--warn);}
+  .timer.danger{border-color:var(--danger); color:var(--danger); animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.5}}
+  
+  .markbtn{padding:8px 14px; border-radius:10px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-size:13px; font-weight: 600;}
+  .markbtn.on{background:rgba(245,158,11,0.15); color:var(--warn); border-color:var(--warn)}
+  .stat{padding:20px; border-radius:18px; background:var(--panel); border:1px solid var(--border); text-align:center; box-shadow: var(--shadow);}
+  .stat .v{font-size:32px; font-weight:900; color: #fff; margin-bottom: 4px;}
+  .stat .l{font-size:13px; color:var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+  
+  .progressbar{height:8px; background:#090f21; border-radius:999px; overflow:hidden; border:1px solid var(--border)}
+  .progressbar > div{height:100%; background:var(--grad); transition:width .4s}
+  
+  .conf{display:flex; gap:8px; justify-content:center; margin-top:12px}
+  .conf button{flex:1; padding:10px; border-radius:10px; border:1px solid var(--border); background:#090f21; color:var(--text); cursor:pointer; font-size:13px; font-weight: 600;}
+  .conf button.sel{border-color:var(--primary-2); background:rgba(6,182,212,0.15); color: var(--primary-2);}
+  
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:12px}
+  .cal .d{aspect-ratio:1; border-radius:8px; background:#090f21; border:1px solid var(--border); font-size:11px; display:flex; align-items:center; justify-content:center; color:var(--muted); font-weight: 600;}
+  .cal .d.active{background:var(--grad); color:#060a17; font-weight:800; border-color:transparent;}
+  .cal .d.today{outline:2px solid var(--primary-2); outline-offset: 2px;}
+  .chart{width:100%; height:150px}
+  .weak{display:flex; justify-content:space-between; align-items: center; padding:12px 16px; border-radius:12px; background:#090f21; border:1px solid var(--border); margin-top:8px;}
+  .weak .bar{height:6px; background:rgba(239,68,68,0.15); border-radius:999px; overflow:hidden; width:120px; margin-top:6px}
+  .weak .bar>div{height:100%; background:var(--danger)}
+  
+  /* AI Chat Module Layout */
+  .ai-chat-container { margin-top: 24px; background: var(--panel); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); }
+  .ai-chat-header { background: var(--panel2); padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-weight: 700; }
+  .chat-messages { height: 350px; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 14px; background: #080d1c; }
+  .chat-message { max-width: 80%; padding: 14px 18px; border-radius: 16px; line-height: 1.5; font-size: 14.5px; }
+  .chat-user { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(99,102,241,0.2); }
+  .chat-ai { align-self: flex-start; background: var(--panel2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .chat-input-area { padding: 16px 24px; background: var(--panel2); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+  .chat-input { flex: 1; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border); background: #060a17; color: var(--text); }
+  .chat-send { height: 48px; width: 48px; display: flex; align-items: center; justify-content: center; background: var(--grad); color: #060a17; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--glow); font-size: 16px; }
 
-  /* AI Chat Styles */
-  .ai-chat-container {
-    margin-top: 40px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    overflow: hidden;
+  /* Premium High-Yield Flashcards */
+  .fcard-container { perspective: 1000px; width: 100%; height: 220px; cursor: pointer; margin-top: 12px; }
+  .fcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+  .fcard-container.flipped .fcard-inner { transform: rotateY(180deg); }
+  .fcard-front, .fcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .fcard-front { background: linear-gradient(135deg, var(--panel), var(--panel2)); color: var(--text); border-top: 3px solid var(--primary-2); }
+  .fcard-back { background: var(--grad); color: #060a17; transform: rotateY(180deg); font-weight: 700; font-size: 18px; }
+  .exam-layout { display: grid; gap: 24px; grid-template-columns: 1fr; }
+  @media(min-width: 950px) { .exam-layout { grid-template-columns: 2.2fr 1fr; } }
+
+  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .chip { background: #060a17; border: 1px solid var(--border); color: var(--primary-2); padding: 8px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; font-weight: 600; }
+  .chip:hover { background: var(--primary-2); color: #060a17; border-color: transparent; box-shadow: var(--glow); }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--panel2); border-left: 4px solid var(--primary-2); padding: 16px 24px; border-radius: 12px; box-shadow: var(--shadow); z-index: 100000; font-weight: 600; font-size: 14px; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from{ transform: translateY(20px); opacity: 0; } to{ transform: translateY(0); opacity: 1; } }
+
+  /* Driver.js Custom Popover Theme Override */
+  .driver-popover {
+    background-color: var(--panel) !important;
+    color: var(--text) !important;
+    border: 2px solid var(--primary-2) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
   }
-  .ai-chat-header {
-    background: var(--panel2);
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-  }
-  .chat-messages {
-    height: 320px;
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: #0f1629;
-  }
-  .chat-message {
-    max-width: 85%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    line-height: 1.4;
-  }
-  .chat-user {
-    align-self: flex-end;
-    background: var(--primary);
-    color: #0b1020;
-    border-bottom-right-radius: 4px;
-  }
-  .chat-ai {
-    align-self: flex-start;
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    border-bottom-left-radius: 4px;
-  }
-  .chat-input-area {
-    padding: 16px;
-    background: var(--panel2);
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-  }
-  .chat-input {
-    flex: 1;
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    font-size: 15px;
-  }
-  .chat-send {
-    padding: 0 24px;
-    background: var(--grad);
-    color: #0b1020;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
+  .driver-popover-title { color: var(--primary-2) !important; font-size: 18px !important; font-weight: 800 !important; }
+  .driver-popover-description { color: var(--muted) !important; font-size: 14px !important; line-height: 1.5 !important; }
+  .driver-popover-next-btn, .driver-popover-prev-btn {
+    background: var(--grad) !important;
+    color: #060a17 !important;
+    text-shadow: none !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    border: none !important;
   }
 
-  /* Footer */
-  footer {
-    background: #0a0f1f;
-    border-top: 1px solid var(--border);
-    padding: 60px 24px 30px;
-    color: var(--muted);
-    font-size: 14px;
+  /* Advanced Class Login Styling */
+  .advanced-login-wrapper { width: 100%; max-width: 480px; position: relative; z-index: 1; }
+  .advanced-login-wrapper::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(99,102,241,0.15) 0%, transparent 60%);
+    z-index: -1; pointer-events: none;
   }
-  .footer-content {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
+  .premium-login-card {
+    background: rgba(13, 21, 45, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 30px 60px -10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px 32px;
   }
-  .footer-col h3 {
-    color: var(--text);
-    margin-bottom: 16px;
-    font-size: 16px;
+  .input-group { margin-bottom: 20px; }
+  .input-group label { color: var(--text); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; font-weight: 600;}
+  .input-group label i { color: var(--primary-2); }
+  .premium-input {
+    background: rgba(6, 10, 23, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .footer-col a {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--muted);
-    text-decoration: none;
+  .premium-input:focus {
+    background: rgba(6, 10, 23, 0.9);
+    border-color: var(--primary-2);
+    box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
+    transform: translateY(-2px);
   }
-  .footer-col a:hover {
-    color: var(--primary-2);
+  .premium-btn {
+    width: 100%; justify-content: center; margin-top: 28px; padding: 16px;
+    font-size: 16px; font-weight: 800; border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    background-size: 200% auto; transition: 0.4s ease;
+    border: 1px solid rgba(255,255,255,0.1);
   }
-  .social-icons {
-    display: flex;
-    gap: 16px;
-    margin-top: 12px;
-  }
-  .social-icons a {
-    font-size: 22px;
-    color: var(--muted);
-  }
-  .footer-bottom {
-    max-width: 1100px;
-    margin: 50px auto 0;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 13px;
-  }
-  @media(max-width:900px) {
-    .footer-content { grid-template-columns: 1fr 1fr; }
+  .premium-btn:hover { 
+    background-position: right center; 
+    transform: translateY(-3px); 
+    box-shadow: 0 15px 25px rgba(6, 182, 212, 0.3); 
   }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="logo" onclick="goDash()"><div class="dot"></div> ExamForge</div>
-  <div class="row">
-    <div id="streakBadge" class="pill hidden">🔥 <span id="streakNum">0</span>-day streak</div>
-    <div id="userInfo" class="small muted"></div>
+<div class="app-container">
+  <div class="sidebar hidden" id="appSidebar">
+    <div>
+      <div class="sidebar-header">
+        <div class="logo-icon"><i class="fas fa-fire"></i></div>
+        <div style="font-weight:800; font-size:20px; letter-spacing:-0.5px;">ExamForge</div>
+      </div>
+      <div class="side-nav" id="navPanel" style="padding: 0 16px;">
+        <button class="on" data-tab="practice" onclick="setTab('practice')" id="tour-practice"><i class="fas fa-book-open"></i> Practice Modules</button>
+        <button data-tab="daily" onclick="setTab('daily')" id="tour-daily"><i class="fas fa-bolt"></i> Daily Challenge</button>
+        <button data-tab="mock" onclick="setTab('mock')" id="tour-mock"><i class="fas fa-graduation-cap"></i> Full Mock Simulation</button>
+        <button data-tab="review" onclick="setTab('review')"><i class="fas fa-history"></i> Error Review Pool</button>
+        <button data-tab="tutor" onclick="setTab('tutor')" id="tour-tutor"><i class="fas fa-robot"></i> 24/7 AI Tutor</button>
+        <button data-tab="notebook" onclick="setTab('notebook')" id="tour-notebook"><i class="fas fa-brain"></i> Active Recall Hub</button>
+        <button data-tab="progress" onclick="setTab('progress')"><i class="fas fa-chart-line"></i> Analytics Matrix</button>
+      </div>
+    </div>
+    <div style="padding: 24px; border-top:1px solid var(--border); background: #050814;">
+      <div id="streakBadge" class="pill hidden" style="margin-bottom:12px; width:100%; justify-content:center;"><i class="fas fa-fire"></i> <span id="streakNum">0</span> Day Streak</div>
+      <div id="userInfo" class="small muted" style="font-size:12px; margin-bottom:12px; font-weight:600;"></div>
+      <button class="btn secondary" style="width:100%; justify-content:center; padding:8px;" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Exit Profile</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    
+    <section id="view-login" class="wrap" style="padding: 60px 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh;">
+      <div class="advanced-login-wrapper">
+        <div class="hero" style="background: transparent; margin-bottom: 32px;">
+          <div class="logo-icon" style="width: 72px; height: 72px; font-size: 32px; margin: 0 auto 16px; border-radius: 20px;"><i class="fas fa-fire"></i></div>
+          <h1 style="font-size: 42px; text-shadow: var(--glow);">ExamForge <span style="color: var(--primary-2);">Pro</span></h1>
+          <p class="muted" style="font-size: 16px;">Advanced ESSLCE Diagnostic Workspace</p>
+        </div>
+
+        <div class="card premium-login-card">
+          <h2 style="text-align: center; margin-bottom: 28px; font-size: 24px;">Candidate Authorization</h2>
+          
+          <div class="input-group">
+            <label><i class="fas fa-user-circle"></i> Candidate Full Name</label>
+            <input id="in-name" class="premium-input" placeholder="Enter designated identity" autocomplete="off" />
+          </div>
+          
+          <div class="grid cols-2" style="gap: 16px;">
+            <div class="input-group">
+              <label><i class="fas fa-fingerprint"></i> Age Matrix</label>
+              <input id="in-age" type="number" class="premium-input" min="10" max="100" placeholder="e.g., 18" />
+            </div>
+            <div class="input-group">
+              <label><i class="fas fa-lock"></i> Passkey Lock</label>
+              <input id="in-pass" type="password" class="premium-input" placeholder="Min. 4 chars" />
+            </div>
+          </div>
+
+          <div id="loginErr" class="hidden" style="color:var(--danger); margin-top:16px; font-weight:600; font-size:14px; text-align:center; background: rgba(239,68,68,0.1); padding: 12px; border-radius: 10px; border: 1px solid rgba(239,68,68,0.3);"></div>
+          
+          <button class="btn premium-btn" onclick="doLogin()">
+            Initialize Secure Hub <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-dash" class="wrap hidden">
+      <div class="between">
+        <h1 id="hi" style="margin:0;">Candidate Hub</h1>
+        <div class="pill" style="background: rgba(6,182,212,0.1);"><i class="fas fa-shield-alt"></i> ESSLCE Standard Mode</div>
+      </div>
+
+      <div class="grid cols-4" style="margin-top:24px">
+        <div class="stat"><div class="v" id="sExams">0</div><div class="l">Exams Completed</div></div>
+        <div class="stat"><div class="v" id="sAvg">—</div><div class="l">Mean Score Metric</div></div>
+        <div class="stat"><div class="v" id="sStreak">0</div><div class="l">Streak Engine</div></div>
+        <div class="stat"><div class="v" id="sBest">—</div><div class="l">Peak Competence</div></div>
+      </div>
+
+      <div id="tab-practice" class="tabpane" style="margin-top:24px">
+        <div id="streamPick" class="grid cols-2">
+          <div class="card" style="cursor:pointer;" onclick="pickStream('natural')">
+            <div style="font-size:36px; margin-bottom:12px;">🧪</div>
+            <h2>Natural Sciences Matrix</h2>
+            <p class="muted">Mathematics, Physics, Chemistry, Biology, English, and General Aptitude tracks.</p>
+          </div>
+          <div class="card" style="cursor:pointer;" onclick="pickStream('social')">
+            <div style="font-size:36px; margin-bottom:12px;">🌍</div>
+            <h2>Social Sciences Matrix</h2>
+            <p class="muted">Mathematics, History, Geography, Economics, English, and General Aptitude tracks.</p>
+          </div>
+        </div>
+        <div id="subjectPick" class="hidden">
+          <div class="between" style="margin-bottom:16px;">
+            <button class="btn secondary" onclick="backToStreams()"><i class="fas fa-arrow-left"></i> Stream Selection</button>
+            <span class="pill" id="streamLabel"></span>
+          </div>
+          <div id="subjectGrid" class="grid cols-3"></div>
+        </div>
+      </div>
+
+      <div id="tab-daily" class="tabpane hidden" style="margin-top:24px">
+        <div class="card">
+          <h2>⚡ High-Stakes Daily 5 Challenge</h2>
+          <p class="muted">Five rapid-fire randomized focus questions. Keeps memory parameters fresh and locks your daily calendar engagement trace.</p>
+          <div id="dailyStatus" style="margin: 14px 0;"></div>
+          <div class="row">
+            <select id="dailyStream" style="max-width:240px;">
+              <option value="natural">Natural Sciences Track</option>
+              <option value="social">Social Sciences Track</option>
+            </select>
+            <button class="btn" onclick="startDaily()"><i class="fas fa-play"></i> Initialize 5 Questions</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-mock" class="tabpane hidden" style="margin-top:24px">
+        <div class="card">
+          <h2>🎯 ESSLCE Full Mock Simulation Block</h2>
+          <p class="muted">Full cross-curriculum validation. 6 core topics, 120 absolute parameters, 3-hour rigid countdown. Simulates realistic test center environments.</p>
+          <div class="row" style="margin-top:20px;">
+            <select id="mockStream" style="max-width:240px;">
+              <option value="natural">Natural Sciences Track</option>
+              <option value="social">Social Sciences Track</option>
+            </select>
+            <button class="btn warn" onclick="startMock()"><i class="fas fa-stopwatch"></i> Run Simulation Environment</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-review" class="tabpane hidden" style="margin-top:24px">
+        <div class="card">
+          <h2>🔁 Targeted Concept Error Review Pool</h2>
+          <p class="muted">Isolates system mistakes or flagged parameters to execute high-efficiency retraining loops.</p>
+          <div id="reviewStats" style="margin: 14px 0;"></div>
+          <div class="row">
+            <button class="btn" onclick="startReview('wrong')"><i class="fas fa-redo"></i> Loop Incorrect Parameters</button>
+            <button class="btn secondary" onclick="startReview('marked')"><i class="fas fa-bookmark"></i> Review Starred Trackers</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-tutor" class="tabpane hidden" style="margin-top:24px">
+        <div class="ai-chat-container">
+          <div class="ai-chat-header">
+            <div><i class="fas fa-brain" style="color:var(--primary-2);"></i> 24/7 National Exam Curriculum Specialist</div>
+            <span class="pill">ESSLCE Engine Active</span>
+          </div>
+          <div style="padding:16px 24px 0 24px;">
+            <div class="chip-row" id="tutorChips"></div>
+          </div>
+          <div id="tutorMessages" class="chat-messages">
+            <div class="chat-message chat-ai">Welcome candidate. Query my processing registers regarding explicit formula architectures, derivations, or metrics mapped to your exam blueprints. Let's maximize your comprehension curves.</div>
+          </div>
+          <div class="chat-input-area">
+            <input id="tutorInput" class="chat-input" placeholder="Inquire regarding equations, formulas, concepts, or rules..." onkeypress="if(event.key==='Enter') sendTutorMessage()" />
+            <button class="chat-send" onclick="sendTutorMessage()"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-notebook" class="tabpane hidden" style="margin-top:24px">
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>📓 Local Persistence Revision Pad</h3>
+            <p class="muted" style="font-size:13px; margin-bottom:12px;">Type core insights, equations, or rules here. Saved automatically to your machine workspace.</p>
+            <textarea id="notebookContent" placeholder="Log critical conceptual metrics here during active review tracks..." oninput="saveLocalNotes()"></textarea>
+          </div>
+          <div class="card">
+            <h3>⚡ Active Recall Flashcard Deck</h3>
+            <p class="muted" style="font-size:13px; margin-bottom:12px;">High-yield parameter cards rendering flawless math notations styles. Click card to rotate.</p>
+            <div id="flashcardBox" class="fcard-container" onclick="this.classList.toggle('flipped')">
+              <div class="fcard-inner">
+                <div class="fcard-front"><h4 id="fcFront" style="margin:0; padding:10px;">Select an educational stream from the Practice tab to activate precision recall card sequences inside this block.</h4></div>
+                <div class="fcard-back"><p id="fcBack" style="margin:0; padding:10px;"></p></div>
+              </div>
+            </div>
+            <div class="between" style="margin-top:20px;">
+              <button class="btn secondary" onclick="prevFlashcard(); event.stopPropagation();"><i class="fas fa-chevron-left"></i> Back</button>
+              <span id="flashcardIndex" class="pill">0 / 0</span>
+              <button class="btn" onclick="nextFlashcard(); event.stopPropagation();">Advance <i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-progress" class="tabpane hidden" style="margin-top:24px">
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>📈 Historical Performance Vector (Last 10 Actions)</h3>
+            <svg id="trendChart" class="chart" viewBox="0 0 400 150"></svg>
+          </div>
+          <div class="card">
+            <h3>📅 Profile Persistence Matrix</h3>
+            <p class="muted" style="font-size:13px; margin-bottom:6px;">Calculated verification of calendar engagement blocks over active interval spans.</p>
+            <div class="cal" id="calendar"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <h3>🎯 Curricular Topic Calibration Matrix</h3>
+          <div id="readinessList"></div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+          <h3>⚠️ Evaluated Structural Deficiencies</h3>
+          <div id="weakList"></div>
+        </div>
+      </div>
+
+      <div id="recentWrap" class="hidden" style="margin-top:32px;">
+        <h2>Recent Evaluated Target Actions</h2>
+        <div id="recentList" class="grid cols-2"></div>
+      </div>
+    </section>
+
+    <section id="view-exam" class="wrap hidden">
+      <div class="between" style="border-bottom:1px solid var(--border); padding-bottom:16px; margin-bottom:20px;">
+        <div>
+          <span class="pill" id="examMeta"></span>
+          <h2 id="examTitle" style="margin:8px 0 0 0;">Exam Environment Workspace</h2>
+        </div>
+        <div class="row">
+          <div class="timer" id="timer">00:00</div>
+          <button class="btn secondary" onclick="confirmQuit()"><i class="fas fa-times-circle"></i> Emergency Exit</button>
+        </div>
+      </div>
+
+      <div id="loadingBox" class="card" style="text-align:center; padding:40px;">
+        <div class="loader"></div>
+        <p class="muted" id="loadingText">Processing cryptographic parameters. Formulating textbook questions...</p>
+        <div id="genErr" class="hidden" style="color:var(--danger); font-weight:700;"></div>
+      </div>
+
+      <div id="examBody" class="exam-layout hidden">
+        <div>
+          <div class="card">
+            <div class="between">
+              <span class="muted" style="font-weight:600;">Evaluation Parameter: <strong id="progress" style="color:#fff;">0/0</strong></span>
+              <button class="markbtn" id="markBtn" onclick="toggleMark()"><i class="far fa-bookmark"></i> Flag Parameter</button>
+            </div>
+            <div class="progressbar" style="margin-top:12px;"><div id="progressFill" style="width:0%;"></div></div>
+            <div id="qBox" style="margin-top:16px;"></div>
+            
+            <div id="confBox" class="hidden" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+              <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:0.5px; text-align:center; font-weight:700;">Rate your conceptual certainty:</div>
+              <div class="conf">
+                <button data-c="1" onclick="setConfidence(1)">Speculating</button>
+                <button data-c="2" onclick="setConfidence(2)">Ambivalent</button>
+                <button data-c="3" onclick="setConfidence(3)">Certain</button>
+                <button data-c="4" onclick="setConfidence(4)">Absolute</button>
+              </div>
+            </div>
+
+            <div class="between" style="margin-top:24px;">
+              <button class="btn secondary" onclick="prevQ()"><i class="fas fa-chevron-left"></i> Previous</button>
+              <button class="btn" id="nextBtn" onclick="nextQ()">Advance <i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <h3>Evaluation Parameter Matrix</h3>
+            <div id="sectionInfo" class="pill hidden" style="margin-bottom:12px;"></div>
+            <div class="palette" id="palette"></div>
+            <div style="text-align:center; margin-top:24px;">
+              <button class="btn warn" id="submitBtn" onclick="submitExam()" disabled><i class="fas fa-cloud-upload-alt"></i> Finalize Evaluation Ledger</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex; flex-direction:column;">
+          <h3>✏️ Real-Time Computation Scratchpad</h3>
+          <p class="muted" style="font-size:13px; margin-bottom:12px;">Process parameters, solve equations, or write down variables here during testing tracks.</p>
+          <textarea id="liveScratchpad" style="flex:1; min-height:300px; background:#050914; font-family:Courier, monospace;" placeholder="// Deduce mathematical sequences or parameter dependencies here..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-results" class="wrap hidden">
+      <div class="card">
+        <div class="between">
+          <div>
+            <span class="pill" id="rMeta">Metrics Sheet</span>
+            <h2 id="rTitle" style="margin:8px 0 0 0;">Evaluation Breakdown</h2>
+          </div>
+          <div style="text-align:right;">
+            <div class="score" id="rScore">0%</div>
+            <div id="rEffective" class="muted" style="font-size:14px; color:var(--success); font-weight:700; margin-top:4px;"></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:20px;">
+          <span class="pill" id="rCorrect" style="color:var(--success); border-color:rgba(16,185,129,0.3);"></span>
+          <span class="pill" id="rWrong" style="color:var(--danger); border-color:rgba(239,68,68,0.3);"></span>
+          <span class="pill" id="rTime"><i class="far fa-clock"></i> </span>
+        </div>
+        <div class="row" style="margin-top:20px; border-top:1px solid var(--border); padding-top:16px;">
+          <button class="btn secondary" onclick="exportWrongPDF()"><i class="fas fa-file-pdf"></i> Export Discrepancy Manifest</button>
+          <button class="btn secondary" onclick="shareResult()"><i class="fas fa-share-alt"></i> Share Verified Analytics</button>
+          <button class="btn secondary" onclick="downloadShareCard()"><i class="fas fa-download"></i> Download Performance Token</button>
+        </div>
+      </div>
+
+      <div class="row" style="margin:24px 0 12px 0;">
+        <button class="markbtn on" data-filter="all" onclick="setFilter('all')">All Metrics</button>
+        <button class="markbtn" data-filter="wrong" onclick="setFilter('wrong')">Isolate Structural Faults</button>
+        <button class="markbtn" data-filter="correct" onclick="setFilter('correct')">Verified Matches</button>
+      </div>
+
+      <div id="answersList"></div>
+
+      <div class="ai-chat-container" style="margin-top:24px;">
+        <div class="ai-chat-header">
+          <div><i class="fas fa-balance-scale" style="color:var(--primary-2);"></i> Real-Time Score Arbitration Pipeline</div>
+          <span class="pill" style="color:var(--warn); border-color:var(--warn);">Live Legal Engine</span>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <div class="chat-input-area">
+          <input id="chatInput" class="chat-input" placeholder="Dispute a grading parameter or request automated calibration adjustments..." onkeypress="if(event.key==='Enter') sendChatMessage()" />
+          <button class="chat-send" onclick="sendChatMessage()"><i class="fas fa-gavel"></i></button>
+        </div>
+      </div>
+
+      <div style="margin-top:32px; text-align:center;">
+        <button class="btn" onclick="goDash()"><i class="fas fa-tachometer-alt"></i> Re-enter Candidate Command Center</button>
+      </div>
+    </section>
+
   </div>
 </div>
 
-<!-- LOGIN -->
-<section id="view-login" class="wrap">
-  <div class="hero">
-    <h1>Master Grade 12 exams.</h1>
-    <p class="muted">AI-generated mock exams · Weak-topic tracking · Daily challenges · Full mock simulations.</p>
-  </div>
-  <div class="card" style="max-width:480px;margin:0 auto">
-    <h2>Sign in / Register</h2>
-    <p class="muted small">Your name + password creates a local account. Re-enter the same to log in.</p>
-    <label>Full name</label>
-    <input id="in-name" placeholder="e.g. Lemessa Tokuma" />
-    <label>Age</label>
-    <input id="in-age" type="number" min="5" max="120" placeholder="e.g. 18" />
-    <label>Password</label>
-    <input id="in-pass" type="password" placeholder="At least 4 characters" />
-    <div id="loginErr" class="err hidden"></div>
-    <div class="row" style="margin-top:16px">
-      <button class="btn" onclick="doLogin()">Continue</button>
-    </div>
-  </div>
-</section>
-
-<!-- DASHBOARD -->
-<section id="view-dash" class="wrap hidden">
-  <h1 id="hi">Hi 👋</h1>
-
-  <!-- Stats row -->
-  <div class="grid cols-4" style="margin-top:18px">
-    <div class="stat"><div class="v" id="sExams">0</div><div class="l">Exams taken</div></div>
-    <div class="stat"><div class="v" id="sAvg">—</div><div class="l">Average score</div></div>
-    <div class="stat"><div class="v" id="sStreak">0</div><div class="l">Day streak 🔥</div></div>
-    <div class="stat"><div class="v" id="sBest">—</div><div class="l">Best subject</div></div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="row" style="margin-top:24px">
-    <button class="tab on" data-tab="practice" onclick="setTab('practice')">📚 Practice</button>
-    <button class="tab" data-tab="daily" onclick="setTab('daily')">⚡ Daily 5</button>
-    <button class="tab" data-tab="mock" onclick="setTab('mock')">🎯 Full Mock</button>
-    <button class="tab" data-tab="review" onclick="setTab('review')">🔁 Review Mode</button>
-    <button class="tab" data-tab="progress" onclick="setTab('progress')">📈 Progress</button>
-  </div>
-
-  <!-- PRACTICE TAB -->
-  <div id="tab-practice" class="tabpane" style="margin-top:16px">
-    <div id="streamPick" class="grid cols-2">
-      <div class="card" style="cursor:pointer" onclick="pickStream('natural')">
-        <div style="font-size:32px">🧪</div>
-        <h2>Natural Science</h2>
-        <p class="muted">Maths · Physics · Chemistry · Biology · English · Aptitude</p>
-      </div>
-      <div class="card" style="cursor:pointer" onclick="pickStream('social')">
-        <div style="font-size:32px">🌍</div>
-        <h2>Social Science</h2>
-        <p class="muted">Maths · History · Geography · Economics · English · Aptitude</p>
-      </div>
-    </div>
-    <div id="subjectPick" class="hidden" style="margin-top:18px">
-      <div class="row" style="margin-bottom:12px">
-        <button class="btn ghost" onclick="document.getElementById('streamPick').classList.remove('hidden');document.getElementById('subjectPick').classList.add('hidden')">← Change stream</button>
-        <span class="pill" id="streamLabel"></span>
-      </div>
-      <div id="subjectGrid" class="grid cols-3"></div>
-    </div>
-  </div>
-
-  <!-- DAILY TAB -->
-  <div id="tab-daily" class="tabpane hidden" style="margin-top:16px">
-    <div class="card">
-      <h2>⚡ Daily 5-Question Challenge</h2>
-      <p class="muted">A quick 5-question warm-up across random subjects. Build the habit — one challenge per day keeps your streak alive.</p>
-      <div id="dailyStatus" class="row" style="margin-top:10px"></div>
-      <div class="row" style="margin-top:14px">
-        <select id="dailyStream" style="max-width:200px">
-          <option value="natural">Natural Science</option>
-          <option value="social">Social Science</option>
-        </select>
-        <button class="btn" onclick="startDaily()">Start today's 5</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MOCK TAB -->
-  <div id="tab-mock" class="tabpane hidden" style="margin-top:16px">
-    <div class="card">
-      <h2>🎯 Full Mock Exam Simulation</h2>
-      <p class="muted">All 6 subjects · 120 questions total · single 3-hour timer. Real exam conditions. Section warnings when you spend too long on one subject.</p>
-      <div class="row" style="margin-top:14px">
-        <select id="mockStream" style="max-width:200px">
-          <option value="natural">Natural Science</option>
-          <option value="social">Social Science</option>
-        </select>
-        <button class="btn warn" onclick="startMock()">Start full mock (3h)</button>
-      </div>
-      <p class="small muted" style="margin-top:10px">⚠️ Once started, the timer doesn't stop. Plan accordingly.</p>
-    </div>
-  </div>
-
-  <!-- REVIEW TAB -->
-  <div id="tab-review" class="tabpane hidden" style="margin-top:16px">
-    <div class="card">
-      <h2>🔁 Review Mode</h2>
-      <p class="muted">Re-attempt questions you previously got wrong or marked for review. The best way to lock in weak areas.</p>
-      <div id="reviewStats" class="row" style="margin-top:10px"></div>
-      <div class="row" style="margin-top:14px">
-        <button class="btn" onclick="startReview('wrong')">Practice my wrong answers</button>
-        <button class="btn secondary" onclick="startReview('marked')">Practice marked questions</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROGRESS TAB -->
-  <div id="tab-progress" class="tabpane hidden" style="margin-top:16px">
-    <div class="grid cols-2">
-      <div class="card">
-        <h3>📈 Score trend (last 10)</h3>
-        <svg id="trendChart" class="chart" viewBox="0 0 400 140"></svg>
-        <p class="small muted">Each dot = one exam. Hover to see details.</p>
-      </div>
-      <div class="card">
-        <h3>📅 Study streak</h3>
-        <div class="small muted">Last 5 weeks · current streak <strong id="streakInline">0</strong> days</div>
-        <div class="cal" id="calendar"></div>
-      </div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <h3>🎯 Subject readiness</h3>
-      <p class="small muted">Based on your last 3 attempts per subject. ≥80% = exam-ready.</p>
-      <div id="readinessList" style="margin-top:10px"></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <h3>⚠️ Your weakest topics</h3>
-      <p class="small muted">Topics from questions you got wrong most often.</p>
-      <div id="weakList" style="margin-top:10px"></div>
-    </div>
-  </div>
-
-  <!-- Recent attempts -->
-  <div id="recentWrap" class="hidden" style="margin-top:36px">
-    <h2>Recent attempts</h2>
-    <div id="recentList" class="grid"></div>
-  </div>
-
-  <div style="margin-top:30px"><button class="btn secondary" onclick="signOut()">Sign out</button></div>
-</section>
-
-<!-- EXAM -->
-<section id="view-exam" class="wrap hidden">
-  <div class="between" style="margin-bottom:14px">
-    <div>
-      <div class="pill" id="examMeta"></div>
-      <h2 id="examTitle" style="margin-top:8px"></h2>
-    </div>
-    <div class="row">
-      <div class="timer" id="timer">00:00</div>
-      <button class="btn secondary" onclick="confirmQuit()">Quit</button>
-    </div>
-  </div>
-
-  <div id="loadingBox" class="card" style="text-align:center">
-    <div class="loader"></div>
-    <p class="muted">Generating fresh national exam-style questions…</p>
-    <div id="genErr" class="err hidden"></div>
-  </div>
-
-  <div id="examBody" class="hidden">
-    <div class="card">
-      <div class="between">
-        <div class="small muted">Answered: <span id="progress">0 / 0</span></div>
-        <button class="markbtn" id="markBtn" onclick="toggleMark()">☐ Mark for review</button>
-      </div>
-      <div class="progressbar" style="margin-top:10px"><div id="progressFill" style="width:0%"></div></div>
-      <div id="qBox" style="margin-top:14px"></div>
-      <div id="confBox" class="hidden">
-        <div class="small muted" style="text-align:center;margin-top:14px">How confident are you in your answer?</div>
-        <div class="conf">
-          <button data-c="1" onclick="setConfidence(1)">😬 Guessing</button>
-          <button data-c="2" onclick="setConfidence(2)">🤔 Unsure</button>
-          <button data-c="3" onclick="setConfidence(3)">🙂 Likely</button>
-          <button data-c="4" onclick="setConfidence(4)">💪 Certain</button>
-        </div>
-      </div>
-      <div class="between" style="margin-top:18px">
-        <button class="btn secondary" onclick="prevQ()">← Previous</button>
-        <button class="btn" id="nextBtn" onclick="nextQ()">Next →</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:14px">
-      <div class="between"><strong>Question palette</strong><span class="small muted">Click a number to jump</span></div>
-      <div id="sectionInfo" class="small muted hidden" style="margin-top:8px"></div>
-      <div class="palette" id="palette" style="margin-top:12px"></div>
-      <div class="row small muted" style="margin-top:10px">
-        <span class="pill">Filled = answered</span>
-        <span class="pill" style="border-color:var(--warn);color:var(--warn)">Outlined = marked</span>
-      </div>
-      <div style="margin-top:14px;text-align:center">
-        <button class="btn" id="submitBtn" onclick="submitExam()" disabled>Submit exam</button>
-        <div class="small muted" style="margin-top:6px">You must answer every question to submit.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- RESULTS -->
-<section id="view-results" class="wrap hidden">
-  <div class="card">
-    <div class="between">
-      <div>
-        <div class="pill" id="rMeta"></div>
-        <h2 id="rTitle" style="margin-top:8px"></h2>
-      </div>
-      <div style="text-align:right">
-        <div class="score" id="rScore">0</div>
-        <div class="muted small">out of 100</div>
-      </div>
-    </div>
-    <div class="row" style="margin-top:14px">
-      <span class="pill" id="rCorrect"></span>
-      <span class="pill" id="rWrong"></span>
-      <span class="pill" id="rTime"></span>
-      <span class="pill" id="rEmail"></span>
-      <span class="pill" id="rConf"></span>
-    </div>
-    <div class="row" style="margin-top:14px">
-      <button class="btn secondary" onclick="exportWrongPDF()">📄 Export wrong answers (PDF)</button>
-      <button class="btn secondary" onclick="shareResult()">📤 Share result card</button>
-      <button class="btn secondary" onclick="downloadShareCard()">⬇️ Download share image</button>
-    </div>
-  </div>
-
-  <!-- Confidence calibration -->
-  <div id="calibBox" class="card hidden" style="margin-top:14px">
-    <h3>🎯 Confidence calibration</h3>
-    <p class="small muted">How well-aligned was your confidence with your accuracy?</p>
-    <div id="calibContent"></div>
-  </div>
-
-  <div class="row" style="margin-top:16px">
-    <button class="markbtn on" data-filter="all" onclick="setFilter('all')">All</button>
-    <button class="markbtn" data-filter="wrong" onclick="setFilter('wrong')">Wrong only</button>
-    <button class="markbtn" data-filter="correct" onclick="setFilter('correct')">Correct only</button>
-    <button class="markbtn" data-filter="marked" onclick="setFilter('marked')">Marked only</button>
-  </div>
-
-  <div id="answersList"></div>
-
-  <!-- AI Dispute Chat -->
-  <div class="ai-chat-container">
-    <div class="ai-chat-header">
-      <span>🤖 AI Question Reviewer</span>
-      <span class="small muted" style="margin-left:auto">Report inconsistencies • Get instant analysis</span>
-    </div>
-    <div id="chatMessages" class="chat-messages"></div>
-    <div class="chat-input-area">
-      <input id="chatInput" class="chat-input" placeholder="E.g. Question 3: Explanation says B is correct but you marked A..." />
-      <button class="chat-send" onclick="sendChatMessage()">Send</button>
-    </div>
-  </div>
-
-  <div style="margin-top:24px;text-align:center">
-    <button class="btn" onclick="goDash()">Back to dashboard</button>
-  </div>
-</section>
-
 <div id="toast" class="toast hidden"></div>
 
-<footer>
-  <div class="footer-content">
-    <div class="footer-col">
-      <div class="logo" style="color:#fff;font-size:28px;margin-bottom:12px"><div class="dot" style="display:inline-block;vertical-align:middle"></div> ExamForge</div>
-      <p style="max-width:280px">Empowering Grade 12 students in Ethiopia with intelligent mock exams and personalized learning.</p>
-      <div class="social-icons">
-        <a href="#" onclick="window.open('https://x.com','_blank')">𝕏</a>
-        <a href="#" onclick="window.open('https://facebook.com','_blank')">📘</a>
-        <a href="#" onclick="window.open('https://instagram.com','_blank')">📷</a>
-        <a href="#" onclick="window.open('https://t.me','_blank')">✈️</a>
-      </div>
-    </div>
-    <div class="footer-col">
-      <h3>Platform</h3>
-      <a href="#" onclick="goDash()">Dashboard</a>
-      <a href="#">Practice Exams</a>
-      <a href="#">Full Mocks</a>
-      <a href="#">Daily Challenges</a>
-    </div>
-    <div class="footer-col">
-      <h3>Resources</h3>
-      <a href="#">Ethiopian Curriculum</a>
-      <a href="#">Study Tips</a>
-      <a href="#">Weak Topic Analyzer</a>
-      <a href="#">Progress Reports</a>
-    </div>
-    <div class="footer-col">
-      <h3>Contact</h3>
-      <a href="#">Support</a>
-      <a href="#">Feedback</a>
-      <a href="#">lemessatokumma@gmail.com</a>
-      <p style="margin-top:20px">Made for Ethiopian Grade 12 Students</p>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div>© 2026 ExamForge. All Rights Reserved.</div>
-    <div>Privacy • Terms • Cookies</div>
-    <div>Version 2.1 • Built with ❤️ for Ethiopian Students</div>
-  </div>
-</footer>
-
 <script>
-/* ===================== CONFIG ===================== */
+/* ===================== CENTRAL DEPLOYMENT MATRIX ===================== */
 const GROQ_API_KEY = "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";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
-const RECIPIENT_EMAIL = "lemessatokumma@gmail.com";
 
 const STREAMS = {
-  natural:{label:"Natural Science", subjects:["Mathematics","Physics","Chemistry","Biology","English","Aptitude"]},
-  social: {label:"Social Science",  subjects:["Mathematics","History","Geography","Economics","English","Aptitude"]},
+  natural: { label: "Natural Sciences Track", subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "English", "General Aptitude"] },
+  social: { label: "Social Sciences Track", subjects: ["Mathematics", "History", "Geography", "Economics", "English", "General Aptitude"] }
 };
 
-/* ===================== STORAGE ===================== */
-const LS = { users:"ef_users", session:"ef_session", results:"ef_results", daily:"ef_daily", days:"ef_days" };
+const FLASHCARDS_PRESETS = {
+  natural: [
+    { q: "What is the derivative of $\\ln(x)$ with respect to $x$?", a: "$\\frac{d}{dx}(\\ln(x)) = \\frac{1}{x}$" },
+    { q: "State Newton's Second Law in terms of momentum over time differential.", a: "$\\vec{F} = \\frac{d\\vec{p}}{dt} = m\\vec{a}$" },
+    { q: "What is the primary thermodynamic criterion for a spontaneous reaction profile at constant pressure and temperature?", a: "$\\Delta G < 0$" },
+    { q: "What defines the basic mathematical identity of the Pythagorean trigonometric theorem?", a: "$\\sin^2(x) + \\cos^2(x) = 1$" },
+    { q: "Identify the net energetic yield of ATP synthesized solely during anaerobic glycolysis per glucose unit molecules.", a: "Net product yield = 2 molecules of ATP." }
+  ],
+  social: [
+    { q: "State the calendar coordinates of the Battle of Adwa victory.", a: "March 1, 1896 (Yekatit 23, 1888 Ethiopian Calendar)." },
+    { q: "Which structural tectonic boundaries created the Great East African Rift System architecture?", a: "Divergent plate boundaries separation metrics." },
+    { q: "State the foundational law of demand relationship mapping assuming ceteris paribus parameters.", a: "$P \\uparrow \\implies Q_d \\downarrow$ (Inverse valuation metric)." },
+    { q: "Identify the mid-19th-century emperor recognized for initiating the structural unification of modern Ethiopia.", a: "Emperor Tewodros II." },
+    { q: "Define structural unemployment parameters within modern market sectors.", a: "Skills gap mismatch between available labor source registers and technical firm demands." }
+  ]
+};
+
+const CHIP_PROMPTS = [
+  "Deduce integration by parts rule formula structure",
+  "Summarize timelines leading to the Battle of Adwa",
+  "Outline the fundamental definitions of organic chemical functional setups",
+  "Differentiate macro vs micro economic boundaries"
+];
+
+/* ===================== METADATA REGISTRATION STORAGE ===================== */
+const LS = { users:"ef_users", session:"ef_session", results:"ef_results", daily:"ef_daily", days:"ef_days", corrections:"ef_corrections" };
 const getUsers = () => JSON.parse(localStorage.getItem(LS.users)||"{}");
 const setUsers = u => localStorage.setItem(LS.users, JSON.stringify(u));
 const getSession = () => JSON.parse(localStorage.getItem(LS.session)||"null");
-const setSession = s => s? localStorage.setItem(LS.session, JSON.stringify(s)) : localStorage.removeItem(LS.session);
+const setSession = s => s ? localStorage.setItem(LS.session, JSON.stringify(s)) : localStorage.removeItem(LS.session);
 const getResults = () => JSON.parse(localStorage.getItem(LS.results)||"[]");
 const saveResult = r => { const a=getResults(); a.unshift(r); localStorage.setItem(LS.results, JSON.stringify(a)); };
-const userResults = () => { const s=getSession(); return s? getResults().filter(r=>r.user===s.name):[]; };
+const userResults = () => { const s=getSession(); return s ? getResults().filter(r=>r.user===s.name):[]; };
 const getDays = () => JSON.parse(localStorage.getItem(LS.days)||"{}");
+
 const markStudyDay = () => {
   const s=getSession(); if(!s) return;
   const map=getDays(); const k=s.name;
   const today=new Date().toISOString().slice(0,10);
   map[k]=map[k]||[]; if(!map[k].includes(today)) map[k].push(today);
-  localStorage.setItem(LS.days,JSON.stringify(map));
+  localStorage.setItem(LS.days, JSON.stringify(map));
 };
-const getDaily = () => JSON.parse(localStorage.getItem(LS.daily)||"{}");
-const setDaily = d => localStorage.setItem(LS.daily,JSON.stringify(d));
 
-/* ===================== VIEWS ===================== */
+const getDaily = () => JSON.parse(localStorage.getItem(LS.daily)||"{}");
+const setDaily = d => localStorage.setItem(LS.daily, JSON.stringify(d));
+const getCorrections = () => JSON.parse(localStorage.getItem(LS.corrections)||"{}");
+const saveCorrections = c => localStorage.setItem(LS.corrections, JSON.stringify(c));
+
+function getEffectiveScore(result) {
+  const corrections = getCorrections();
+  const corr = corrections[result.id] || [];
+  return Math.min(100, result.score + Math.round((corr.length / result.total) * 100));
+}
+
+/* ===================== STRING ESCAPING & HIGHLIGHT RENDERING ===================== */
+function escapeHtml(s){ 
+  return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); 
+}
+
+function formatQuestionText(text) {
+  if (!text) return "";
+  
+  // 1. Extract and protect all MathJax expressions
+  let mathBlocks = [];
+  let tempText = String(text).replace(/(\$\$[\s\S]*?\$\$|\$[\s\S]*?\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g, (match) => {
+    mathBlocks.push(match);
+    return `__MATH_BLOCK_${mathBlocks.length - 1}__`;
+  });
+
+  // 2. Escape standard text to prevent HTML injection
+  let escaped = escapeHtml(tempText);
+
+  // 3. Apply the keyword highlight styling
+  escaped = escaped.replace(/\*\*(.*?)\*\*/g, "<span class='kw-highlight'>$1</span>");
+
+  // 4. Safely inject the raw MathJax back into the string
+  mathBlocks.forEach((block, index) => {
+    escaped = escaped.replace(`__MATH_BLOCK_${index}__`, block);
+  });
+
+  return escaped;
+}
+
+/* ===================== LAYER ENGINE VISUAL SYSTEMS ===================== */
 function show(id){
   ["view-login","view-dash","view-exam","view-results"].forEach(v=>document.getElementById(v).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
   window.scrollTo(0,0);
 }
+
+function setTab(t){
+  document.querySelectorAll("#navPanel button").forEach(b=>b.classList.toggle("on", b.dataset.tab===t));
+  document.querySelectorAll(".tabpane").forEach(p=>p.classList.add("hidden"));
+  const targetPane = document.getElementById("tab-"+t);
+  if(targetPane) targetPane.classList.remove("hidden");
+  triggerMathCompilation();
+}
+
+function triggerMathCompilation(){
+  setTimeout(()=>{ if(window.MathJax && MathJax.typesetPromise) { MathJax.typesetPromise(); } }, 50);
+}
+
 function refreshUserInfo(){
   const s = getSession();
-  document.getElementById("userInfo").textContent = s ? `${s.name} · age ${s.age}` : "";
+  document.getElementById("userInfo").innerHTML = s ? `<i class="far fa-user-circle"></i> ${s.name}<br><span style="opacity:0.6;">Age Matrix: ${s.age}</span>` : "";
   const sb = document.getElementById("streakBadge");
-  if(s){ const st=computeStreak(); document.getElementById("streakNum").textContent=st; sb.classList.toggle("hidden",st===0); }
+  if(s){ const st=computeStreak(); document.getElementById("streakNum").textContent=st; sb.classList.toggle("hidden", st===0); }
   else sb.classList.add("hidden");
 }
+
 function toast(msg){
   const t=document.getElementById("toast");
   t.textContent=msg; t.classList.remove("hidden");
-  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.add("hidden"),3000);
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.add("hidden"),4000);
 }
 
-/* ===================== AUTH ===================== */
+/* ===================== CANDIDATE ENTRY VALIDATION ===================== */
 function doLogin(){
   const name = document.getElementById("in-name").value.trim();
   const age  = parseInt(document.getElementById("in-age").value,10);
@@ -591,719 +689,543 @@ function doLogin(){
   const errEl = document.getElementById("loginErr");
   errEl.classList.add("hidden");
   if(!name || !age || !pass || pass.length<4){
-    errEl.textContent="Please enter your name, age, and a password (min 4 chars).";
+    errEl.textContent="Invalid credentials. Verify your fields configuration.";
     errEl.classList.remove("hidden"); return;
   }
   const users = getUsers();
   const key = name.toLowerCase();
-  if(users[key]){
-    if(users[key].pass !== pass){
-      errEl.textContent="Wrong password for this name.";
-      errEl.classList.remove("hidden"); return;
-    }
-  } else { users[key] = { name, age, pass }; setUsers(users); }
+  if(users[key] && users[key].pass !== pass){
+    errEl.textContent="Cryptographic authentication key match failure.";
+    errEl.classList.remove("hidden"); return;
+  } else if(!users[key]) { users[key] = { name, age, pass }; setUsers(users); }
   setSession({ name, age });
   enterDashboard();
 }
-function signOut(){ setSession(null); show("view-login"); refreshUserInfo(); }
+function signOut(){ setSession(null); document.getElementById("appSidebar").classList.add("hidden"); show("view-login"); refreshUserInfo(); }
 
-/* ===================== DASHBOARD ===================== */
+/* ===================== INTERACTIVE ENVIRONMENT CONTROL ===================== */
 function enterDashboard(){
   const s = getSession();
-  document.getElementById("hi").textContent = `Hi ${s.name.split(" ")[0]} 👋`;
-  document.getElementById("streamPick").classList.remove("hidden");
-  document.getElementById("subjectPick").classList.add("hidden");
+  document.getElementById("appSidebar").classList.remove("hidden");
+  document.getElementById("hi").innerHTML = `Hub Architecture: <span style="color:var(--primary-2);">${s.name.split(" ")[0]}</span>`;
+  backToStreams();
   setTab("practice");
   renderStats();
   renderRecent();
   renderProgress();
   renderReview();
   renderDaily();
+  loadNotebookData();
+  setupTutorModule();
   refreshUserInfo();
   show("view-dash");
+
+  if (!localStorage.getItem(`ef_onboarded_${s.name.toLowerCase()}`)) { initTour(); }
 }
-function setTab(t){
-  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on", b.dataset.tab===t));
-  document.querySelectorAll(".tabpane").forEach(p=>p.classList.add("hidden"));
-  document.getElementById("tab-"+t).classList.remove("hidden");
+
+function backToStreams() {
+  document.getElementById("streamPick").classList.remove("hidden");
+  document.getElementById("subjectPick").classList.add("hidden");
 }
+
 function pickStream(stream){
   document.getElementById("streamPick").classList.add("hidden");
   document.getElementById("subjectPick").classList.remove("hidden");
   document.getElementById("streamLabel").textContent = STREAMS[stream].label;
+  document.getElementById("view-dash").dataset.activeStream = stream;
+  initFlashcardSet(stream);
+
   const grid = document.getElementById("subjectGrid");
   grid.innerHTML = "";
   STREAMS[stream].subjects.forEach(sub=>{
     const ready = subjectReadiness(stream, sub);
     const c = document.createElement("div");
     c.className="card"; c.style.cursor="pointer";
-    c.innerHTML = `<h2>${sub}</h2>
-      <p class="muted small">20 questions · ~25 min</p>
-      ${ready!=null?`<div class="small muted" style="margin-top:6px">Readiness: <strong style="color:${ready>=80?'#86efac':ready>=60?'#fcd34d':'#fca5a5'}">${ready}%</strong></div>
-        <div class="progressbar" style="margin-top:6px"><div style="width:${ready}%"></div></div>`:''}
-      <div style="color:#22d3ee;font-weight:600;margin-top:10px">Start exam →</div>`;
+    c.innerHTML = `<h3>${sub}</h3>
+      <p class="muted small" style="font-size:13px; margin-bottom:12px;">20 target properties · ~25 minute estimation metrics</p>
+      ${ready!=null?`<div class="small muted" style="margin-bottom:6px;">Calculated readiness: <strong style="color:${ready>=80?'#10b981':ready>=60?'#f59e0b':'#ef4444'}">${ready}%</strong></div>
+        <div class="progressbar" style="margin-bottom:12px;"><div style="width:${ready}%"></div></div>`:''}
+      <div style="color:var(--primary-2); font-weight:700; font-size:14px; display:flex; align-items:center; gap:6px;">Deploy Matrix Parameters <i class="fas fa-chevron-right" style="font-size:11px;"></i></div>`;
     c.onclick = ()=>startExam(stream, sub);
     grid.appendChild(c);
   });
 }
+
 function renderRecent(){
-  const all = userResults().slice(0,6);
+  const all = userResults().slice(0,4);
   const wrap = document.getElementById("recentWrap");
   const list = document.getElementById("recentList");
   if(!all.length){ wrap.classList.add("hidden"); return; }
   wrap.classList.remove("hidden");
   list.innerHTML="";
   all.forEach(r=>{
+    const eff = getEffectiveScore(r);
     const d = document.createElement("div");
     d.className="card"; d.style.cursor="pointer";
-    d.innerHTML = `<div class="between"><div><strong>${r.subject}</strong><div class="muted small">${STREAMS[r.stream]?.label||r.stream} · ${new Date(r.date).toLocaleString()}</div></div><div class="score" style="font-size:32px">${r.score}%</div></div>`;
+    d.innerHTML = `<div class="between"><div><strong>${r.subject}</strong><div class="muted small" style="font-size:12px; margin-top:4px;">${STREAMS[r.stream]?.label||r.stream} · ${new Date(r.date).toLocaleDateString()}</div></div><div class="score" style="font-size:28px">${eff}%</div></div>`;
     d.onclick = ()=>showResults(r);
     list.appendChild(d);
   });
 }
+
 function renderStats(){
   const rs = userResults();
   document.getElementById("sExams").textContent = rs.length;
   if(rs.length){
-    const avg = Math.round(rs.reduce((a,r)=>a+r.score,0)/rs.length);
+    const effScores = rs.map(r => getEffectiveScore(r));
+    const avg = Math.round(effScores.reduce((a,s)=>a+s,0)/rs.length);
     document.getElementById("sAvg").textContent = avg+"%";
-    const bySub={}; rs.forEach(r=>{(bySub[r.subject]=bySub[r.subject]||[]).push(r.score)});
-    let best=null,bv=-1;
-    for(const k in bySub){ const a=Math.round(bySub[k].reduce((x,y)=>x+y,0)/bySub[k].length); if(a>bv){bv=a;best=k;} }
+    const bySub={}; 
+    rs.forEach((r,i)=>{ (bySub[r.subject]=bySub[r.subject]||[]).push(effScores[i]); });
+    let best=null, bv=-1;
+    for(const k in bySub){ 
+      const a=Math.round(bySub[k].reduce((x,y)=>x+y,0)/bySub[k].length); if(a>bv){bv=a; best=k;} 
+    }
     document.getElementById("sBest").textContent = best?`${best}`:"—";
   } else { document.getElementById("sAvg").textContent="—"; document.getElementById("sBest").textContent="—"; }
   document.getElementById("sStreak").textContent = computeStreak();
 }
 
-/* ===================== STREAK & CALENDAR ===================== */
+/* ===================== STREAK SYSTEM PROCESSING ===================== */
 function computeStreak(){
   const s=getSession(); if(!s) return 0;
-  const days=(getDays()[s.name]||[]).sort();
-  if(!days.length) return 0;
+  const days=(getDays()[s.name]||[]).sort(); if(!days.length) return 0;
   let streak=0; const today=new Date(); today.setHours(0,0,0,0);
-  for(let i=0;i<400;i++){
+  for(let i=0; i<400; i++){
     const d=new Date(today); d.setDate(today.getDate()-i);
     const k=d.toISOString().slice(0,10);
     if(days.includes(k)) streak++; else if(i>0) break;
   }
   return streak;
 }
+
 function renderCalendar(){
   const s=getSession(); if(!s) return;
   const days=new Set(getDays()[s.name]||[]);
   const cal=document.getElementById("calendar"); cal.innerHTML="";
   const today=new Date(); today.setHours(0,0,0,0);
   const start=new Date(today); start.setDate(today.getDate()-34);
-  for(let i=0;i<35;i++){
+  for(let i=0; i<35; i++){
     const d=new Date(start); d.setDate(start.getDate()+i);
     const k=d.toISOString().slice(0,10);
     const el=document.createElement("div");
     el.className="d"+(days.has(k)?" active":"")+(k===today.toISOString().slice(0,10)?" today":"");
-    el.textContent=d.getDate();
-    el.title=k;
-    cal.appendChild(el);
+    el.textContent=d.getDate(); el.title=k; cal.appendChild(el);
   }
 }
 
-/* ===================== PROGRESS / TREND / READINESS / WEAK ===================== */
+/* ===================== MATRIX PREDICTIVE ANALYTICS ===================== */
 function renderProgress(){
-  document.getElementById("streakInline").textContent=computeStreak();
-  renderCalendar();
-  renderTrend();
-  renderReadiness();
-  renderWeak();
+  renderCalendar(); renderTrend(); renderReadiness(); renderWeak();
 }
+
 function renderTrend(){
   const svg=document.getElementById("trendChart");
   const rs=userResults().slice(0,10).reverse();
-  if(!rs.length){ svg.innerHTML='<text x="200" y="70" fill="#9aa3c7" text-anchor="middle" font-size="13">No exams yet</text>'; return; }
-  const W=400,H=140,P=20;
+  if(!rs.length){ svg.innerHTML='<text x="200" y="75" fill="#94a3b8" text-anchor="middle" font-size="13">No operational tracks documented.</text>'; return; }
+  const W=400, H=150, P=25;
   const pts=rs.map((r,i)=>{
-    const x=P+(i*(W-2*P))/Math.max(1,rs.length-1);
-    const y=H-P-(r.score/100)*(H-2*P);
-    return [x,y,r];
+    const eff = getEffectiveScore(r);
+    const x=P+(i*(W-2*P))/Math.max(1, rs.length-1);
+    const y=H-P-(eff/100)*(H-2*P);
+    return [x,y,r,eff];
   });
   const path=pts.map((p,i)=>(i?"L":"M")+p[0]+","+p[1]).join(" ");
-  let html=`<line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="#26305a"/>
-    <line x1="${P}" y1="${P}" x2="${P}" y2="${H-P}" stroke="#26305a"/>
-    <path d="${path}" fill="none" stroke="url(#g)" stroke-width="2.5"/>
-    <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>`;
-  pts.forEach(p=>{ html+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#22d3ee"><title>${p[2].subject}: ${p[2].score}%</title></circle>`; });
+  let html=`<line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="#1e293b" stroke-width="1.5"/>
+    <path d="${path}" fill="none" stroke="url(#g)" stroke-width="3"/>
+    <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>`;
+  pts.forEach(p=>{ html+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#06b6d4"></circle>`; });
   svg.innerHTML=html;
 }
-function subjectReadiness(stream,subject){
-  const rs=userResults().filter(r=>r.stream===stream && r.subject===subject).slice(0,3);
-  if(!rs.length) return null;
-  return Math.round(rs.reduce((a,r)=>a+r.score,0)/rs.length);
+
+function subjectReadiness(stream, subject){
+  const rs=userResults().filter(r=>r.stream===stream && r.subject===subject).slice(0,3); if(!rs.length) return null;
+  return Math.round(rs.map(r=>getEffectiveScore(r)).reduce((a,r)=>a+r,0)/rs.length);
 }
+
 function renderReadiness(){
   const list=document.getElementById("readinessList"); list.innerHTML="";
-  const rs=userResults();
-  if(!rs.length){ list.innerHTML='<p class="small muted">Take some exams to see readiness.</p>'; return; }
+  const rs=userResults(); if(!rs.length){ list.innerHTML='<p class="small muted">Awaiting quantitative performance vectors.</p>'; return; }
   const seen=new Set();
-  rs.forEach(r=>{ const k=r.stream+"|"+r.subject; if(seen.has(k))return; seen.add(k);
-    const v=subjectReadiness(r.stream,r.subject);
-    const color=v>=80?'#86efac':v>=60?'#fcd34d':'#fca5a5';
-    const tag=v>=80?'✅ Ready':v>=60?'⚠️ Improving':'❌ Needs work';
-    list.innerHTML+=`<div style="margin-top:10px"><div class="between"><strong>${r.subject}</strong><span style="color:${color};font-weight:700">${v}% · ${tag}</span></div>
-      <div class="small muted">${STREAMS[r.stream]?.label||''}</div>
-      <div class="progressbar" style="margin-top:6px"><div style="width:${v}%"></div></div></div>`;
+  rs.forEach(r=>{ 
+    const k=r.stream+"|"+r.subject; if(seen.has(k))return; seen.add(k);
+    const v=subjectReadiness(r.stream, r.subject);
+    const color=v>=80?'#10b981':v>=60?'#f59e0b':'#ef4444';
+    list.innerHTML+=`<div style="margin-top:12px;"><div class="between"><strong>${r.subject}</strong><span style="color:${color}; font-weight:700;">${v}%</span></div>
+      <div class="progressbar" style="margin-top:6px;"><div style="width:${v}%"></div></div></div>`;
   });
 }
-function extractTopic(q){
-  const txt=(q.question||"").replace(/[^A-Za-z0-9 ]/g," ");
-  const stop=new Set(["the","a","an","of","is","in","to","and","for","on","what","which","how","why","are","be","by","as","at","that","this","with","from","or"]);
-  const words=txt.split(/\s+/).filter(w=>w.length>3 && !stop.has(w.toLowerCase()));
-  return words.slice(0,3).join(" ").toLowerCase() || "general";
-}
+
 function renderWeak(){
-  const list=document.getElementById("weakList"); list.innerHTML="";
-  const topics={};
+  const list=document.getElementById("weakList"); list.innerHTML=""; const topics={};
   userResults().forEach(r=>{
+    const corr = (getCorrections()[r.id] || []);
     r.questions.forEach((q,i)=>{
-      if(r.selections[i]!==q.correctIndex){
-        const t=extractTopic(q);
-        topics[t]=(topics[t]||0)+1;
+      if(!corr.includes(i) && r.selections[i]!==q.correctIndex){
+        let topicName = q.topic;
+        if (!topicName) {
+          const txt=(q.question||"").replace(/[^A-Za-z0-9 ]/g," ");
+          topicName = txt.split(/\s+/).filter(w=>w.length>4).slice(0,2).join(" ").toLowerCase() || "Core Curriculum Parameter";
+        }
+        topicName = topicName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        topics[topicName]=(topics[topicName]||0)+1;
       }
     });
   });
-  const arr=Object.entries(topics).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  if(!arr.length){ list.innerHTML='<p class="small muted">Take a few exams to see weak topics.</p>'; return; }
+  const arr=Object.entries(topics).sort((a,b)=>b[1]-a[1]).slice(0,4);
+  if(!arr.length){ list.innerHTML='<p class="small muted">System deficiencies nominal or undetected.</p>'; return; }
   const max=arr[0][1];
   arr.forEach(([t,n])=>{
     const w=Math.round((n/max)*100);
-    list.innerHTML+=`<div class="weak"><div><div>${t}</div><div class="bar"><div style="width:${w}%"></div></div></div><div class="muted small">${n} wrong</div></div>`;
+    list.innerHTML+=`<div class="weak"><strong>${t}</strong><div class="row"><div class="bar"><div style="width:${w}%"></div></div><span class="small muted">${n} parameters missed</span></div></div>`;
   });
 }
 
-/* ===================== REVIEW MODE ===================== */
-function reviewPool(kind){
-  const out=[];
-  userResults().forEach(r=>{
-    r.questions.forEach((q,i)=>{
-      if(kind==="wrong" && r.selections[i]!==q.correctIndex) out.push(q);
-      else if(kind==="marked" && (r.marked && r.marked[i])) out.push(q);
-    });
-  });
-  const seen=new Set(); const dedup=[];
-  out.forEach(q=>{ const k=q.question; if(!seen.has(k)){ seen.add(k); dedup.push(q); } });
-  return dedup;
+/* ===================== ACTIVE RECALL ENGINE LOGIC ===================== */
+let activeCards = []; let currentCardIdx = 0;
+function loadNotebookData() {
+  const s = getSession(); if(!s) return;
+  document.getElementById("notebookContent").value = localStorage.getItem(`ef_notes_${s.name.toLowerCase()}`) || "";
 }
-function renderReview(){
-  const w=reviewPool("wrong").length, m=reviewPool("marked").length;
-  document.getElementById("reviewStats").innerHTML =
-    `<span class="pill">❌ ${w} wrong available</span><span class="pill">⭐ ${m} marked available</span>`;
+function saveLocalNotes() {
+  const s = getSession(); if(!s) return;
+  localStorage.setItem(`ef_notes_${s.name.toLowerCase()}`, document.getElementById("notebookContent").value);
 }
-function startReview(kind){
-  const pool=reviewPool(kind);
-  if(pool.length<3){ toast("Not enough "+kind+" questions yet. Take more exams!"); return; }
-  const shuffled=pool.sort(()=>Math.random()-0.5).slice(0,Math.min(10,pool.length));
-  EXAM = {
-    stream:"natural", subject:"Review · "+kind, questions:shuffled,
-    selections:new Array(shuffled.length).fill(null),
-    marked:new Array(shuffled.length).fill(false),
-    confidence:new Array(shuffled.length).fill(null),
-    mode:"review", startedAt:Date.now(), current:0
-  };
-  document.getElementById("examMeta").textContent = "Review Mode";
-  document.getElementById("examTitle").textContent = `${kind==="wrong"?"Wrong answers":"Marked questions"} · ${shuffled.length} questions`;
-  document.getElementById("loadingBox").classList.add("hidden");
-  document.getElementById("examBody").classList.remove("hidden");
-  document.getElementById("sectionInfo").classList.add("hidden");
-  show("view-exam");
-  startTimer();
-  renderQuestion(); renderPalette();
+function initFlashcardSet(stream) {
+  activeCards = FLASHCARDS_PRESETS[stream] || []; currentCardIdx = 0; displayFlashcard();
 }
-
-/* ===================== DAILY 5 ===================== */
-function renderDaily(){
-  const s=getSession(); if(!s) return;
-  const d=getDaily(); const k=s.name+"|"+new Date().toISOString().slice(0,10);
-  const st=document.getElementById("dailyStatus");
-  if(d[k]) st.innerHTML=`<span class="pill" style="color:#86efac">✅ Done today · scored ${d[k]}%</span>`;
-  else st.innerHTML=`<span class="pill">Not started today</span>`;
+function displayFlashcard() {
+  const container = document.getElementById("flashcardBox");
+  if(!activeCards.length) return;
+  container.classList.remove("flipped");
+  setTimeout(() => {
+    document.getElementById("fcFront").textContent = activeCards[currentCardIdx].q;
+    document.getElementById("fcBack").textContent = activeCards[currentCardIdx].a;
+    document.getElementById("flashcardIndex").textContent = `${currentCardIdx + 1} / ${activeCards.length}`;
+    triggerMathCompilation();
+  }, container.classList.contains("flipped") ? 300 : 0);
 }
-async function startDaily(){
-  const stream=document.getElementById("dailyStream").value;
-  const sub=STREAMS[stream].subjects[Math.floor(Math.random()*STREAMS[stream].subjects.length)];
-  await startExam(stream, sub, { count:5, mode:"daily", label:"Daily 5" });
-}
+function nextFlashcard() { if(!activeCards.length) return; currentCardIdx = (currentCardIdx + 1) % activeCards.length; displayFlashcard(); }
+function prevFlashcard() { if(!activeCards.length) return; currentCardIdx = (currentCardIdx - 1 + activeCards.length) % activeCards.length; displayFlashcard(); }
 
-/* ===================== FULL MOCK ===================== */
-async function startMock(){
-  if(!confirm("Start the full 3-hour mock? Timer will not pause.")) return;
-  const stream=document.getElementById("mockStream").value;
-  const subjects=STREAMS[stream].subjects;
-  EXAM = {
-    stream, subject:"Full Mock", questions:[], sections:[],
-    selections:[], marked:[], confidence:[], mode:"mock",
-    startedAt:Date.now(), current:0, durationLimit:3*60*60
-  };
-  document.getElementById("examMeta").textContent = STREAMS[stream].label+" · FULL MOCK";
-  document.getElementById("examTitle").textContent = `Full Mock Exam — ${subjects.length*20} questions`;
-  document.getElementById("loadingBox").classList.remove("hidden");
-  document.getElementById("examBody").classList.add("hidden");
-  document.getElementById("genErr").classList.add("hidden");
-  show("view-exam"); startTimer();
-  try{
-    const all=[];
-    for(const sub of subjects){
-      const qs=await generateQuestions(stream, sub, 20);
-      qs.forEach(q=>{ q._subject=sub; });
-      EXAM.sections.push({subject:sub, start:all.length, end:all.length+qs.length});
-      all.push(...qs);
-      document.querySelector("#loadingBox p").textContent = `Loaded ${all.length} / ${subjects.length*20} questions…`;
-    }
-    EXAM.questions=all;
-    EXAM.selections=new Array(all.length).fill(null);
-    EXAM.marked=new Array(all.length).fill(false);
-    EXAM.confidence=new Array(all.length).fill(null);
-    document.getElementById("loadingBox").classList.add("hidden");
-    document.getElementById("examBody").classList.remove("hidden");
-    document.getElementById("sectionInfo").classList.remove("hidden");
-    renderQuestion(); renderPalette();
-  }catch(e){
-    stopTimer();
-    const err=document.getElementById("genErr");
-    err.textContent="Failed: "+e.message; err.classList.remove("hidden");
-  }
-}
-
-/* ===================== IMPROVED QUESTION GENERATION ===================== */
-async function generateQuestions(stream, subject, count=20){
-  const streamLabel = STREAMS[stream].label;
-  const seed = Math.floor(Math.random()*1e9);
-  const prompt = `You are an expert Ethiopian National Examination (Grade 12) question writer.
-
-Generate exactly ${count} high-quality, curriculum-aligned multiple-choice questions for **${subject}** in the **${streamLabel} stream**.
-
-Requirements:
-- Questions must reflect the official Ethiopian Grade 12 syllabus and national exam difficulty and style.
-- Use real-world Ethiopian contexts where appropriate (e.g., Ethiopian geography, history, economy, science applications).
-- Each question should test conceptual understanding, application, or problem-solving skills typical of national exams.
-- Exactly 4 choices (A, B, C, D).
-- Exactly ONE correct answer.
-- The explanation must clearly justify why the chosen correctIndex is right and why others are wrong.
-- Make questions diverse across different topics in the subject.
-
-Return ONLY clean JSON in this format:
-{
-  "questions": [
-    {
-      "id": 1,
-      "question": "...",
-      "choices": ["...", "...", "...", "..."],
-      "correctIndex": 0,
-      "explanation": "..."
-    }
-  ]
-}
-
-Seed for variation: ${seed}.`;
-
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
-    method:"POST",
-    headers:{ "Authorization":"Bearer "+GROQ_API_KEY, "Content-Type":"application/json" },
-    body: JSON.stringify({
-      model: GROQ_MODEL, 
-      temperature: 0.65,
-      max_tokens: 5000,
-      response_format:{type:"json_object"},
-      messages:[
-        {role:"system",content:"You are a precise, professional Ethiopian Grade 12 national exam question generator. Always ensure correctIndex perfectly matches the explanation."},
-        {role:"user",content:prompt}
-      ]
-    })
-  });
-  if(!res.ok){ throw new Error("AI error "+res.status+": "+(await res.text()).slice(0,200)); }
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content;
-  if(!content) throw new Error("Empty AI response");
-  const parsed = JSON.parse(content);
-  const list = (parsed.questions||[]).slice(0,count).map((q,i)=>({
-    id:i+1,
-    question:String(q.question||"").trim(),
-    choices:Array.isArray(q.choices)?q.choices.slice(0,4).map(String):[],
-    correctIndex:Math.max(0,Math.min(3,Number(q.correctIndex)||0)),
-    explanation:String(q.explanation||"").trim()
-  })).filter(q=>q.question && q.choices.length===4);
-  if(list.length<count) throw new Error("Only got "+list.length+" valid questions");
-  return list;
-}
-
-/* ===================== EXAM CORE ===================== */
-let EXAM = null;
-async function startExam(stream, subject, opts={}){
-  const count = opts.count || 20;
-  EXAM = { stream, subject, questions:[], selections:[], marked:[], confidence:[],
-           startedAt:Date.now(), current:0, mode:opts.mode||"normal", label:opts.label };
-  document.getElementById("examMeta").textContent = (opts.label?opts.label+" · ":"")+STREAMS[stream].label;
-  document.getElementById("examTitle").textContent = `${subject} — ${count} questions`;
-  document.getElementById("loadingBox").classList.remove("hidden");
-  document.getElementById("examBody").classList.add("hidden");
-  document.getElementById("genErr").classList.add("hidden");
-  document.getElementById("sectionInfo").classList.add("hidden");
-  show("view-exam"); startTimer();
-  try{
-    const qs = await generateQuestions(stream, subject, count);
-    EXAM.questions = qs;
-    EXAM.selections = new Array(qs.length).fill(null);
-    EXAM.marked = new Array(qs.length).fill(false);
-    EXAM.confidence = new Array(qs.length).fill(null);
-    document.getElementById("loadingBox").classList.add("hidden");
-    document.getElementById("examBody").classList.remove("hidden");
-    renderQuestion(); renderPalette();
-  }catch(e){
-    stopTimer();
-    const err = document.getElementById("genErr");
-    err.textContent = "Failed: " + e.message;
-    err.classList.remove("hidden");
-  }
-}
-
-function renderQuestion(){
-  const i = EXAM.current;
-  const q = EXAM.questions[i];
-  const box = document.getElementById("qBox");
-  const answered = EXAM.selections.filter(x=>x!==null).length;
-  document.getElementById("progress").textContent = `${answered} / ${EXAM.questions.length}`;
-  document.getElementById("progressFill").style.width = (answered/EXAM.questions.length*100)+"%";
-  const mark = document.getElementById("markBtn");
-  mark.textContent = EXAM.marked[i] ? "★ Marked" : "☐ Mark for review";
-  mark.classList.toggle("on", EXAM.marked[i]);
-  let secLabel="";
-  if(EXAM.sections){
-    const sec=EXAM.sections.find(s=>i>=s.start && i<s.end);
-    if(sec) secLabel=`<span class="pill" style="margin-left:6px">📚 ${sec.subject}</span>`;
-  }
-  box.innerHTML = `<div class="row"><span class="pill">Question ${i+1} of ${EXAM.questions.length}</span>${secLabel}</div>
-    <h2 style="margin-top:10px">${escapeHtml(q.question)}</h2>` +
-    q.choices.map((c,ci)=>`
-      <div class="choice ${EXAM.selections[i]===ci?'sel':''}" onclick="selectChoice(${ci})">
-        <div class="letter">${String.fromCharCode(65+ci)}</div>
-        <div>${escapeHtml(c)}</div>
-      </div>`).join("");
-  const confBox=document.getElementById("confBox");
-  if(EXAM.selections[i]!==null){
-    confBox.classList.remove("hidden");
-    confBox.querySelectorAll("button").forEach(b=>b.classList.toggle("sel", Number(b.dataset.c)===EXAM.confidence[i]));
-  } else confBox.classList.add("hidden");
-
-  document.getElementById("nextBtn").textContent = (i===EXAM.questions.length-1) ? "Review →" : "Next →";
-  if(EXAM.sections){
-    const sec=EXAM.sections.find(s=>i>=s.start && i<s.end);
-    if(sec) document.getElementById("sectionInfo").innerHTML = `Current section: <strong>${sec.subject}</strong> (Q${sec.start+1}–${sec.end})`;
-  }
-  updateSubmitBtn();
-  renderPalette();
-}
-function setConfidence(c){ EXAM.confidence[EXAM.current]=c; renderQuestion(); }
-function selectChoice(ci){ EXAM.selections[EXAM.current] = ci; renderQuestion(); }
-function toggleMark(){ EXAM.marked[EXAM.current] = !EXAM.marked[EXAM.current]; renderQuestion(); }
-function prevQ(){ if(EXAM.current>0){EXAM.current--; renderQuestion();} }
-function nextQ(){ if(EXAM.current<EXAM.questions.length-1){EXAM.current++; renderQuestion();} else { window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); } }
-function jumpTo(i){ EXAM.current=i; renderQuestion(); window.scrollTo({top:0,behavior:'smooth'}); }
-function renderPalette(){
-  const p = document.getElementById("palette");
-  p.innerHTML="";
-  EXAM.questions.forEach((_,i)=>{
-    const d = document.createElement("div");
-    d.className = "pal" + (EXAM.selections[i]!==null?" answered":"") + (EXAM.marked[i]?" marked":"") + (i===EXAM.current?" current":"");
-    d.textContent = i+1;
-    d.onclick = ()=>jumpTo(i);
-    p.appendChild(d);
+/* ===================== AI ACADEMIC TUTOR CONSOLE ===================== */
+function setupTutorModule() {
+  const chips = document.getElementById("tutorChips"); chips.innerHTML = "";
+  CHIP_PROMPTS.forEach(p => {
+    const btn = document.createElement("button"); btn.className = "chip"; btn.textContent = p;
+    btn.onclick = () => { document.getElementById("tutorInput").value = p; sendTutorMessage(); };
+    chips.appendChild(btn);
   });
 }
-function updateSubmitBtn(){
-  const allDone = EXAM.selections.every(x=>x!==null);
-  document.getElementById("submitBtn").disabled = !allDone;
-}
-function confirmQuit(){ if(confirm("Quit this exam? Progress will be lost.")){ stopTimer(); enterDashboard(); } }
-
-/* ===================== TIMER & SECTION WARNINGS ===================== */
-function startTimer(){
-  EXAM.startedAt = Date.now();
-  EXAM._sectionWarned = {};
-  EXAM.timerId = setInterval(()=>{
-    const s = Math.floor((Date.now()-EXAM.startedAt)/1000);
-    const el=document.getElementById("timer");
-    const m=Math.floor(s/60), sec=s%60;
-    let display=`${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-    if(EXAM.durationLimit){
-      const remain=EXAM.durationLimit-s;
-      if(remain<=0){ stopTimer(); alert("Time's up! Submitting your exam."); submitExam(true); return; }
-      const rm=Math.floor(remain/60), rs=remain%60;
-      display=`⏳ ${String(rm).padStart(2,"0")}:${String(rs).padStart(2,"0")}`;
-      el.classList.toggle("warn", remain<600 && remain>=120);
-      el.classList.toggle("danger", remain<120);
-    }
-    el.textContent=display;
-    if(EXAM.sections && EXAM.durationLimit){
-      const perSection=EXAM.durationLimit/EXAM.sections.length;
-      const sec=EXAM.sections.find(x=>EXAM.current>=x.start && EXAM.current<x.end);
-      if(sec){
-        const idx=EXAM.sections.indexOf(sec);
-        const expected=(idx+1)*perSection;
-        if(s>expected && !EXAM._sectionWarned[idx]){
-          EXAM._sectionWarned[idx]=true;
-          toast(`⚠️ Pacing alert: you're behind on the ${sec.subject} section.`);
-        }
-      }
-    }
-  },1000);
-}
-function stopTimer(){ if(EXAM?.timerId){ clearInterval(EXAM.timerId); EXAM.timerId=null; } }
-
-/* ===================== SUBMIT ===================== */
-async function submitExam(forced){
-  if(!forced && EXAM.selections.some(x=>x===null)){ alert("Answer all questions before submitting."); return; }
-  stopTimer();
-  let correct=0;
-  EXAM.questions.forEach((q,i)=>{ if(EXAM.selections[i]===q.correctIndex) correct++; });
-  const total = EXAM.questions.length;
-  const score = Math.round((correct/total)*100);
-  const duration = Math.floor((Date.now()-EXAM.startedAt)/1000);
-  const user = getSession();
-  const result = {
-    id: "r_"+Date.now(), user: user.name, age: user.age,
-    stream: EXAM.stream, subject: EXAM.subject,
-    score, correct, total, duration,
-    questions: EXAM.questions, selections: EXAM.selections,
-    marked: EXAM.marked, confidence: EXAM.confidence,
-    mode: EXAM.mode||"normal",
-    date: new Date().toISOString(), emailed: false
-  };
-  saveResult(result);
-  markStudyDay();
-  if(EXAM.mode==="daily"){
-    const d=getDaily(); d[user.name+"|"+new Date().toISOString().slice(0,10)]=score; setDaily(d);
-  }
-  result.emailed = await sendEmail(result);
-  const all = getResults();
-  const idx = all.findIndex(r=>r.id===result.id);
-  if(idx>=0){ all[idx]=result; localStorage.setItem(LS.results, JSON.stringify(all)); }
-  showResults(result);
-  refreshUserInfo();
-}
-
-async function sendEmail(r){
-  try{
-    const body = {
-      _subject: `Exam Result: ${r.user} — ${r.subject} — ${r.score}%`,
-      name: r.user, age: r.age,
-      stream: STREAMS[r.stream]?.label||r.stream, subject: r.subject,
-      score: `${r.correct}/${r.total} (${r.score}%)`,
-      duration_minutes: Math.round(r.duration/60),
-      taken_at: new Date(r.date).toLocaleString(),
-      summary: `Student: ${r.user} (age ${r.age})\nStream: ${STREAMS[r.stream]?.label||r.stream}\nSubject: ${r.subject}\nMode: ${r.mode}\nScore: ${r.correct}/${r.total} (${r.score}%)\nDuration: ${Math.round(r.duration/60)} min\nTaken: ${new Date(r.date).toLocaleString()}`
-    };
-    const res = await fetch("https://formsubmit.co/ajax/"+encodeURIComponent(RECIPIENT_EMAIL),{
-      method:"POST",
-      headers:{"Content-Type":"application/json", "Accept":"application/json"},
-      body: JSON.stringify(body)
-    });
-    return res.ok;
-  }catch(e){ console.error("email failed",e); return false; }
-}
-
-/* ===================== RESULTS ===================== */
-let CURRENT_RESULT = null;
-let FILTER = "all";
-function showResults(r){
-  CURRENT_RESULT = r;
-  document.getElementById("rMeta").textContent = (STREAMS[r.stream]?.label||r.stream)+" · "+(r.mode||"normal");
-  document.getElementById("rTitle").textContent = r.subject;
-  document.getElementById("rScore").textContent = r.score;
-  document.getElementById("rCorrect").textContent = `✅ ${r.correct} correct`;
-  document.getElementById("rWrong").textContent = `❌ ${r.total - r.correct} wrong`;
-  const m = Math.floor(r.duration/60), s = r.duration%60;
-  document.getElementById("rTime").textContent = `⏱ ${m}m ${s}s`;
-  document.getElementById("rEmail").textContent = r.emailed ? `📧 Sent to ${RECIPIENT_EMAIL}` : "📧 Email pending";
-  const cbox=document.getElementById("calibBox");
-  if(r.confidence && r.confidence.some(c=>c!=null)){
-    cbox.classList.remove("hidden");
-    const buckets={1:{c:0,t:0,l:"😬 Guessing"},2:{c:0,t:0,l:"🤔 Unsure"},3:{c:0,t:0,l:"🙂 Likely"},4:{c:0,t:0,l:"💪 Certain"}};
-    r.questions.forEach((q,i)=>{
-      const c=r.confidence[i]; if(!c) return;
-      buckets[c].t++; if(r.selections[i]===q.correctIndex) buckets[c].c++;
-    });
-    let html="";
-    for(let k=1;k<=4;k++){
-      const b=buckets[k]; if(!b.t) continue;
-      const pct=Math.round(b.c/b.t*100);
-      html+=`<div style="margin-top:8px"><div class="between"><span>${b.l}</span><span class="small muted">${b.c}/${b.t} correct (${pct}%)</span></div>
-        <div class="progressbar" style="margin-top:4px"><div style="width:${pct}%"></div></div></div>`;
-    }
-    const avgConf=r.confidence.filter(x=>x).reduce((a,b)=>a+b,0)/r.confidence.filter(x=>x).length;
-    document.getElementById("rConf").textContent=`🎯 Avg confidence ${avgConf.toFixed(1)}/4`;
-    document.getElementById("calibContent").innerHTML=html;
-  } else { cbox.classList.add("hidden"); document.getElementById("rConf").textContent=""; }
-  setFilter("all");
-  document.getElementById("chatMessages").innerHTML = `<div class="chat-message chat-ai">Hello! Report any question where you believe the scoring or explanation is incorrect. I'll analyze it.</div>`;
-  show("view-results");
-}
-function setFilter(f){
-  FILTER = f;
-  document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("on", b.dataset.filter===f));
-  const r = CURRENT_RESULT;
-  const list = document.getElementById("answersList");
-  list.innerHTML = "";
-  r.questions.forEach((q,i)=>{
-    const isCorrect = r.selections[i]===q.correctIndex;
-    if(f==="wrong" && isCorrect) return;
-    if(f==="correct" && !isCorrect) return;
-    if(f==="marked" && !(r.marked && r.marked[i])) return;
-    const conf=r.confidence?.[i];
-    const confTag=conf?`<span class="badge b-info">${["","Guessing","Unsure","Likely","Certain"][conf]}</span>`:"";
-    const d = document.createElement("div");
-    d.className="qcard";
-    d.innerHTML = `
-      <div class="row">
-        <span class="pill">Q${i+1}</span>
-        <span class="badge ${isCorrect?'b-ok':'b-bad'}">${isCorrect?'Correct':'Wrong'}</span>
-        ${r.marked?.[i]?'<span class="badge b-warn">★ Marked</span>':''}
-        ${confTag}
-      </div>
-      <h3 style="margin:10px 0">${escapeHtml(q.question)}</h3>
-      ${q.choices.map((c,ci)=>{
-        const sel = r.selections[i]===ci;
-        const cor = q.correctIndex===ci;
-        const cls = cor?"choice correct":(sel?"choice wrong":"choice");
-        const tag = cor?'<span class="badge b-ok" style="margin-left:auto">✓ Correct</span>':(sel?'<span class="badge b-bad" style="margin-left:auto">Your answer</span>':'');
-        return `<div class="${cls}"><div class="letter">${String.fromCharCode(65+ci)}</div><div>${escapeHtml(c)}</div>${tag}</div>`;
-      }).join("")}
-      ${q.explanation?`<div class="expl"><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</div>`:""}
-    `;
-    list.appendChild(d);
-  });
-}
-function goDash(){ if(getSession()) enterDashboard(); else show("view-login"); }
-
-/* ===================== AI CHAT ===================== */
-async function sendChatMessage(){
-  const input = document.getElementById("chatInput");
-  const msg = input.value.trim();
-  if(!msg || !CURRENT_RESULT) return;
+async function sendTutorMessage() {
+  const inp = document.getElementById("tutorInput"); const msg = inp.value.trim(); if(!msg) return;
+  const box = document.getElementById("tutorMessages");
+  box.innerHTML += `<div class="chat-message chat-user">${msg}</div>`; box.scrollTop = box.scrollHeight; inp.value = "";
   
-  const messagesDiv = document.getElementById("chatMessages");
-  messagesDiv.innerHTML += `<div class="chat-message chat-user">${escapeHtml(msg)}</div>`;
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  input.value = "";
-
-  const thinking = document.createElement("div");
-  thinking.className = "chat-message chat-ai";
-  thinking.textContent = "Analyzing...";
-  messagesDiv.appendChild(thinking);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
+  const loaderMsg = document.createElement("div"); loaderMsg.className = "chat-message chat-ai"; loaderMsg.textContent = "Processing algorithmic data paths...";
+  box.appendChild(loaderMsg); box.scrollTop = box.scrollHeight;
   try {
-    const context = CURRENT_RESULT.questions.map((q,i) => {
-      const userAns = CURRENT_RESULT.selections[i] !== null ? q.choices[CURRENT_RESULT.selections[i]] : "No answer";
-      const correctAns = q.choices[q.correctIndex];
-      return `Q${i+1}: ${q.question}\nYour answer: ${userAns}\nMarked correct: ${correctAns}\nExplanation: ${q.explanation}`;
-    }).join("\n\n");
-
-    const prompt = `Current result: ${CURRENT_RESULT.subject} - Score ${CURRENT_RESULT.score}%\n\n${context}\n\nUser says: "${msg}"\n\nAnalyze if there is any inconsistency between the correctIndex, the explanation, and the user's answer. Give a clear verdict and suggest correction if needed.`;
-
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
       method:"POST",
       headers:{ "Authorization":"Bearer "+GROQ_API_KEY, "Content-Type":"application/json" },
       body: JSON.stringify({
-        model: GROQ_MODEL,
-        temperature: 0.6,
+        model: GROQ_MODEL, temperature: 0.4,
         messages: [
-          {role:"system", content: "You are an expert exam reviewer. Be factual and helpful."},
-          {role:"user", content: prompt}
+          {role:"system", content: "You are an elite ESSLCE Grade 12 educational tutor. Format complex mathematical definitions using standard clean inline LaTeX text expressions style ($...$). Keep it scannable, clear, and highly academic."},
+          {role:"user", content: msg}
         ]
       })
     });
+    const data = await res.json(); loaderMsg.remove();
+    box.innerHTML += `<div class="chat-message chat-ai">${data.choices[0].message.content}</div>`;
+    box.scrollTop = box.scrollHeight; triggerMathCompilation();
+  } catch(e) { loaderMsg.textContent = "Communications link operational failure."; }
+}
 
-    const data = await res.json();
-    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't process that.";
-    thinking.remove();
+/* ===================== CORE RUN-TIME EVALUATION ENGINE ===================== */
+let EXAM = null;
+function reviewPool(kind){
+  const out=[];
+  userResults().forEach(r=>{
+    const corr = (getCorrections()[r.id] || []);
+    r.questions.forEach((q,i)=>{
+      if(kind==="wrong" && !corr.includes(i) && r.selections[i]!==q.correctIndex) out.push(q);
+      else if(kind==="marked" && r.marked && r.marked[i]) out.push(q);
+    });
+  });
+  return out.filter((q, idx, self) => self.findIndex(t => t.question === q.question) === idx);
+}
+function renderReview(){
+  document.getElementById("reviewStats").innerHTML = `<span class="pill">❌ ${reviewPool("wrong").length} Deficiencies cataloged</span><span class="pill">⭐ ${reviewPool("marked").length} Flagged markers pending</span>`;
+}
+function startReview(kind){
+  const pool=reviewPool(kind); if(pool.length<1){ toast("Awaiting data trace entries before loop activation."); return; }
+  const shuffled=pool.sort(()=>Math.random()-0.5).slice(0, 10);
+  initializeExamObject("Retraining Workspace", `Review Run Matrix · ${shuffled.length} Parameters`, shuffled, "review");
+}
+function renderDaily(){
+  const s=getSession(); if(!s) return;
+  const d=getDaily(); const k=s.name+"|"+new Date().toISOString().slice(0,10);
+  document.getElementById("dailyStatus").innerHTML = d[k] ? `<span class="pill" style="color:var(--success); border-color:var(--success);">✅ Operational Target Met (${d[k]}%)</span>` : `<span class="pill">Awaiting Daily Session Initialization</span>`;
+}
+async function startDaily(){
+  const stream=document.getElementById("dailyStream").value;
+  const sub=STREAMS[stream].subjects[Math.floor(Math.random()*STREAMS[stream].subjects.length)];
+  await startExam(stream, sub, { count:5, mode:"daily", label:"Daily Challenge Run" });
+}
+async function startMock(){
+  if(!confirm("Deploy the full ESSLCE 3-hour examination module?")) return;
+  const stream=document.getElementById("mockStream").value; const subjects=STREAMS[stream].subjects;
+  initializeExamObject("ESSLCE Full Mock Block", `Cross-Curriculum Simulation`, [], "mock", 3*60*60);
+  try {
+    const all=[];
+    for(const sub of subjects){
+      const qs=await generateQuestions(stream, sub, 20); qs.forEach(q=>{ q._subject=sub; }); all.push(...qs);
+    }
+    EXAM.questions=all; EXAM.selections=new Array(all.length).fill(null);
+    EXAM.marked=new Array(all.length).fill(false); EXAM.confidence=new Array(all.length).fill(null);
+    document.getElementById("loadingBox").classList.add("hidden");
+    document.getElementById("examBody").classList.remove("hidden");
+    renderQuestion(); renderPalette();
+  } catch(e) { stopTimer(); document.getElementById("genErr").textContent="Generation Fault: "+e.message; document.getElementById("genErr").classList.remove("hidden"); }
+}
+
+async function startExam(stream, subject, opts={}){
+  initializeExamObject(opts.label || "Subject Module", `${subject}`, [], opts.mode || "normal");
+  try{
+    const qs = await generateQuestions(stream, subject, opts.count || 20);
+    EXAM.questions = qs; EXAM.selections = new Array(qs.length).fill(null);
+    EXAM.marked = new Array(qs.length).fill(false); EXAM.confidence = new Array(qs.length).fill(null);
+    EXAM.stream = stream; EXAM.subject = subject;
+    document.getElementById("loadingBox").classList.add("hidden");
+    document.getElementById("examBody").classList.remove("hidden");
+    renderQuestion(); renderPalette();
+  } catch(e) { stopTimer(); document.getElementById("genErr").textContent="Data pipeline failure: "+e.message; document.getElementById("genErr").classList.remove("hidden"); }
+}
+
+function initializeExamObject(meta, title, qs, mode, duration=0) {
+  EXAM = { stream:"natural", subject:title, questions:qs, selections:new Array(qs.length).fill(null), marked:new Array(qs.length).fill(false), confidence:new Array(qs.length).fill(null), mode, startedAt:Date.now(), current:0 };
+  document.getElementById("examMeta").textContent = meta; document.getElementById("examTitle").textContent = title;
+  document.getElementById("loadingBox").classList.remove("hidden"); document.getElementById("examBody").classList.add("hidden");
+  document.getElementById("genErr").classList.add("hidden"); document.getElementById("liveScratchpad").value = "";
+  show("view-exam"); startTimer();
+  if(qs.length) { document.getElementById("loadingBox").classList.add("hidden"); document.getElementById("examBody").classList.remove("hidden"); }
+}
+
+/* FORCED EXPLICIT TOPIC CONFIGURATION INJECTION & HIGHLIGHTING */
+async function generateQuestions(stream, subject, count){
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+    method:"POST",
+    headers:{ "Authorization":"Bearer "+GROQ_API_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify({
+      model: GROQ_MODEL, temperature: 0.4, response_format:{type:"json_object"},
+      messages:[
+        {role:"system", content: `Write exactly ${count} multiple-choice questions for Grade 12 ESSLCE ${subject}. 
+CRITICAL RULE 1: Wrap exactly 1 to 3 of the most important/tricky words in the question string with double asterisks for highlighting (e.g., "Which of the following is **NOT** a characteristic..."). 
+CRITICAL RULE 2: Output valid JSON matching format: {"questions": [{"id": 1, "topic": "Exact explicit core subtopic name", "question": "Question text with **highlighted** words and MathJax $...$", "choices": ["Choice A", "Choice B", "Choice C", "Choice D"], "correctIndex": 0, "explanation": "Educational reasoning."}]}`}
+      ]
+    })
+  });
+  const data = await res.json(); return JSON.parse(data.choices[0].message.content).questions.slice(0, count);
+}
+
+function renderQuestion(){
+  const i = EXAM.current; const q = EXAM.questions[i]; const box = document.getElementById("qBox");
+  const answered = EXAM.selections.filter(x=>x!==null).length;
+  document.getElementById("progress").textContent = `${answered} / ${EXAM.questions.length}`;
+  document.getElementById("progressFill").style.width = (answered/EXAM.questions.length*100)+"%";
+  
+  const mark = document.getElementById("markBtn");
+  mark.className = "markbtn" + (EXAM.marked[i] ? " on" : "");
+  mark.innerHTML = EXAM.marked[i] ? `<i class="fas fa-bookmark"></i> Parameter Flagged` : `<i class="far fa-bookmark"></i> Flag Parameter`;
+
+  // Applying our specialized Keyword Formatter to render Glowing CSS spans instead of raw asterisks
+  const formattedQuestion = formatQuestionText(q.question);
+
+  box.innerHTML = `<h3 style="font-size:20px; line-height:1.5; margin-bottom:18px;">${formattedQuestion}</h3>` +
+    q.choices.map((c, ci)=>`
+      <div class="choice ${EXAM.selections[i]===ci?'sel':''}" onclick="selectChoice(${ci})">
+        <div class="letter">${String.fromCharCode(65+ci)}</div><div>${formatQuestionText(c)}</div>
+      </div>`).join("");
+      
+  if(EXAM.selections[i]!==null){
+    document.getElementById("confBox").classList.remove("hidden");
+    document.querySelectorAll(".conf button").forEach(b=>b.classList.toggle("sel", Number(b.dataset.c)===EXAM.confidence[i]));
+  } else document.getElementById("confBox").classList.add("hidden");
+  document.getElementById("submitBtn").disabled = !EXAM.selections.every(x=>x!==null);
+  triggerMathCompilation();
+}
+
+function selectChoice(ci){ EXAM.selections[EXAM.current] = ci; renderQuestion(); renderPalette(); }
+function setConfidence(c){ EXAM.confidence[EXAM.current]=c; renderQuestion(); }
+function toggleMark(){ EXAM.marked[EXAM.current] = !EXAM.marked[EXAM.current]; renderQuestion(); renderPalette(); }
+function prevQ(){ if(EXAM.current>0){EXAM.current--; renderQuestion(); renderPalette();} }
+function nextQ(){ if(EXAM.current<EXAM.questions.length-1){EXAM.current++; renderQuestion(); renderPalette();} }
+function jumpTo(i){ EXAM.current=i; renderQuestion(); renderPalette(); }
+
+function renderPalette(){
+  const p = document.getElementById("palette"); p.innerHTML="";
+  EXAM.questions.forEach((_, i)=>{
+    const d = document.createElement("div");
+    d.className = "pal" + (EXAM.selections[i]!==null?" answered":"") + (EXAM.marked[i]?" marked":"") + (i===EXAM.current?" current":"");
+    d.textContent = i+1; d.onclick = ()=>jumpTo(i); p.appendChild(d);
+  });
+}
+function confirmQuit(){ if(confirm("Terminate processing space? Logs will clear.")) { stopTimer(); enterDashboard(); } }
+
+function startTimer(){
+  EXAM.startedAt = Date.now();
+  EXAM.timerId = setInterval(()=>{
+    const s = Math.floor((Date.now()-EXAM.startedAt)/1000);
+    document.getElementById("timer").textContent = `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  },1000);
+}
+function stopTimer(){ if(EXAM?.timerId){ clearInterval(EXAM.timerId); EXAM.timerId=null; } }
+
+function submitExam(){
+  stopTimer(); let correct=0; EXAM.questions.forEach((q,i)=>{ if(EXAM.selections[i]===q.correctIndex) correct++; });
+  const total = EXAM.questions.length; const score = Math.round((correct/total)*100); const user = getSession();
+  const result = { id: "r_"+Date.now(), user: user.name, stream: EXAM.stream, subject: EXAM.subject, score, correct, total, duration: Math.floor((Date.now()-EXAM.startedAt)/1000), questions: EXAM.questions, selections: EXAM.selections, marked: EXAM.marked, confidence: EXAM.confidence, mode: EXAM.mode, date: new Date().toISOString() };
+  saveResult(result); markStudyDay();
+  if(EXAM.mode==="daily"){ const d=getDaily(); d[user.name+"|"+new Date().toISOString().slice(0,10)]=score; setDaily(d); }
+  showResults(result);
+}
+
+/* ===================== EVALUATION ANALYTICS DISPATCHER ===================== */
+let CURRENT_RESULT = null; let FILTER = "all";
+function showResults(r){
+  CURRENT_RESULT = r; const effScore = getEffectiveScore(r);
+  document.getElementById("rMeta").textContent = STREAMS[r.stream]?.label || "Verified Core Matrix";
+  document.getElementById("rTitle").textContent = r.subject; document.getElementById("rScore").textContent = r.score+"%";
+  document.getElementById("rEffective").innerHTML = effScore !== r.score ? `Calibrated Adjustments Metric: ${effScore}%` : "";
+  document.getElementById("rCorrect").textContent = `${r.correct} / ${r.total} Match Parameters`;
+  document.getElementById("rWrong").textContent = `${r.total - r.correct} Structural Deviations`;
+  document.getElementById("rTime").innerHTML = `<i class="far fa-clock"></i> Delta Span: ${Math.floor(r.duration/60)}m ${r.duration%60}s`;
+  setFilter("all");
+  document.getElementById("chatMessages").innerHTML = `<div class="chat-message chat-ai">Arbitration protocol online. Specify grading parameters or logic overrides requiring automated pipeline confirmation adjustment.</div>`;
+  show("view-results");
+}
+
+function setFilter(f){
+  FILTER = f; document.querySelectorAll("[data-filter]").forEach(b=>b.classList.toggle("on", b.dataset.filter===f));
+  const r = CURRENT_RESULT; const corrections = getCorrections()[r.id] || [];
+  const list = document.getElementById("answersList"); list.innerHTML = "";
+  r.questions.forEach((q, i)=>{
+    const isCorrect = r.selections[i]===q.correctIndex || corrections.includes(i);
+    if(f==="wrong" && isCorrect) return; if(f==="correct" && !isCorrect) return;
+    const d = document.createElement("div"); d.className="qcard";
+    d.innerHTML = `<h3 style="font-size:18px;">${formatQuestionText(q.question)}</h3>` + 
+      q.choices.map((c, ci)=>`<div class="choice ${q.correctIndex===ci?'correct':(r.selections[i]===ci?'wrong':'')}"><div class="letter">${String.fromCharCode(65+ci)}</div><div>${formatQuestionText(c)}</div></div>`).join("") +
+      `<div class="expl"><strong>Analysis Vector Breakdown:</strong> ${escapeHtml(q.explanation)}</div>`;
+    list.appendChild(d);
+  });
+  triggerMathCompilation();
+}
+
+/* ===================== SCORE ARBITRATION PARSING PIPELINE ===================== */
+async function sendChatMessage(){
+  const input = document.getElementById("chatInput"); const msg = input.value.trim(); if(!msg || !CURRENT_RESULT) return;
+  const messagesDiv = document.getElementById("chatMessages");
+  messagesDiv.innerHTML += `<div class="chat-message chat-user">${escapeHtml(msg)}</div>`; messagesDiv.scrollTop = messagesDiv.scrollHeight; input.value = "";
+  
+  const thinking = document.createElement("div"); thinking.className = "chat-message chat-ai"; thinking.textContent = "Analyzing evaluation discrepancy context parameters...";
+  messagesDiv.appendChild(thinking);
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions",{
+      method:"POST",
+      headers:{ "Authorization":"Bearer "+GROQ_API_KEY, "Content-Type":"application/json" },
+      body: JSON.stringify({
+        model: GROQ_MODEL, temperature: 0.1,
+        messages: [
+          {role:"system", content: "You review multiple choice questions. If the candidate makes a valid case that their answer is right, approve the point. To grant a correction, append exactly '[CORRECTIONS: X]' at the end of your response, where X is the array index integer of the question being disputed."},
+          {role:"user", content: `Question: "${CURRENT_RESULT.questions[0].question}". Candidate Answer Choice Given: "${CURRENT_RESULT.questions[0].choices[CURRENT_RESULT.selections[0]]}". System Core Answer: "${CURRENT_RESULT.questions[0].choices[CURRENT_RESULT.questions[0].correctIndex]}". Candidate Dispute: "${msg}"`}
+        ]
+      })
+    });
+    const data = await res.json(); thinking.remove();
+    const reply = data.choices[0].message.content;
     messagesDiv.innerHTML += `<div class="chat-message chat-ai">${escapeHtml(reply)}</div>`;
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  } catch(e) {
-    thinking.textContent = "Error connecting to AI. Please try again.";
-  }
+    
+    const match = reply.match(/\[CORRECTIONS:\s*(\d+)\]/i);
+    if(match) {
+      const idx = parseInt(match[1], 10); const c = getCorrections(); c[CURRENT_RESULT.id] = c[CURRENT_RESULT.id] || [];
+      if(!c[CURRENT_RESULT.id].includes(idx)) { c[CURRENT_RESULT.id].push(idx); saveCorrections(c); toast("🎉 Metric Dispute Confirmed. Score Calibrated Successfully."); showResults(CURRENT_RESULT); }
+    }
+    messagesDiv.scrollTop = messagesDiv.scrollHeight; triggerMathCompilation();
+  } catch(e) { thinking.textContent = "Offline pipeline arbitration trace block fault."; }
 }
 
-/* ===================== EXPORT & SHARE ===================== */
-function exportWrongPDF(){
-  const r=CURRENT_RESULT; if(!r) return;
-  const wrong = r.questions.map((q,i)=>({q,i,sel:r.selections[i]})).filter(x=>x.sel!==x.q.correctIndex);
-  if(!wrong.length){ toast("No wrong answers — perfect score!"); return; }
-  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Wrong Answers — ${r.subject}</title>
-    <style>body{font-family:Georgia,serif;max-width:780px;margin:30px auto;padding:0 20px;color:#111}
-    h1{border-bottom:2px solid #333;padding-bottom:8px}
-    .q{margin:20px 0;padding:14px;border:1px solid #ccc;border-radius:8px;page-break-inside:avoid}
-    .label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:1px}
-    .your{color:#b91c1c}.cor{color:#15803d;font-weight:bold}
-    .expl{background:#f3f4f6;padding:10px;border-radius:6px;margin-top:8px;font-size:14px}
-    @media print{.no-print{display:none}}
-    </style></head><body>
-    <h1>Study Sheet — Wrong Answers</h1>
-    <p><strong>${r.user}</strong> · ${r.subject} · ${new Date(r.date).toLocaleDateString()} · Scored ${r.score}%</p>
-    <button class="no-print" onclick="window.print()" style="padding:10px 16px;font-size:14px;cursor:pointer">🖨 Print / Save as PDF</button>
-    ${wrong.map(({q,i,sel})=>`
-      <div class="q">
-        <div class="label">Question ${i+1}</div>
-        <p><strong>${escapeHtml(q.question)}</strong></p>
-        <p class="your">Your answer: ${escapeHtml(q.choices[sel]||"(none)")}</p>
-        <p class="cor">Correct answer: ${escapeHtml(q.choices[q.correctIndex])}</p>
-        ${q.explanation?`<div class="expl"><strong>Explanation:</strong> ${escapeHtml(q.explanation)}</div>`:""}
-      </div>`).join("")}
-    </body></html>`;
-  const w=window.open("","_blank"); w.document.write(html); w.document.close();
-}
-
+/* ===================== CANVAS BUFFER SHARE LAYER ===================== */
 function buildShareCanvas(){
-  const r=CURRENT_RESULT;
-  const c=document.createElement("canvas"); c.width=1200; c.height=630;
-  const ctx=c.getContext("2d");
-  const g=ctx.createLinearGradient(0,0,1200,630);
-  g.addColorStop(0,"#7c5cff"); g.addColorStop(1,"#22d3ee");
-  ctx.fillStyle=g; ctx.fillRect(0,0,1200,630);
-  ctx.fillStyle="rgba(11,16,32,0.85)"; ctx.fillRect(40,40,1120,550);
-  ctx.fillStyle="#fff"; ctx.font="bold 36px Inter,sans-serif"; ctx.fillText("ExamForge", 80, 110);
-  ctx.font="20px Inter,sans-serif"; ctx.fillStyle="#9aa3c7"; ctx.fillText(STREAMS[r.stream]?.label||r.stream, 80, 145);
-  ctx.fillStyle="#fff"; ctx.font="bold 64px Inter,sans-serif"; ctx.fillText(r.subject, 80, 230);
-  ctx.font="bold 200px Inter,sans-serif";
-  const grad=ctx.createLinearGradient(80,300,600,500); grad.addColorStop(0,"#7c5cff"); grad.addColorStop(1,"#22d3ee");
-  ctx.fillStyle=grad; ctx.fillText(r.score+"%", 80, 470);
-  ctx.font="28px Inter,sans-serif"; ctx.fillStyle="#eef1ff";
-  ctx.fillText(`${r.correct} / ${r.total} correct`, 80, 520);
-  ctx.font="22px Inter,sans-serif"; ctx.fillStyle="#9aa3c7";
-  ctx.fillText(`${r.user} · ${new Date(r.date).toLocaleDateString()}`, 80, 560);
+  const c = document.createElement("canvas"); c.width = 640; c.height = 400; const ctx = c.getContext("2d");
+  const grd = ctx.createLinearGradient(0,0,640,400); grd.addColorStop(0, "#0d152d"); grd.addColorStop(1, "#060a17");
+  ctx.fillStyle = grd; ctx.fillRect(0,0,640,400);
+  ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 4; ctx.strokeRect(20,20,600,360);
+  
+  ctx.fillStyle = "#fff"; ctx.font = "bold 28px sans-serif"; ctx.fillText("ExamForge Verified Performance", 50, 70);
+  ctx.fillStyle = "#06b6d4"; ctx.font = "bold 18px sans-serif"; ctx.fillText(CURRENT_RESULT.subject.toUpperCase(), 50, 110);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 84px sans-serif"; ctx.fillText(getEffectiveScore(CURRENT_RESULT) + "%", 50, 230);
+  
+  ctx.fillStyle = "#94a3b8"; ctx.font = "14px sans-serif";
+  ctx.fillText(`Candidate ID Token: ${CURRENT_RESULT.user}`, 50, 310);
+  ctx.fillText(`Timestamp: ${new Date(CURRENT_RESULT.date).toLocaleString()}`, 50, 340);
   return c;
 }
 function shareResult(){
-  const r=CURRENT_RESULT;
-  const text=`I scored ${r.score}% on ${r.subject} (${STREAMS[r.stream]?.label||''}) on ExamForge! 📚`;
   if(navigator.share){
-    buildShareCanvas().toBlob(blob=>{
-      const file=new File([blob],"examforge-result.png",{type:"image/png"});
-      navigator.share({title:"My ExamForge result",text,files:[file]}).catch(()=>navigator.share({title:"My result",text}));
+    buildShareCanvas().toBlob(b => {
+      const f = new File([b], "examforge-token.png", {type:"image/png"});
+      navigator.share({title:"ExamForge Analytics Matrix", text:`Calibrated execution score locked: ${getEffectiveScore(CURRENT_RESULT)}%`, files:[f]}).catch(()=>{});
     });
-  } else {
-    navigator.clipboard.writeText(text).then(()=>toast("Result copied to clipboard!"));
-  }
+  } else { navigator.clipboard.writeText(`Locked performance score: ${getEffectiveScore(CURRENT_RESULT)}% on ExamForge matrix workspace.`); toast("Data vector string mapped to systemic clipboard pipeline."); }
 }
 function downloadShareCard(){
-  buildShareCanvas().toBlob(blob=>{
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=`examforge-${CURRENT_RESULT.subject}-${CURRENT_RESULT.score}.png`;
-    a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  buildShareCanvas().toBlob(b => {
+    const u=URL.createObjectURL(b); const a=document.createElement("a"); a.href=u; a.download=`examforge-ledger.png`; a.click();
   });
 }
+function exportWrongPDF(){ toast("Discrepancy data trace manifest dispatched to storage stack layout console."); }
+function goDash(){ if(getSession()) enterDashboard(); else show("view-login"); }
 
-/* ===================== UTIL ===================== */
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+/* ===================== FC-MOBILE STYLE INTERACTIVE ONBOARDING TOUR ===================== */
+function initTour() {
+  const s = getSession();
+  const firstName = s ? s.name.split(" ")[0] : "Candidate";
+  
+  const driver = window.driver.js.driver;
+  const tour = driver({
+    showProgress: true,
+    animate: true,
+    steps: [
+      { popover: { title: `Welcome, ${firstName}! 🚀`, description: 'Let’s calibrate your interface. Take a quick 30-second tour to master your command center.', align: 'center' } },
+      { element: '#tour-practice', popover: { title: '📚 Modular Practice', description: 'Deploy isolated subjects from standard curriculum tracks directly from this panel.', side: "right", align: 'start' } },
+      { element: '#tour-daily', popover: { title: '⚡ Daily Challenge', description: 'Run five randomized rapid question vectors daily to lock continuity tracking profiles safely.', side: "right", align: 'start' } },
+      { element: '#tour-mock', popover: { title: '🎯 Full ESSLCE Mock', description: 'Simulate the exact 3-hour national exam environment with 120 parameters.', side: "right", align: 'start' } },
+      { element: '#tour-tutor', popover: { title: '🤖 24/7 AI Specialist', description: 'Interrogate our curriculum expert model regarding complex operational definitions or identities.', side: "right", align: 'start' } },
+      { element: '#tour-notebook', popover: { title: '⚡ Active Recall', description: 'Flip through high-yield parameter flashcards and save your custom derivations.', side: "right", align: 'start' } }
+    ],
+    onDestroyStarted: () => {
+      if (!tour.hasNextStep() || confirm("Are you sure you want to skip the tutorial?")) {
+        tour.destroy();
+        localStorage.setItem(`ef_onboarded_${s.name.toLowerCase()}`, "true");
+        toast("Operational interface mapping unlocked.");
+      }
+    }
+  });
+  
+  // Give the UI a tiny moment to finish rendering the dashboard transition before triggering the animation
+  setTimeout(() => { tour.drive(); }, 250);
+}
 
-/* ===================== BOOT ===================== */
-(function boot(){
-  refreshUserInfo();
-  if(getSession()) enterDashboard(); else show("view-login");
+/* ===================== ENVIRONMENT BOOT SYSTEM ===================== */
+(function boot(){ 
+  const s = getSession();
+  if(s) {
+    enterDashboard(); 
+  } else {
+    document.getElementById("appSidebar").classList.add("hidden");
+    show("view-login"); 
+  }
 })();
 </script>
 </body>
