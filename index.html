@@ -232,6 +232,46 @@
         .progress-bar-bg { width: 100%; height: 6px; background: var(--glass-border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
         .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
+
+
+
+
+
+
+
+
+html, body {
+    background: var(--bg-base); /* Fallback */
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto; /* Explicitly allow vertical scrolling */
+    transition: var(--transition-smooth);
+    /* Removed background-attachment: fixed and overscroll-behavior-y: none */
+}
+
+/* Add this to keep your fixed gradient background without breaking mobile scroll */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-gradient);
+    z-index: -1;
+}
+
+
+
+
+
+
+
+
+
+
+
         /* Buttons Mobile */
         .btn-primary { 
             background: var(--primary); color: white; border: none; 
