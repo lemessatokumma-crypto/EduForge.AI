@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>ExamForge Premium</title>
     <link rel="icon" href="12.png" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <link rel="apple-touch-icon" href="12.png">
 
@@ -31,7 +32,7 @@
         });
     });
 </script>
-    <style>
+     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
         :root {
@@ -193,10 +194,29 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
         }
 
-        .view { display: none; animation: viewFadeIn 0.35s ease; flex: 1; flex-direction: column; }
-        .view.active { display: flex; }
-        @keyframes viewFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+       .view { 
+    display: none; 
+    flex: 1; 
+    flex-direction: column; 
+}
+.view.active { 
+    display: flex; 
+    /* Upgraded cubic-bezier for a "spring" feel */
+    animation: viewReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
 
+@keyframes viewReveal { 
+    0% { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.98); 
+        filter: blur(8px); 
+    } 
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+        filter: blur(0); 
+    } 
+}
         /* Dashboard Mobile-First */
         .dash-top-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin-bottom: var(--space-lg); }
         .stat-card { padding: var(--space-md); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; min-height: 100px;}
@@ -253,7 +273,35 @@ body::before {
     z-index: -1;
 }
 
+html, body {
+    background: var(--bg-base);
+    color: var(--text-main);
+    /* Use dynamic viewport height for perfect mobile sizing */
+    min-height: 100dvh; 
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: var(--transition-smooth);
+    /* Enable smooth scrolling globally */
+    scroll-behavior: smooth;
+    /* Prevent pull-to-refresh on mobile apps */
+    overscroll-behavior-y: none; 
+}
 
+/* Enhancing the fixed gradient background */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0; /* Modern shorthand for top/left/right/bottom 0 */
+    background: var(--bg-gradient);
+    z-index: -1;
+    /* Subtle breathing animation for the background */
+    animation: bgBreathe 15s ease-in-out infinite alternate;
+}
+
+@keyframes bgBreathe {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
 
 
 
@@ -689,6 +737,15 @@ body::before {
                 transform: translateX(0); 
                 box-shadow: 10px 0 30px rgba(0,0,0,0.5); 
             }
+            .formula-display{
+                font-size: 18px;
+            }
+        }
+        .formula-display{
+            font-size: 12px !important;
+        }
+        .fa-stop {
+            padding-left: 40%;
         }
         .text-center { text-align: center; }
         .mb-1 { margin-bottom: 8px; } .mb-2 { margin-bottom: 16px; } .mb-3 { margin-bottom: 24px; } .mb-4 { margin-bottom: 32px; }
@@ -699,6 +756,32 @@ body::before {
         .font-bold { font-weight: 700; }
         .text-muted { color: var(--text-muted); }
         .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+
+
+        /* Ripple Effect Base */
+.btn-primary, .btn-secondary, .btn-danger, .cbt-option {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-anim 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+}
+
+@keyframes ripple-anim {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+   
     </style>
 </head>
 <body>
@@ -749,7 +832,7 @@ body::before {
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
-                    <span style="color: var(--danger); background: rgba(239,68,68,0.1); padding: 4px 10px; border-radius: 8px; font-size: 12px;"><i class="fa-solid fa-calendar-day"></i> <span id="countdown-days">--</span>d</span>
+                    <span style="color: var(--danger); background: rgba(239,68,68,0.1); padding: 4px 10px; border-radius: 8px; font-size: 12px;"><i class="fa-solid fa-calendar-day"></i> <span id="countdown-days"></span>d</span>
                 </div>
             </div>
 
@@ -3140,6 +3223,19 @@ try { renderMathInElement(document.getElementById('formula-detail-sheet'), { del
                 rawScore: rawScore, totalQ: activeExam.questions.length, time: timeSec, violations: activeExam.violations,
                 details: activeExam.questions.map((q,i) => ({...q, userAns: activeExam.answers[i], isCorrect: activeExam.answers[i] === q.answer}))
             };
+            // Inside finalSubmitExam(), right before switchTab('exam-review'):
+if (finalScore >= (studentProfile.targetScore * 0.8)) {
+    // Gold confetti for hitting 80% of target
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#fbbf24', '#ffffff']
+    });
+} else if (finalScore >= 300) {
+    // Standard confetti for passing
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+}
 
             examHistory.push(result);
             records.examsTaken++; records.highestOverall = Math.max(records.highestOverall, finalScore);
@@ -3695,6 +3791,28 @@ function showToast(msg, type = "success") {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3200);
 }
+
+// Ripple Effect Logic
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('.btn-primary, .btn-secondary, .btn-danger, .cbt-option');
+    if (!target) return;
+
+    const circle = document.createElement('span');
+    const diameter = Math.max(target.clientWidth, target.clientHeight);
+    const radius = diameter / 2;
+
+    const rect = target.getBoundingClientRect();
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - radius}px`;
+    circle.style.top = `${e.clientY - rect.top - radius}px`;
+    circle.classList.add('ripple');
+
+    // Remove existing ripples
+    const existing = target.querySelector('.ripple');
+    if (existing) existing.remove();
+
+    target.appendChild(circle);
+});
     </script>
 
 
