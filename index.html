@@ -251,58 +251,6 @@
 
 
 
-html, body {
-    background: var(--bg-base); /* Fallback */
-    color: var(--text-main);
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto; /* Explicitly allow vertical scrolling */
-    transition: var(--transition-smooth);
-    /* Removed background-attachment: fixed and overscroll-behavior-y: none */
-}
-
-/* Add this to keep your fixed gradient background without breaking mobile scroll */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: var(--bg-gradient);
-    z-index: -1;
-}
-
-html, body {
-    background: var(--bg-base);
-    color: var(--text-main);
-    /* Use dynamic viewport height for perfect mobile sizing */
-    min-height: 100dvh; 
-    overflow-x: hidden;
-    overflow-y: auto;
-    transition: var(--transition-smooth);
-    /* Enable smooth scrolling globally */
-    scroll-behavior: smooth;
-    /* Prevent pull-to-refresh on mobile apps */
-    overscroll-behavior-y: none; 
-}
-
-/* Enhancing the fixed gradient background */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0; /* Modern shorthand for top/left/right/bottom 0 */
-    background: var(--bg-gradient);
-    z-index: -1;
-    /* Subtle breathing animation for the background */
-    animation: bgBreathe 15s ease-in-out infinite alternate;
-}
-
-@keyframes bgBreathe {
-    0% { transform: scale(1); }
-    100% { transform: scale(1.05); }
-}
-
 
 
 
@@ -781,7 +729,21 @@ body::before {
         opacity: 0;
     }
 }
-   
+      html, body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: none !important;
+            transition: var(--transition-smooth);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+         /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
     </style>
 </head>
 <body>
@@ -820,6 +782,8 @@ body::before {
         <div class="bottom-nav-item" onclick="switchTab('formulas', this, true)"><i class="fa-solid fa-square-root-variable"></i><span>Formulas</span></div>
         <div class="bottom-nav-item" onclick="switchTab('mock', this, true)"><i class="fa-solid fa-stopwatch"></i><span>Exams</span></div>
         <div class="bottom-nav-item" onclick="switchTab('flashcards', this, true)"><i class="fa-solid fa-clone"></i><span>Cards</span></div>
+                <div class="bottom-nav-item" onclick="showSettings()"><i class="fa-solid fa-gear"></i><span> Settings</span></div>
+
         <div class="bottom-nav-item" onclick="toggleSidebar(event)"><i class="fa-solid fa-bars"></i><span>Menu</span></div>
     </nav>
 
@@ -832,7 +796,7 @@ body::before {
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
-                    <span style="color: var(--danger); background: rgba(239,68,68,0.1); padding: 4px 10px; border-radius: 8px; font-size: 12px;"><i class="fa-solid fa-calendar-day"></i> <span id="countdown-days"></span>d</span>
+                    <span style="color: var(--danger); display: none; background: rgba(239,68,68,0.1); padding: 4px 10px; border-radius: 8px; font-size: 12px;"><i class="fa-solid fa-calendar-day"></i> <span id="countdown-days"></span>d</span>
                 </div>
             </div>
 
