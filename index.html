@@ -764,17 +764,24 @@
         </div>
     </div>
 
-    <nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar">
         <div class="brand"><i class="fa-solid fa-graduation-cap"></i> ExamForge</div>
+        
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 4px 12px; letter-spacing: 0.5px;">Main Menu</div>
         <div class="nav-item active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-house"></i> Dashboard</div>
-        <div class="nav-item" onclick="switchTab('ai-builder', this)"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Builder</div>
-        <div class="nav-item" onclick="switchTab('formulas', this)"><i class="fa-solid fa-square-root-variable"></i> Formulas</div>
-        <div class="nav-item" onclick="switchTab('flashcards', this)"><i class="fa-solid fa-clone"></i> Flashcards</div>
-        <div class="nav-item" onclick="switchTab('mock', this)"><i class="fa-solid fa-stopwatch"></i> Exams</div>
         <div class="nav-item" onclick="switchTab('analytics', this)"><i class="fa-solid fa-chart-pie"></i> Analytics</div>
-        <div class="nav-item" onclick="switchTab('achievements', this)"><i class="fa-solid fa-trophy"></i> Records</div>
-        <div class="nav-item" onclick="switchTab('physics3d', this)"><i class="fa-solid fa-cube"></i> Physics Lab</div>
-        <div class="nav-item" onclick="switchTab('chemistry3d', this)"><i class="fa-solid fa-flask"></i> Chem Lab</div>
+        <div class="nav-item" onclick="switchTab('achievements', this)"><i class="fa-solid fa-trophy"></i> Records & XP</div>
+        
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 16px 0 4px 12px; letter-spacing: 0.5px;">Study Tools</div>
+        <div class="nav-item" onclick="switchTab('ai-builder', this)"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Builder</div>
+        <div class="nav-item" onclick="switchTab('mock', this)"><i class="fa-solid fa-shield-halved"></i> CBT Exams</div>
+        <div class="nav-item" onclick="switchTab('formulas', this)"><i class="fa-solid fa-square-root-variable"></i> Formula Bank</div>
+        <div class="nav-item" onclick="switchTab('flashcards', this)"><i class="fa-solid fa-clone"></i> Flashcards</div>
+        
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 16px 0 4px 12px; letter-spacing: 0.5px;">STEM Labs</div>
+        <div class="nav-item" onclick="switchTab('physics3d', this)"><i class="fa-solid fa-cube"></i> Physics Sandbox</div>
+        <div class="nav-item" onclick="switchTab('chemistry3d', this)"><i class="fa-solid fa-flask"></i> Molecular Viewer</div>
+        
         <div style="flex:1; min-height:20px;"></div>
         <div class="nav-item" onclick="showSettings()"><i class="fa-solid fa-gear"></i> Settings</div>
     </nav>
@@ -792,7 +799,9 @@
     <main class="main-wrapper">
         <header class="top-header">
             <div style="display: flex; align-items: center; gap: 12px;">
-                
+                <div class="hamburger-menu" id="mobile-menu-btn" onclick="toggleSidebar(event)">
+                    <span></span><span></span><span></span>
+                </div>
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
@@ -804,7 +813,7 @@
                 <button onclick="toggleGlobalSearch()" class="btn-secondary" style="padding:8px 12px; min-height:36px;"><i class="fa-solid fa-magnifying-glass"></i></button>
                 <div class="gamification-bar">
                     <div class="badge streak-badge" title="Daily Streak"><i class="fa-solid fa-fire"></i> <span id="streak-count">1</span></div>
-                    <div class="badge xp-badge" title="XP / Level" onclick="switchTab('achievements', document.querySelectorAll('.nav-item')[6])"><i class="fa-solid fa-star"></i> <span id="xp-points">0</span></div>
+                    <div class="badge xp-badge" title="Total Experience Points" onclick="switchTab('achievements', document.querySelectorAll('.nav-item')[6])"><i class="fa-solid fa-star"></i> <span id="xp-points">0</span> XP <span style="opacity:0.5; margin:0 4px;">|</span> Lv. <span id="level">1</span></div>
                 </div>
                 <button onclick="toggleNotesPanel()" class="btn-secondary" style="padding:8px 12px; min-height:36px;"><i class="fa-solid fa-note-sticky"></i></button>
             </div>
@@ -1428,63 +1437,7 @@
 
     <div id="toast-container" class="toast-container"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // 1. CONFIGURATION
-        const firebaseConfig = {
-            apiKey: "AIzaSyAaJgHV_2rvy7_Zz77rBvZBvziGKMKHBnc",
-            authDomain: "project-2103346420048829294.firebaseapp.com",
-            projectId: "project-2103346420048829294",
-            storageBucket: "project-2103346420048829294.firebasestorage.app",
-            messagingSenderId: "53960115907",
-            appId: "1:53960115907:web:215dea3620d43d46834476"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // 2. EXPOSE BRIDGE FUNCTIONS TO MAIN SCRIPT
-        window.firebaseSyncData = async function(dataPayload) {
-            const user = auth.currentUser;
-            if (user) {
-                try {
-                    await setDoc(doc(db, "users", user.uid), dataPayload, { merge: true });
-                } catch (e) {
-                    console.error("Error saving to Firebase:", e);
-                }
-            }
-        };
-
-        window.firebaseLoadData = async function(callback) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    try {
-                        const docRef = doc(db, "users", user.uid);
-                        const docSnap = await getDoc(docRef);
-                        if (docSnap.exists()) {
-                            callback(docSnap.data());
-                        } else {
-                            callback(null);
-                        }
-                    } catch (e) {
-                        console.error("Error loading from Firebase:", e);
-                        callback(null);
-                    }
-                } else {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Auth error:", error);
-                    }
-                }
-            });
-        };
-    </script>    
-
+    
     <script>
         // ==========================================
         // CONSTANTS & CONFIG
