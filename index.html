@@ -10,7 +10,6 @@
     <link rel="icon" href="12.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    
 <link rel="apple-touch-icon" href="12.png">
 
 <meta name="theme-color" content="#ffffff">
@@ -21,6 +20,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         renderMathInElement(document.body, {
@@ -745,8 +749,240 @@
         ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .top-header{
-    grid-template-columns: repeat(6, 1fr) !important;
-    
+    grid-template-columns: repeat(6, 1) !important;
+}
+
+/* Periodic Table 3D Element Styles */
+.pt-element {
+    width: 120px;
+    height: 160px;
+    box-shadow: 0px 0px 12px rgba(14, 165, 233, 0.5);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    background-color: rgba(15, 23, 42, 0.75);
+    text-align: center;
+    cursor: default;
+    transition: box-shadow 0.3s, border 0.3s;
+}
+.pt-element:hover {
+    box-shadow: 0px 0px 20px rgba(14, 165, 233, 0.9);
+    border: 1px solid rgba(14, 165, 233, 0.75);
+}
+.pt-element .number {
+    position: absolute; top: 10px; right: 10px; font-size: 16px; color: rgba(255,255,255,0.7); font-weight: bold;
+}
+.pt-element .symbol {
+    position: absolute; top: 40px; left: 0px; right: 0px; font-size: 50px; font-weight: bold; color: white;
+}
+.pt-element .details {
+    position: absolute; bottom: 15px; left: 0px; right: 0px; font-size: 12px; color: var(--accent);
+}
+
+
+
+
+/* ==========================================
+   ELEMENT MODAL & 3D ATOM ANIMATION
+========================================== */
+#element-modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(11, 17, 32, 0.85); z-index: 9999;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s ease; padding: 16px;
+}
+#element-modal.show { display: flex; opacity: 1; }
+
+.element-modal-content {
+    background: var(--bg-base); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl); width: 100%; max-width: 900px;
+    max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; 
+    position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+    transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#element-modal.show .element-modal-content { transform: scale(1); }
+
+@media (min-width: 768px) { 
+    .element-modal-content { flex-direction: row; overflow: hidden; } 
+}
+
+.element-modal-close {
+    position: absolute; top: 16px; right: 16px; background: var(--glass-input); 
+    border: 1px solid var(--glass-border); color: var(--text-muted); 
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer; z-index: 10; 
+    display:flex; align-items:center; justify-content:center; transition: var(--transition-smooth);
+}
+.element-modal-close:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: var(--danger); transform: rotate(90deg); }
+
+/* Data Panel */
+.element-data-panel { padding: 32px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 24px; }
+.data-box { background: var(--glass-input); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); text-align: center; }
+.data-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+.data-value { font-size: 18px; font-weight: 800; color: var(--text-main); }
+
+/* Atom 3D Viewport */
+.atom-container {
+    width: 100%; height: 280px; display: flex; align-items: center; justify-content: center;
+    perspective: 1000px; background: radial-gradient(circle at center, #1e293b 0%, #0b1120 100%);
+    position: relative; border-bottom: 1px solid var(--glass-border); overflow: hidden;
+}
+@media (min-width: 768px) {
+    .atom-container { width: 45%; height: auto; border-bottom: none; border-right: 1px solid var(--glass-border); min-height: 400px;}
+}
+
+.atom-nucleus {
+    width: 30px; height: 30px; border-radius: 50%; position: absolute;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--primary));
+    box-shadow: 0 0 30px var(--primary), 0 0 60px var(--accent); z-index: 5;
+    animation: pulseGlow 2s infinite alternate;
+}
+
+.atom-orbit {
+    position: absolute; border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 50%;
+    transform-style: preserve-3d; animation: spinOrbit linear infinite;
+    top: 50%; left: 50%;
+}
+
+.atom-electron {
+    position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px var(--accent);
+    top: -3px; left: 50%; margin-left: -3px;
+}
+
+@keyframes spinOrbit { 
+    0% { transform: translate(-50%, -50%) rotate3d(var(--rx), var(--ry), var(--rz), 0deg); } 
+    100% { transform: translate(-50%, -50%) rotate3d(var(--rx), var(--ry), var(--rz), 360deg); } 
+}
+@keyframes pulseGlow { 
+    from { box-shadow: 0 0 20px var(--primary); transform: scale(1); } 
+    to { box-shadow: 0 0 40px var(--accent); transform: scale(1.1); } 
+}
+/* ==========================================
+   PERIODIC TABLE MOBILE RESPONSIVENESS
+========================================== */
+#pt-canvas-container {
+    /* Critical: Stops the page from scrolling when swiping the 3D model */
+    touch-action: none; 
+}
+
+/* Make the header stack neatly on mobile */
+.pt-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+    .pt-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .pt-header .pt-controls {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+    }
+    .pt-header .pt-controls button {
+        flex: 1; /* Makes buttons stretch evenly */
+        text-align: center;
+        padding: 10px 8px !important;
+    }
+    /* Slightly shrink the cards for mobile */
+    .pt-element {
+        transform: scale(0.85);
+    }
+}
+
+/* Periodic Table Category Colors */
+.pt-element.alkali { border-color: #f87171; box-shadow: inset 0 0 20px rgba(248, 113, 113, 0.3); }
+.pt-element.alkaline { border-color: #fb923c; box-shadow: inset 0 0 20px rgba(251, 146, 60, 0.3); }
+.pt-element.transition { border-color: #fbbf24; box-shadow: inset 0 0 20px rgba(251, 191, 36, 0.3); }
+.pt-element.nonmetal { border-color: #4ade80; box-shadow: inset 0 0 20px rgba(74, 222, 128, 0.3); }
+.pt-element.noble { border-color: #22d3ee; box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.3); }
+.pt-element.halogen { border-color: #a78bfa; box-shadow: inset 0 0 20px rgba(167, 139, 250, 0.3); }
+
+
+
+/* --- 3D Biology Lab Styles --- */
+.bio-lab-layout {
+    display: grid;
+    grid-template-columns: 180px 1fr 260px;
+    gap: var(--space-md);
+    height: 500px;
+}
+.bio-systems-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+}
+.bio-sys-btn {
+    background: var(--glass-input);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid transparent;
+    color: var(--text-main);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    text-align: left;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.bio-sys-btn:hover { background: var(--glass-hover); }
+.bio-sys-btn.active { 
+    background: var(--glass-bg); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+}
+#bio-canvas-container {
+    background: #050810;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+    cursor: grab;
+}
+#bio-canvas-container:active { cursor: grabbing; }
+.bio-overlay-info {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 18px;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    pointer-events: none;
+}
+.bio-controls {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+}
+.bio-info-panel {
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+/* Mobile Responsiveness for Bio Lab */
+@media (max-width: 1024px) {
+    .bio-lab-layout { grid-template-columns: 140px 1fr; grid-template-rows: 1fr auto; height: auto; }
+    .bio-info-panel { grid-column: span 2; }
+    #bio-canvas-container { height: 350px; }
+}
+@media (max-width: 768px) {
+    .bio-lab-layout { grid-template-columns: 1fr; }
+    .bio-systems-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
+    .bio-sys-btn { flex: 0 0 auto; white-space: nowrap; }
+    .bio-info-panel { grid-column: span 1; }
 }
     </style>
 </head>
@@ -783,7 +1019,8 @@
         <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 16px 0 4px 12px; letter-spacing: 0.5px;">STEM Labs</div>
         <div class="nav-item" onclick="switchTab('physics3d', this)"><i class="fa-solid fa-cube"></i> Physics Sandbox</div>
         <div class="nav-item" onclick="switchTab('chemistry3d', this)"><i class="fa-solid fa-flask"></i> Molecular Viewer</div>
-        
+        <div class="nav-item" onclick="switchTab('biology3d', this)"><i class="fa-solid fa-dna" style="color: #ec4899;"></i> 3D Anatomy Lab</div>
+        <div class="nav-item" onclick="switchTab('periodictable', this)"><i class="fa-solid fa-table-cells"></i> Periodic Table</div>
         <div style="flex:1; min-height:20px;"></div>
         <div class="nav-item" onclick="showSettings()"><i class="fa-solid fa-gear"></i> Settings</div>
     </nav>
@@ -801,7 +1038,9 @@
     <main class="main-wrapper">
         <header class="top-header">
             <div style="display: flex; align-items: center; gap: 12px;">
-                
+                <div class="hamburger-menu" id="mobile-menu-btn" onclick="toggleSidebar(event)">
+                    <span></span><span></span><span></span>
+                </div>
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
@@ -1204,6 +1443,99 @@
             </div>
         </div>
 
+
+
+<div id="view-biology3d" class="view">
+    <div style="margin-bottom: 16px;">
+        <h2 style="font-size:24px; margin-bottom: 4px; letter-spacing:-0.5px;">Interactive Anatomy Lab</h2>
+        <p style="color:var(--text-muted); font-size: 13px;">Explore the 6 major human body systems in real-time 3D.</p>
+    </div>
+
+    <div class="bio-lab-layout">
+        <div class="bio-systems-menu">
+            <button class="bio-sys-btn active" onclick="loadBioSystem('circulatory', this)" style="border-left-color: #f43f5e;">
+                <i class="fa-solid fa-heart-pulse" style="color: #f43f5e;"></i> Circulatory
+            </button>
+            <button class="bio-sys-btn" onclick="loadBioSystem('respiratory', this)" style="border-left-color: #06b6d4;">
+                <i class="fa-solid fa-lungs" style="color: #06b6d4;"></i> Respiratory
+            </button>
+            <button class="bio-sys-btn" onclick="loadBioSystem('nervous', this)" style="border-left-color: #a855f7;">
+                <i class="fa-solid fa-brain" style="color: #a855f7;"></i> Nervous
+            </button>
+            <button class="bio-sys-btn" onclick="loadBioSystem('skeletal', this)" style="border-left-color: #e2e8f0;">
+                <i class="fa-solid fa-bone" style="color: #e2e8f0;"></i> Skeletal
+            </button>
+            <button class="bio-sys-btn" onclick="loadBioSystem('muscular', this)" style="border-left-color: #f97316;">
+                <i class="fa-solid fa-child" style="color: #f97316;"></i> Muscular
+            </button>
+            <button class="bio-sys-btn" onclick="loadBioSystem('digestive', this)" style="border-left-color: #10b981;">
+                <i class="fa-solid fa-stomach" style="color: #10b981;"></i> Digestive
+            </button>
+        </div>
+
+        <div id="bio-canvas-container">
+            <div class="bio-overlay-info" id="bio-overlay-title">Circulatory System</div>
+            <div class="bio-controls">
+                <button class="btn-secondary" style="font-size:12px; padding:8px 12px;" onclick="resetBioView()">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reset View
+                </button>
+            </div>
+        </div>
+
+        <div class="glass-panel bio-info-panel">
+            <h3 id="bio-info-title" style="margin-bottom: 8px; color: #f43f5e;">Circulatory</h3>
+            <p id="bio-info-desc" style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                Pumps blood, distributing oxygen and nutrients to tissues while removing waste.
+            </p>
+            <div class="card-header" style="font-size: 13px;"><i class="fa-solid fa-sliders"></i> Simulation Controls</div>
+            <div class="form-group" style="margin-top: 10px;">
+                <label id="bio-slider-label" style="display:flex; justify-content:space-between;">
+                    <span>Heart Rate</span> <span id="bio-slider-val">72 BPM</span>
+                </label>
+                <input type="range" id="bio-sim-slider" min="40" max="180" value="72" style="height: 4px; padding: 0;" oninput="updateBioSim(this.value)">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="view-periodictable" class="view">
+    <div class="pt-header">
+        <div>
+            <h2 style="font-size:24px; margin-bottom: 4px; letter-spacing:-0.5px;">Interactive Periodic Table</h2>
+            <p style="color:var(--text-muted); font-size: 13px;">1 finger to rotate. 2 fingers to zoom/pan.</p>
+        </div>
+        <div class="pt-controls">
+            
+            <button class="btn-primary" style="font-size: 12px; padding: 8px 12px;" onclick="transformPT('table')">Table</button>
+            <button class="btn-secondary" style="font-size: 12px; padding: 8px 12px;" onclick="transformPT('sphere')">Sphere</button>
+            <button class="btn-secondary" style="font-size: 12px; padding: 8px 12px;" onclick="transformPT('helix')">Helix</button>
+        </div>
+    </div>
+    <div class="pt-legend" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; justify-content: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700;">
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #f87171;"></span> Alkali
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #fb923c;"></span> Alkaline
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #fbbf24;"></span> Transition
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #4ade80;"></span> Nonmetal
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #22d3ee;"></span> Noble
+    </div>
+    <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-lg);">
+        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #a78bfa;"></span> Halogen
+    </div>
+</div>
+    <div id="pt-canvas-container" style="width: 100%; height: 75vh; min-height: 500px; max-height: 700px; background: #000; border-radius: var(--radius-xl); overflow: hidden; position: relative; border: 1px solid var(--glass-border);">
+    </div>
+</div>
     </main>
 
     <div class="ai-chat-btn" onclick="toggleAIChat()" title="AI Tutor">
@@ -2384,12 +2716,14 @@
                 document.getElementById('sidebar').classList.remove('open');
                 document.getElementById('mobile-menu-btn').classList.remove('open');
             }
-
+// Add this line inside switchTab()
+if (tabId === 'biology3d') initBiologySandbox();
             if (tabId === 'dashboard') updateDashboardUI();
             if (tabId === 'analytics') { renderCharts(); renderHeatmap(); }
             if (tabId === 'mock') renderMockHistory();
             if (tabId === 'physics3d') initPhysicsSandbox();
             if (tabId === 'chemistry3d') initChemistrySandbox();
+            if (tabId === 'periodictable') initPeriodicTable();
             if (tabId === 'achievements') { renderAchievements(); renderLeaderboard(); }
             if (tabId === 'flashcards') initFlashcards();
             if (tabId === 'formulas') initFormulaBank();
@@ -3729,9 +4063,611 @@ document.addEventListener('click', function(e) {
 
     target.appendChild(circle);
 });
+
+// ==========================================
+// 3D PERIODIC TABLE SANDBOX (COMPLETE 118)
+// ==========================================
+let ptInitialized = false;
+let ptCamera, ptScene, ptRenderer, ptControls;
+let ptObjects = [];
+let ptTargets = { table: [], sphere: [], helix: [] };
+
+function initPeriodicTable() {
+    if(ptInitialized) return;
+    ptInitialized = true;
+
+    // Full 118 Elements Dataset: [Symbol, Name, Weight, Column, Row]
+    const elementsData = [
+        "H", "Hydrogen", "1.008", 1, 1,
+        "He", "Helium", "4.003", 18, 1,
+        "Li", "Lithium", "6.94", 1, 2,
+        "Be", "Beryllium", "9.012", 2, 2,
+        "B", "Boron", "10.81", 13, 2,
+        "C", "Carbon", "12.011", 14, 2,
+        "N", "Nitrogen", "14.007", 15, 2,
+        "O", "Oxygen", "15.999", 16, 2,
+        "F", "Fluorine", "18.998", 17, 2,
+        "Ne", "Neon", "20.180", 18, 2,
+        "Na", "Sodium", "22.990", 1, 3,
+        "Mg", "Magnesium", "24.305", 2, 3,
+        "Al", "Aluminum", "26.982", 13, 3,
+        "Si", "Silicon", "28.085", 14, 3,
+        "P", "Phosphorus", "30.974", 15, 3,
+        "S", "Sulfur", "32.06", 16, 3,
+        "Cl", "Chlorine", "35.45", 17, 3,
+        "Ar", "Argon", "39.95", 18, 3,
+        "K", "Potassium", "39.098", 1, 4,
+        "Ca", "Calcium", "40.078", 2, 4,
+        "Sc", "Scandium", "44.956", 3, 4,
+        "Ti", "Titanium", "47.867", 4, 4,
+        "V", "Vanadium", "50.942", 5, 4,
+        "Cr", "Chromium", "51.996", 6, 4,
+        "Mn", "Manganese", "54.938", 7, 4,
+        "Fe", "Iron", "55.845", 8, 4,
+        "Co", "Cobalt", "58.933", 9, 4,
+        "Ni", "Nickel", "58.693", 10, 4,
+        "Cu", "Copper", "63.546", 11, 4,
+        "Zn", "Zinc", "65.38", 12, 4,
+        "Ga", "Gallium", "69.723", 13, 4,
+        "Ge", "Germanium", "72.63", 14, 4,
+        "As", "Arsenic", "74.922", 15, 4,
+        "Se", "Selenium", "78.971", 16, 4,
+        "Br", "Bromine", "79.904", 17, 4,
+        "Kr", "Krypton", "83.798", 18, 4,
+        "Rb", "Rubidium", "85.468", 1, 5,
+        "Sr", "Strontium", "87.62", 2, 5,
+        "Y", "Yttrium", "88.906", 3, 5,
+        "Zr", "Zirconium", "91.224", 4, 5,
+        "Nb", "Niobium", "92.906", 5, 5,
+        "Mo", "Molybdenum", "95.95", 6, 5,
+        "Tc", "Technetium", "(98)", 7, 5,
+        "Ru", "Ruthenium", "101.07", 8, 5,
+        "Rh", "Rhodium", "102.91", 9, 5,
+        "Pd", "Palladium", "106.42", 10, 5,
+        "Ag", "Silver", "107.87", 11, 5,
+        "Cd", "Cadmium", "112.41", 12, 5,
+        "In", "Indium", "114.82", 13, 5,
+        "Sn", "Tin", "118.71", 14, 5,
+        "Sb", "Antimony", "121.76", 15, 5,
+        "Te", "Tellurium", "127.60", 16, 5,
+        "I", "Iodine", "126.90", 17, 5,
+        "Xe", "Xenon", "131.29", 18, 5,
+        "Cs", "Cesium", "132.91", 1, 6,
+        "Ba", "Barium", "137.33", 2, 6,
+        "La", "Lanthanum", "138.91", 3, 6,
+        "Ce", "Cerium", "140.12", 4, 9,
+        "Pr", "Praseodymium", "140.91", 5, 9,
+        "Nd", "Neodymium", "144.24", 6, 9,
+        "Pm", "Promethium", "(145)", 7, 9,
+        "Sm", "Samarium", "150.36", 8, 9,
+        "Eu", "Europium", "151.96", 9, 9,
+        "Gd", "Gadolinium", "157.25", 10, 9,
+        "Tb", "Terbium", "158.93", 11, 9,
+        "Dy", "Dysprosium", "162.50", 12, 9,
+        "Ho", "Holmium", "164.93", 13, 9,
+        "Er", "Erbium", "167.26", 14, 9,
+        "Tm", "Thulium", "168.93", 15, 9,
+        "Yb", "Ytterbium", "173.05", 16, 9,
+        "Lu", "Lutetium", "174.97", 17, 9,
+        "Hf", "Hafnium", "178.49", 4, 6,
+        "Ta", "Tantalum", "180.95", 5, 6,
+        "W", "Tungsten", "183.84", 6, 6,
+        "Re", "Rhenium", "186.21", 7, 6,
+        "Os", "Osmium", "190.23", 8, 6,
+        "Ir", "Iridium", "192.22", 9, 6,
+        "Pt", "Platinum", "195.08", 10, 6,
+        "Au", "Gold", "196.97", 11, 6,
+        "Hg", "Mercury", "200.59", 12, 6,
+        "Tl", "Thallium", "204.38", 13, 6,
+        "Pb", "Lead", "207.2", 14, 6,
+        "Bi", "Bismuth", "208.98", 15, 6,
+        "Po", "Polonium", "(209)", 16, 6,
+        "At", "Astatine", "(210)", 17, 6,
+        "Rn", "Radon", "(222)", 18, 6,
+        "Fr", "Francium", "(223)", 1, 7,
+        "Ra", "Radium", "(226)", 2, 7,
+        "Ac", "Actinium", "(227)", 3, 7,
+        "Th", "Thorium", "232.04", 4, 10,
+        "Pa", "Protactinium", "231.04", 5, 10,
+        "U", "Uranium", "238.03", 6, 10,
+        "Np", "Neptunium", "(237)", 7, 10,
+        "Pu", "Plutonium", "(244)", 8, 10,
+        "Am", "Americium", "(243)", 9, 10,
+        "Cm", "Curium", "(247)", 10, 10,
+        "Bk", "Berkelium", "(247)", 11, 10,
+        "Cf", "Californium", "(251)", 12, 10,
+        "Es", "Einsteinium", "(252)", 13, 10,
+        "Fm", "Fermium", "(257)", 14, 10,
+        "Md", "Mendelevium", "(258)", 15, 10,
+        "No", "Nobelium", "(259)", 16, 10,
+        "Lr", "Lawrencium", "(262)", 17, 10,
+        "Rf", "Rutherfordium", "(267)", 4, 7,
+        "Db", "Dubnium", "(268)", 5, 7,
+        "Sg", "Seaborgium", "(269)", 6, 7,
+        "Bh", "Bohrium", "(270)", 7, 7,
+        "Hs", "Hassium", "(269)", 8, 7,
+        "Mt", "Meitnerium", "(278)", 9, 7,
+        "Ds", "Darmstadtium", "(281)", 10, 7,
+        "Rg", "Roentgenium", "(282)", 11, 7,
+        "Cn", "Copernicium", "(285)", 12, 7,
+        "Nh", "Nihonium", "(286)", 13, 7,
+        "Fl", "Flerovium", "(289)", 14, 7,
+        "Mc", "Moscovium", "(290)", 15, 7,
+        "Lv", "Livermorium", "(293)", 16, 7,
+        "Ts", "Tennessine", "(294)", 17, 7,
+        "Og", "Oganesson", "(294)", 18, 7
+    ];
+
+    const container = document.getElementById('pt-canvas-container');
+    
+    ptCamera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 );
+// Pull camera back much further on mobile screens
+ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;    ptScene = new THREE.Scene();
+
+    // Build the Elements
+    for ( let i = 0; i < elementsData.length; i += 5 ) {
+        
+       const element = document.createElement( 'div' );
+        
+        // --- ADD COLOR MAPPING LOGIC ---
+        let groupClass = 'transition'; // Default
+        const col = elementsData[i+3];
+        const symbol = elementsData[i];
+        
+        if (col === 1 && symbol !== 'H') groupClass = 'alkali';
+        else if (col === 2) groupClass = 'alkaline';
+        else if (col === 18) groupClass = 'noble';
+        else if (col === 17) groupClass = 'halogen';
+        else if ((col >= 13 && col <= 16) || symbol === 'H') groupClass = 'nonmetal';
+        
+        element.className = `pt-element ${groupClass}`;
+        // -------------------------------
+        
+        // --- ADD THESE TWO LINES ---
+        element.style.pointerEvents = 'auto'; // Ensures the 3D element catches the mouse click
+        element.onclick = () => openElementModal((i/5)+1, elementsData[i], elementsData[i+1], elementsData[i+2], elementsData[i+3], elementsData[i+4]);
+        
+        const number = document.createElement( 'div' );
+        number.className = 'number';
+        number.textContent = (i/5) + 1;
+        element.appendChild( number );
+
+        const symbols = document.createElement( 'div' );
+        symbols.className = 'symbol';
+        symbols.textContent = elementsData[ i ];
+        element.appendChild( symbols );
+
+        const details = document.createElement( 'div' );
+        details.className = 'details';
+        details.innerHTML = elementsData[ i + 1 ] + '<br>' + elementsData[ i + 2 ];
+        element.appendChild( details );
+
+        const objectCSS = new THREE.CSS3DObject( element );
+        objectCSS.position.x = Math.random() * 4000 - 2000;
+        objectCSS.position.y = Math.random() * 4000 - 2000;
+        objectCSS.position.z = Math.random() * 4000 - 2000;
+        ptScene.add( objectCSS );
+        ptObjects.push( objectCSS );
+
+        // Dynamic authentic grid alignments
+        const objectTable = new THREE.Object3D();
+        objectTable.position.x = ( elementsData[ i + 3 ] * 140 ) - 1330;
+        objectTable.position.y = - ( elementsData[ i + 4 ] * 180 ) + 990;
+        ptTargets.table.push( objectTable );
+    }
+
+    // Sphere Transformation
+    const vector = new THREE.Vector3();
+    for ( let i = 0, l = ptObjects.length; i < l; i ++ ) {
+        const phi = Math.acos( - 1 + ( 2 * i ) / l );
+        const theta = Math.sqrt( l * Math.PI ) * phi;
+        const objectSphere = new THREE.Object3D();
+        objectSphere.position.setFromSphericalCoords( 900, phi, theta );
+        vector.copy( objectSphere.position ).multiplyScalar( 2 );
+        objectSphere.lookAt( vector );
+        ptTargets.sphere.push( objectSphere );
+    }
+
+    // Helix Transformation
+    for ( let i = 0, l = ptObjects.length; i < l; i ++ ) {
+        const theta = i * 0.175 + Math.PI;
+        const y = - ( i * 8 ) + 450;
+        const objectHelix = new THREE.Object3D();
+        objectHelix.position.setFromCylindricalCoords( 900, theta, y );
+        vector.x = objectHelix.position.x * 2;
+        vector.y = objectHelix.position.y;
+        vector.z = objectHelix.position.z * 2;
+        objectHelix.lookAt( vector );
+        ptTargets.helix.push( objectHelix );
+    }
+
+    ptRenderer = new THREE.CSS3DRenderer();
+    ptRenderer.setSize( container.clientWidth, container.clientHeight );
+    container.appendChild( ptRenderer.domElement );
+
+    ptControls = new THREE.TrackballControls( ptCamera, ptRenderer.domElement );
+    ptControls.minDistance = 500;
+    ptControls.maxDistance = 6000;
+
+    transformPT('table');
+
+   window.addEventListener('resize', () => {
+        if(!document.getElementById('view-periodictable').classList.contains('active')) return;
+        
+        // Adjust zoom dynamically if screen flips or resizes
+        ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;
+        
+        ptCamera.aspect = container.clientWidth / container.clientHeight;
+        ptCamera.updateProjectionMatrix();
+        ptRenderer.setSize( container.clientWidth, container.clientHeight );
+    });
+
+    animatePT();
+}
+
+function transformPT( shape ) {
+    const targets = ptTargets[shape];
+    for ( let i = 0; i < ptObjects.length; i ++ ) {
+        const object = ptObjects[ i ];
+        const target = targets[ i ];
+        object.position.copy( target.position );
+        object.rotation.copy( target.rotation );
+    }
+}
+
+function animatePT() {
+    requestAnimationFrame( animatePT );
+    if(document.getElementById('view-periodictable').classList.contains('active')) {
+        ptControls.update();
+        ptRenderer.render( ptScene, ptCamera );
+    }
+}
+
+
+
+// ==========================================
+// DYNAMIC ELEMENT MODAL & ATOM GENERATOR
+// ==========================================
+function openElementModal(atomicNum, symbol, name, weight, col, row) {
+    // 1. Populate standard text data
+    document.getElementById('modal-el-symbol').textContent = symbol;
+    document.getElementById('modal-el-name').textContent = name;
+    document.getElementById('modal-el-num').textContent = atomicNum;
+    document.getElementById('modal-el-weight').textContent = weight;
+    document.getElementById('modal-el-shells').textContent = row; // Row = Number of shells
+    
+    // Determine roughly what kind of element it is based on column
+    let block = "Transition Metal";
+    if (col === 1) block = "Alkali Metal";
+    else if (col === 2) block = "Alkaline Earth Metal";
+    else if (col === 17) block = "Halogen";
+    else if (col === 18) block = "Noble Gas";
+    else if (col >= 13 && col <= 16) block = "Post-Transition / Metalloid";
+    
+    // Edge cases for specific rows/elements
+    if(row >= 8) block = "Lanthanide / Actinide"; 
+    if(symbol === "H" || symbol === "C" || symbol === "N" || symbol === "O" || symbol === "P" || symbol === "S") block = "Reactive Nonmetal";
+
+    document.getElementById('modal-el-block').textContent = block;
+
+    let state = "Solid";
+    if (["H", "He", "N", "O", "F", "Ne", "Cl", "Ar", "Kr", "Xe", "Rn", "Og"].includes(symbol)) state = "Gas";
+    if (["Hg", "Br"].includes(symbol)) state = "Liquid";
+    document.getElementById('modal-el-state').textContent = state;
+
+    // 2. Procedurally Generate the 3D Atom Animation
+    const viewport = document.getElementById('atom-viewport');
+    viewport.innerHTML = '<div class="atom-nucleus"></div>';
+    
+    const numShells = parseInt(row) > 7 ? 7 : parseInt(row); // Max 7 standard shells
+    
+    for (let i = 1; i <= numShells; i++) {
+        // Calculate orbit size and speed
+        const size = 60 + (i * 35); // Base size + expanding rings
+        const duration = 12 - i; // Inner orbits spin faster, outer slower
+        
+        // Generate random 3D tilt vectors for chaos/beauty
+        const rx = (Math.random() * 2) - 1;
+        const ry = (Math.random() * 2) - 1;
+        const rz = (Math.random() * 2) - 1;
+
+        // Visual approximation of electrons per shell (cap visual rendering at 8 per ring so it isn't a mess)
+        let visualElectrons = i === 1 ? Math.min(atomicNum, 2) : 8;
+        if(atomicNum < 3 && i > 1) visualElectrons = 0; // Don't draw electrons if element is H/He and we are on shell 2+
+
+        let orbitHTML = `<div class="atom-orbit" style="width:${size}px; height:${size}px; --rx:${rx}; --ry:${ry}; --rz:${rz}; animation-duration:${duration}s;">`;
+        
+        // Distribute electrons evenly around the ring
+        for (let e = 0; e < visualElectrons; e++) {
+            const rot = (360 / visualElectrons) * e;
+            // The electron container counter-rotates or just sits on the perimeter
+            orbitHTML += `
+                <div style="position:absolute; top:50%; left:50%; width:100%; height:100%; transform:translate(-50%,-50%) rotate(${rot}deg);">
+                    <div class="atom-electron"></div>
+                </div>`;
+        }
+        orbitHTML += `</div>`;
+        viewport.innerHTML += orbitHTML;
+    }
+
+    // 3. Trigger Modal
+    const modal = document.getElementById('element-modal');
+    modal.style.display = 'flex';
+    // Small delay to allow CSS transitions to trigger
+    setTimeout(() => { modal.classList.add('show'); }, 10);
+}
+
+function closeElementModal(e) {
+    // If an event is passed, check if the user clicked outside the modal content
+    if(e && e.target !== e.currentTarget) return;
+    
+    const modal = document.getElementById('element-modal');
+    modal.classList.remove('show');
+    setTimeout(() => { modal.style.display = 'none'; }, 300); // Matches CSS transition duration
+}
+
+
+
+
+
+
+
+
+
+
+// ==========================================
+// 3D BIOLOGY ANATOMY LAB
+// ==========================================
+let bioScene, bioCamera, bioRenderer, bioGroup;
+let bioInitialized = false, isBioDragging = false;
+let prevBioMouse = { x: 0, y: 0 };
+let currentBioAnimSpeed = 1.0;
+let activeBioSystem = 'circulatory';
+let bioAnimatedMeshes = {}; // Stores meshes that need real-time updates
+
+const bioData = {
+    circulatory: { title: "Circulatory System", color: "#f43f5e", desc: "The body's primary transport network. The heart pumps oxygenated blood through arteries and returns deoxygenated blood through veins.", label: "Heart Rate", val: "72 BPM", min: 40, max: 180, default: 72 },
+    respiratory: { title: "Respiratory System", color: "#06b6d4", desc: "Facilitates gas exchange. The lungs expand to draw in oxygen (inhalation) and contract to expel carbon dioxide (exhalation).", label: "Breathing Rate", val: "16 Breaths/min", min: 8, max: 40, default: 16 },
+    nervous: { title: "Nervous System", color: "#a855f7", desc: "The control center. The brain processes sensory data and fires electrical impulses through a vast network of synapses.", label: "Synaptic Speed", val: "120 m/s", min: 10, max: 200, default: 120 },
+    skeletal: { title: "Skeletal System", color: "#e2e8f0", desc: "The structural framework. Bones protect organs, produce blood cells, and provide anchor points for muscular movement.", label: "Mineral Density", val: "Standard", min: 1, max: 10, default: 5 },
+    muscular: { title: "Muscular System", color: "#f97316", desc: "Contractile tissues responsible for kinetic motion, posture, and heat generation via ATP hydrolysis.", label: "Muscle Tension", val: "Resting", min: 1, max: 10, default: 2 },
+    digestive: { title: "Digestive System", color: "#10b981", desc: "Breaks down food via enzymes and muscular contractions (peristalsis) to extract essential cellular nutrients.", label: "Peristalsis Rate", val: "Normal", min: 1, max: 10, default: 3 }
+};
+
+function initBiologySandbox() {
+    if(bioInitialized) return;
+    bioInitialized = true;
+    
+    const container = document.getElementById('bio-canvas-container');
+    bioScene = new THREE.Scene(); 
+    bioScene.background = new THREE.Color(0x050810);
+    
+    bioCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+    bioCamera.position.z = 15;
+    
+    bioRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    bioRenderer.setSize(container.clientWidth, container.clientHeight);
+    bioRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(bioRenderer.domElement);
+    
+    // Lighting setup for biological forms
+    bioScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 15);
+    bioScene.add(dirLight);
+    const pointLight = new THREE.PointLight(0xffffff, 0.5);
+    pointLight.position.set(-5, -5, -5);
+    bioScene.add(pointLight);
+    
+    bioGroup = new THREE.Group();
+    bioScene.add(bioGroup);
+    
+    // Drag/Touch Interaction
+    const handleMove = (deltaX, deltaY) => {
+        bioGroup.rotation.y += deltaX * 0.01;
+        bioGroup.rotation.x += deltaY * 0.01;
+    };
+    
+    bioRenderer.domElement.addEventListener('mousedown', e => { isBioDragging = true; prevBioMouse = { x: e.offsetX, y: e.offsetY }; });
+    bioRenderer.domElement.addEventListener('mousemove', e => { if(isBioDragging) { handleMove(e.offsetX - prevBioMouse.x, e.offsetY - prevBioMouse.y); prevBioMouse = { x: e.offsetX, y: e.offsetY }; }});
+    bioRenderer.domElement.addEventListener('mouseup', () => isBioDragging = false);
+    bioRenderer.domElement.addEventListener('mouseleave', () => isBioDragging = false);
+    
+    bioRenderer.domElement.addEventListener('touchstart', e => { isBioDragging = true; prevBioMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, {passive:true});
+    bioRenderer.domElement.addEventListener('touchmove', e => { if(isBioDragging) { handleMove(e.touches[0].clientX - prevBioMouse.x, e.touches[0].clientY - prevBioMouse.y); prevBioMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }, {passive:true});
+    bioRenderer.domElement.addEventListener('touchend', () => isBioDragging = false);
+    
+    window.addEventListener('resize', () => {
+        if(!document.getElementById('view-biology3d').classList.contains('active')) return;
+        bioCamera.aspect = container.clientWidth / (container.clientHeight || 350);
+        bioCamera.updateProjectionMatrix();
+        bioRenderer.setSize(container.clientWidth, container.clientHeight || 350);
+    });
+    
+    loadBioSystem('circulatory', document.querySelector('.bio-sys-btn.active'));
+    animateBiology();
+}
+
+function loadBioSystem(sysId, btnElement) {
+    activeBioSystem = sysId;
+    const data = bioData[sysId];
+    
+    // Update UI Elements
+    if(btnElement) {
+        document.querySelectorAll('.bio-sys-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+    
+    document.getElementById('bio-overlay-title').textContent = data.title;
+    document.getElementById('bio-overlay-title').style.color = data.color;
+    document.getElementById('bio-info-title').textContent = data.title;
+    document.getElementById('bio-info-title').style.color = data.color;
+    document.getElementById('bio-info-desc').textContent = data.desc;
+    
+    const slider = document.getElementById('bio-sim-slider');
+    slider.min = data.min; slider.max = data.max; slider.value = data.default;
+    slider.style.accentColor = data.color;
+    document.getElementById('bio-slider-label').innerHTML = `<span>${data.label}</span> <span id="bio-slider-val">${data.val}</span>`;
+    currentBioAnimSpeed = 1.0;
+    
+    // Clear old 3D objects cleanly
+    while(bioGroup.children.length > 0){ bioGroup.remove(bioGroup.children[0]); }
+    bioAnimatedMeshes = {};
+    bioGroup.rotation.set(0,0,0);
+    
+    // Procedural Geometry Generation based on system
+    const matOpts = { wireframe: true, transparent: true, opacity: 0.85 };
+    
+    if(sysId === 'circulatory') {
+        // Heart
+        const heartGeo = new THREE.SphereGeometry(2, 32, 32); heartGeo.scale(1, 1.2, 0.8);
+        const heartMat = new THREE.MeshPhongMaterial({ color: 0xf43f5e, ...matOpts, wireframe:false, shininess:100 });
+        const heart = new THREE.Mesh(heartGeo, heartMat);
+        bioGroup.add(heart);
+        bioAnimatedMeshes.core = heart;
+        
+        // Aorta curve
+        const curve = new THREE.CatmullRomCurve3([ new THREE.Vector3(0,1,0), new THREE.Vector3(1,3,-1), new THREE.Vector3(0,4,-2), new THREE.Vector3(-1,2,-1) ]);
+        const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.4, 8, false);
+        bioGroup.add(new THREE.Mesh(tubeGeo, new THREE.MeshPhongMaterial({color:0xff0000})));
+    } 
+    else if(sysId === 'respiratory') {
+        const lungGeo = new THREE.ConeGeometry(1.8, 4.5, 16); lungGeo.rotateZ(-0.2);
+        const lungMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, ...matOpts });
+        const leftLung = new THREE.Mesh(lungGeo, lungMat); leftLung.position.set(-1.8, 0, 0);
+        const rightLung = leftLung.clone(); rightLung.position.set(1.8, 0, 0); rightLung.rotation.z = 0.4;
+        bioGroup.add(leftLung, rightLung);
+        bioAnimatedMeshes.left = leftLung; bioAnimatedMeshes.right = rightLung;
+    }
+    else if(sysId === 'nervous') {
+        const brainGeo = new THREE.IcosahedronGeometry(2.2, 3);
+        const brainMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true });
+        bioAnimatedMeshes.core = new THREE.Mesh(brainGeo, brainMat);
+        bioGroup.add(bioAnimatedMeshes.core);
+    }
+    else if(sysId === 'skeletal') {
+        const boneMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 });
+        const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 6, 12), boneMat);
+        bioGroup.add(spine);
+        bioAnimatedMeshes.ribs = [];
+        for(let i=0; i<6; i++) {
+            const rib = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.15, 8, 24), boneMat);
+            rib.position.y = i * 0.8 - 2; rib.rotation.x = Math.PI/2;
+            bioGroup.add(rib); bioAnimatedMeshes.ribs.push(rib);
+        }
+    }
+    else if(sysId === 'muscular') {
+        const fiberMat = new THREE.MeshStandardMaterial({ color: 0xf97316, wireframe:true });
+        const bundle = new THREE.Group();
+        for(let i=0; i<8; i++) {
+            const fiber = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 8), fiberMat);
+            fiber.position.x = Math.sin(i * Math.PI/4) * 0.8;
+            fiber.position.z = Math.cos(i * Math.PI/4) * 0.8;
+            bundle.add(fiber);
+        }
+        bioGroup.add(bundle);
+        bioAnimatedMeshes.core = bundle;
+    }
+    else if(sysId === 'digestive') {
+        const track = [];
+        for (let i = 0; i < 50; i++) {
+            track.push(new THREE.Vector3(Math.sin(i*0.6)*1.5, 3-(i*0.12), Math.cos(i*0.6)*1.5));
+        }
+        const intestineGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(track), 64, 0.5, 8, false);
+        const intestine = new THREE.Mesh(intestineGeo, new THREE.MeshPhongMaterial({color: 0x10b981, ...matOpts}));
+        bioGroup.add(intestine);
+        bioAnimatedMeshes.core = intestine;
+    }
+}
+
+function updateBioSim(val) {
+    // Maps slider value to animation speed and updates UI text
+    const data = bioData[activeBioSystem];
+    currentBioAnimSpeed = val / data.default;
+    let unit = data.val.split(' ')[1] || '';
+    document.getElementById('bio-slider-val').textContent = `${val} ${unit}`;
+}
+
+function resetBioView() {
+    if(bioGroup) { bioGroup.rotation.set(0,0,0); }
+}
+
+function animateBiology() {
+    requestAnimationFrame(animateBiology);
+    if(document.getElementById('view-biology3d').classList.contains('active')) {
+        const time = Date.now() * 0.001 * currentBioAnimSpeed;
+        
+        // Auto-rotation if user isn't dragging
+        if(!isBioDragging) bioGroup.rotation.y += 0.003;
+        
+        // System-specific animations
+        if (activeBioSystem === 'circulatory' && bioAnimatedMeshes.core) {
+            const pulse = 1.0 + Math.sin(time * 6) * 0.1;
+            bioAnimatedMeshes.core.scale.set(pulse, pulse * 1.1, pulse * 0.9);
+        } 
+        else if (activeBioSystem === 'respiratory' && bioAnimatedMeshes.left) {
+            const breath = 1.0 + Math.sin(time * 3) * 0.12;
+            bioAnimatedMeshes.left.scale.set(breath, breath, breath);
+            bioAnimatedMeshes.right.scale.set(breath, breath, breath);
+        }
+        else if (activeBioSystem === 'nervous' && bioAnimatedMeshes.core) {
+            bioAnimatedMeshes.core.rotation.x = Math.sin(time) * 0.1;
+        }
+        else if (activeBioSystem === 'muscular' && bioAnimatedMeshes.core) {
+            const contract = 1.0 + Math.sin(time * 4) * 0.1;
+            bioAnimatedMeshes.core.scale.set(contract, 1/contract, contract); // Muscle flexes
+        }
+        else if (activeBioSystem === 'digestive' && bioAnimatedMeshes.core) {
+            bioAnimatedMeshes.core.rotation.z = Math.sin(time * 2) * 0.05; // Peristalsis wiggle
+        }
+        
+        bioRenderer.render(bioScene, bioCamera);
+    }
+}
     </script>
 
 
+<div id="element-modal" onclick="closeElementModal(event)">
+    <div class="element-modal-content" onclick="event.stopPropagation()">
+        <button class="element-modal-close" onclick="closeElementModal()"><i class="fa-solid fa-xmark"></i></button>
+        
+        <div class="atom-container" id="atom-viewport">
+            </div>
 
+        <div class="element-data-panel">
+            <div style="display:flex; align-items: baseline; gap: 12px; margin-bottom: 8px;">
+                <h2 id="modal-el-symbol" style="font-size: 48px; color: var(--accent); margin: 0; line-height: 1;">U</h2>
+                <h3 id="modal-el-name" style="font-size: 28px; margin: 0;">Uranium</h3>
+            </div>
+            
+            <div class="badge" style="display:inline-flex; background:rgba(14,165,233,0.1); color:var(--accent); border-color:var(--accent); font-size:12px; margin-bottom: 24px;">
+                <i class="fa-solid fa-atom"></i> Atomic No. <span id="modal-el-num" style="margin-left:4px; font-weight:800;">92</span>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 15px; line-height: 1.6;">
+                This element is a fundamental building block of the universe. Its electron configuration dictates its chemical behavior, bonding properties, and stability.
+            </p>
+
+            <div class="data-grid">
+                <div class="data-box">
+                    <div class="data-label">Standard Weight</div>
+                    <div class="data-value" id="modal-el-weight">238.03</div>
+                </div>
+                <div class="data-box">
+                    <div class="data-label">Electron Shells</div>
+                    <div class="data-value" id="modal-el-shells">7</div>
+                </div>
+                <div class="data-box">
+                    <div class="data-label">Block / Group</div>
+                    <div class="data-value" id="modal-el-block">Actinide</div>
+                </div>
+                <div class="data-box">
+                    <div class="data-label">State at STP</div>
+                    <div class="data-value" id="modal-el-state">Solid</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
