@@ -745,10 +745,7 @@
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 .top-header{
     grid-template-columns: repeat(6, 1fr) !important;
-    display:flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center;
+    
 }
     </style>
 </head>
@@ -803,9 +800,7 @@
     <main class="main-wrapper">
         <header class="top-header">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="hamburger-menu" id="mobile-menu-btn" onclick="toggleSidebar(event)">
-                    <span></span><span></span><span></span>
-                </div>
+                
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
