@@ -1,0 +1,2853 @@
+  // ==========================================
+        // CONSTANTS & CONFIG
+        // ==========================================
+        const GROQ_API_KEY = "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";
+
+        const CORE_SUBJECTS = {
+            "Mathematics": ["Algebra", "Calculus", "Geometry", "Trigonometry", "Probability", "Statistics", "Vectors", "Matrices"],
+            "Physics": ["Mechanics", "Electromagnetism", "Thermodynamics", "Modern Physics", "Waves"],
+            "Chemistry": ["Organic", "Physical", "Inorganic", "Analytical", "Stoichiometry"],
+            "Biology": ["Genetics", "Ecology", "Anatomy", "Cell Biology", "Evolution"],
+            "English": ["Grammar", "Reading Comprehension", "Vocabulary", "Sentence Correction"],
+            "Scholastic Aptitude": ["Logic", "Quantitative", "Pattern Recognition", "Analytical Thinking"]
+        };
+        const emojiMap = { 'Mathematics': '📐', 'Physics': '⚡', 'Chemistry': '🧪', 'Biology': '🧬', 'English': '📖', 'Scholastic Aptitude': '🧠' };
+
+        const M_QUESTION_BANK = [
+            { subject: "Physics", topic: "Mechanics", difficulty: "Medium", q: "A car accelerates uniformly from rest to 20 m/s in 5s. What is the acceleration?", options: ["2 m/s²", "4 m/s²", "5 m/s²", "10 m/s²"], answer: 1, expl: "Using v = u + at -> 20 = 0 + a(5) -> a = 4 m/s²." },
+            { subject: "Physics", topic: "Gravitation", difficulty: "Medium", q: "If distance between two masses is doubled, gravitational force becomes:", options: ["Double", "Half", "One-fourth", "Four times"], answer: 2, expl: "F = G(m1m2)/r². If r→2r, F→F/4." },
+            { subject: "Chemistry", topic: "Atomic Structure", difficulty: "Medium", q: "Which quantum number determines orbital shape?", options: ["Principal (n)", "Angular Momentum (l)", "Magnetic (ml)", "Spin (ms)"], answer: 1, expl: "Angular momentum quantum number (l) describes orbital shape." },
+            { subject: "Chemistry", topic: "Electrochemistry", difficulty: "Medium", q: "In a galvanic cell, oxidation occurs at the:", options: ["Cathode", "Anode", "Salt bridge", "Electrolyte"], answer: 1, expl: "Oxidation always occurs at the anode." },
+            { subject: "Mathematics", topic: "Algebra", difficulty: "Medium", q: "If log₂(x) = 3, what is x?", options: ["6", "8", "9", "10"], answer: 1, expl: "log₂(x)=3 → 2³=x → x=8." },
+            { subject: "Biology", topic: "Cell Biology", difficulty: "Medium", q: "Which organelle is the powerhouse?", options: ["Nucleus", "Ribosome", "Mitochondria", "Golgi"], answer: 2, expl: "Mitochondria generate ATP via cellular respiration." },
+            { subject: "English", topic: "Grammar", difficulty: "Medium", q: "Choose the correct sentence:", options: ["She don't like apples.", "She doesn't likes apples.", "She doesn't like apples.", "She don’t likes apples."], answer: 2, expl: "'Doesn't' + base verb 'like' is correct." }
+        ];
+
+        let EXTENDED_QUESTIONS = [];
+        for(let i=0; i<6; i++) {
+            M_QUESTION_BANK.forEach(q => { EXTENDED_QUESTIONS.push({...q, q: q.q + (i>0?` [V${i+1}]`:'')}); });
+        }
+
+        // ==========================================
+        // FORMULA BANK WITH RICH METADATA
+        // ==========================================
+       const M_FORMULA_BANK = [
+    // ==========================================
+    // BIOLOGY
+    // ==========================================
+    { 
+        subject: 'Biology', topic: 'Biochemistry', title: 'ATP Hydrolysis', 
+        formula: 'ATP + H_2O \\rightarrow ADP + P_i + \\text{Energy}', desc: 'Cellular energy release.',
+        symbols: { 'ATP': 'Adenosine Triphosphate', 'ADP': 'Adenosine Diphosphate', 'P_i': 'Inorganic Phosphate' }, 
+        example: { problem: 'What provides energy for cellular functions like muscle contraction?', solution: 'The energy released from ATP hydrolysis.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Cellular Respiration', title: 'Respiration Equation', 
+        formula: 'C_6H_{12}O_6 + 6O_2 \\rightarrow 6CO_2 + 6H_2O + ATP', desc: 'Overall aerobic respiration.',
+        symbols: { 'C_6H_{12}O_6': 'Glucose', 'O_2': 'Oxygen', 'CO_2': 'Carbon Dioxide', 'H_2O': 'Water' }, 
+        example: { problem: 'How much energy is produced by breaking down 1 glucose molecule?', solution: 'Cells yield up to 38 ATP.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Ecology', title: 'Logistic Growth', 
+        formula: '\\frac{dN}{dt} = rN\\left(1-\\frac{N}{K}\\right)', desc: 'Population growth with carrying capacity.',
+        symbols: { 'N': 'Population size', 'r': 'Intrinsic growth rate', 'K': 'Carrying capacity', 't': 'Time' }, 
+        example: { problem: 'What happens to the growth rate as a population N approaches its carrying capacity K?', solution: 'The growth rate (dN/dt) slows to 0.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Ecology', title: 'Population Growth', 
+        formula: '\\frac{dN}{dt} = rN', desc: 'Exponential population growth.',
+        symbols: { 'N': 'Population size', 'r': 'Growth rate', 't': 'Time' }, 
+        example: { problem: 'Describe the growth pattern of bacteria doubling every hour.', solution: 'They show exponential growth represented by rN.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Allele Frequencies', 
+        formula: 'p + q = 1', desc: 'Sum of dominant and recessive alleles.',
+        symbols: { 'p': 'Frequency of dominant allele', 'q': 'Frequency of recessive allele' }, 
+        example: { problem: 'If the frequency of the dominant allele p is 0.7, find the recessive allele frequency.', solution: 'q = 1 - 0.7 = 0.3' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Dihybrid Ratio', 
+        formula: '9:3:3:1', desc: 'Phenotypic ratio in dihybrid cross.',
+        symbols: { '9': 'Dom/Dom', '3': 'Dom/Rec', '1': 'Rec/Rec' }, 
+        example: { problem: 'What is the expected phenotypic outcome of crossing RrYy x RrYy?', solution: '9 round/yellow, 3 round/green, 3 wrinkled/yellow, 1 wrinkled/green.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Hardy-Weinberg Frequency', 
+        formula: 'p^2 + 2pq + q^2 = 1', desc: 'Genotype frequency equation.',
+        symbols: { 'p^2': 'Homozygous dominant', '2pq': 'Heterozygous', 'q^2': 'Homozygous recessive' }, 
+        example: { problem: 'If the homozygous recessive frequency (q²) is 0.04 (4%), what is q?', solution: 'q = √0.04 = 0.2' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Hardy-Weinberg Principle', 
+        formula: 'p^2 + 2pq + q^2 = 1', desc: 'Genotype frequencies in equilibrium.',
+        symbols: { 'p': 'Dominant allele frequency', 'q': 'Recessive allele frequency' }, 
+        example: { problem: 'What does the Hardy-Weinberg equation calculate?', solution: 'It calculates expected genetic stability in a non-evolving population.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Monohybrid Genotypic Ratio', 
+        formula: '1:2:1', desc: 'Genotypic ratio in monohybrid cross.',
+        symbols: { '1': 'Homozygous dominant or recessive', '2': 'Heterozygous' }, 
+        example: { problem: 'What is the genotypic ratio of crossing Aa x Aa?', solution: '1 AA, 2 Aa, and 1 aa.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Monohybrid Ratio', 
+        formula: '3:1', desc: 'Phenotypic ratio in monohybrid cross.',
+        symbols: { '3': 'Dominant phenotype', '1': 'Recessive phenotype' }, 
+        example: { problem: 'What is the phenotypic outcome of crossing two heterozygous pea plants?', solution: '3 tall plants to 1 short plant.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Recombination Frequency', 
+        formula: '\\text{RF} = \\frac{\\text{Recombinants}}{\\text{Total Offspring}} \\times 100', desc: 'Genetic mapping formula.',
+        symbols: { 'RF': 'Recombination Frequency' }, 
+        example: { problem: 'If there are 15 recombinants out of 100 offspring, what is the gene distance?', solution: 'RF = (15/100) * 100 = 15 map units.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Microscopy', title: 'Magnification', 
+        formula: '\\text{Magnification} = \\frac{\\text{Image Size}}{\\text{Actual Size}}', desc: 'Magnification formula.',
+        symbols: { 'Image Size': 'Measured size', 'Actual Size': 'Real specimen size' }, 
+        example: { problem: 'An image measuring 10mm represents a 0.1mm cell. Find the magnification.', solution: 'Magnification = 10mm / 0.1mm = 100x.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Photosynthesis', title: 'Photosynthesis Equation', 
+        formula: '6CO_2 + 6H_2O \\rightarrow C_6H_{12}O_6 + 6O_2', desc: 'Overall photosynthesis reaction.',
+        symbols: { 'CO_2': 'Carbon Dioxide', 'H_2O': 'Water', 'C_6H_{12}O_6': 'Glucose' }, 
+        example: { problem: 'How many moles of glucose are produced from 6 moles of CO₂?', solution: 'Plants convert 6 moles of CO₂ into exactly 1 mole of glucose.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Population Ecology', title: 'Population Density', 
+        formula: '\\text{Density} = \\frac{\\text{Population}}{\\text{Area}}', desc: 'Population per unit area.',
+        symbols: { 'Population': 'Total individuals', 'Area': 'Square units' }, 
+        example: { problem: 'Find the density of 500 oak trees in a 10 sq km forest.', solution: 'Density = 500 / 10 = 50 trees/sq km.' }
+    },
+
+    // ==========================================
+    // CHEMISTRY
+    // ==========================================
+    { 
+        subject: 'Chemistry', topic: 'Acid-Base', title: 'Henderson-Hasselbalch', 
+        formula: 'pH = pK_a + \\log\\frac{[\\text{Base}]}{[\\text{Acid}]}', desc: 'pH of a buffer solution.',
+        symbols: { 'pK_a': 'Acid dissociation constant', '[Base]': 'Conjugate base concentration', '[Acid]': 'Weak acid concentration' }, 
+        example: { problem: 'What is this formula primarily used for?', solution: 'It is used to find the pH of a buffer system, such as human blood.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Acid-Base', title: 'pH', 
+        formula: 'pH = -\\log[H^+]', desc: 'Measure of hydrogen ion concentration (acidity).',
+        symbols: { '[H^+]': 'Hydrogen ion concentration (M)' }, 
+        example: { problem: 'Find the pH if the [H⁺] is 1.0 x 10⁻³ M.', solution: 'pH = -log(1.0 x 10⁻³) = 3.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Acid-Base', title: 'pOH', 
+        formula: 'pOH = -\\log[OH^-]', desc: 'Measure of hydroxide ion concentration (alkalinity).',
+        symbols: { '[OH^-]': 'Hydroxide ion concentration (M)' }, 
+        example: { problem: 'Find the pOH if the [OH⁻] is 1.0 x 10⁻⁴ M.', solution: 'pOH = -log(1.0 x 10⁻⁴) = 4.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Acid-Base', title: 'pH and pOH Relation', 
+        formula: 'pH + pOH = 14', desc: 'The constant sum of pH and pOH in aqueous solutions at 25°C.',
+        symbols: { 'pH': 'Acidity scale', 'pOH': 'Basicity scale' }, 
+        example: { problem: 'If a solution has a pH of 5, what is its pOH?', solution: 'pOH = 14 - 5 = 9.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Acid-Base', title: 'Water Autoionization Constant', 
+        formula: 'K_w = [H^+][OH^-] = 1.0 \\times 10^{-14}', desc: 'Equilibrium constant for the autoionization of water at 25°C.',
+        symbols: { 'K_w': 'Ion-product constant for water' }, 
+        example: { problem: 'What are the ion concentrations in pure water at 25°C?', solution: 'In pure water, [H⁺] and [OH⁻] are both 1.0 x 10⁻⁷ M.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Mass Number', 
+        formula: 'A = Z + N', desc: 'Total number of protons (Z) and neutrons (N) in the atomic nucleus.',
+        symbols: { 'A': 'Mass Number', 'Z': 'Protons (Atomic Number)', 'N': 'Neutrons' }, 
+        example: { problem: 'Carbon-14 has Z=6 and N=8. What is its mass number?', solution: 'A = 6 + 8 = 14.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Energy of Photon (Frequency)', 
+        formula: 'E = hf', desc: 'Energy carried by a photon using frequency.',
+        symbols: { 'E': 'Energy (J)', 'h': 'Planck\'s constant', 'f': 'Frequency (Hz)' }, 
+        example: { problem: 'Find the energy of a photon with frequency 5x10¹⁴ Hz.', solution: 'E = h * (5x10¹⁴ Hz).' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Energy of Photon (Wavelength)', 
+        formula: 'E = \\frac{hc}{\\lambda}', desc: 'Energy carried by a photon using wavelength.',
+        symbols: { 'h': 'Planck\'s constant', 'c': 'Speed of light', 'λ': 'Wavelength (m)' }, 
+        example: { problem: 'Which has more energy: light with λ = 400 nm or λ = 700 nm?', solution: 'Light with λ = 400 nm has more energy because energy is inversely proportional to wavelength.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Planck Relation', 
+        formula: 'c = f\\lambda', desc: 'Wave relationship between the speed of light, frequency, and wavelength.',
+        symbols: { 'c': 'Speed of light', 'f': 'Frequency', 'λ': 'Wavelength' }, 
+        example: { problem: 'How are frequency and wavelength related for an electromagnetic wave in a vacuum?', solution: 'The product of frequency (f) and wavelength (λ) always equals the speed of light (c).' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Photoelectric Effect', 
+        formula: 'KE_e = h\\nu - h\\nu_0', desc: 'Kinetic energy of an ejected electron after exceeding threshold frequency.',
+        symbols: { 'KE_e': 'Kinetic energy of electron', 'h\\nu': 'Incident photon energy', 'h\\nu_0': 'Work function (binding energy)' }, 
+        example: { problem: 'What happens if incident photon energy exceeds the binding energy?', solution: 'An electron is ejected with kinetic energy equal to the difference.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Bohr Hydrogen Orbit Energy', 
+        formula: 'E_n = -R_H \\frac{1}{n^2}', desc: 'Quantized energy level of an electron in a hydrogen-like atom.',
+        symbols: { 'E_n': 'Energy of level n', 'R_H': 'Rydberg energy constant', 'n': 'Principal quantum number' }, 
+        example: { problem: 'What does n=1 represent in this equation?', solution: 'For n=1, E₁ represents the lowest possible energy state, or ground state energy.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Rydberg Energy Transition', 
+        formula: '\\Delta E = R_H \\left(\\frac{1}{n_i^2} - \\frac{1}{n_f^2}\\right)', desc: 'Energy difference when an electron transitions between initial and final energy levels.',
+        symbols: { 'n_i': 'Initial state', 'n_f': 'Final state', 'R_H': 'Rydberg constant' }, 
+        example: { problem: 'What is this formula used to calculate?', solution: 'The specific energy emitted or absorbed when a Hydrogen electron transitions between levels (e.g., n=3 to n=2).' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'Heisenberg Uncertainty Principle', 
+        formula: '\\Delta x \\Delta p \\ge \\frac{h}{4\\pi}', desc: 'Fundamental limit on simultaneously measuring an electron\'s position and momentum.',
+        symbols: { 'Δx': 'Uncertainty in position', 'Δp': 'Uncertainty in momentum', 'h': 'Planck\'s constant' }, 
+        example: { problem: 'Can you know an electron\'s exact location and speed simultaneously?', solution: 'No, minimizing uncertainty in position inherently maximizes uncertainty in momentum.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Atomic Structure', title: 'De Broglie Wavelength', 
+        formula: '\\lambda = \\frac{h}{mv}', desc: 'The wavelength associated with a particle of matter possessing mass and velocity.',
+        symbols: { 'λ': 'Wavelength', 'h': 'Planck\'s constant', 'm': 'Mass', 'v': 'Velocity' }, 
+        example: { problem: 'Does an electron moving at 10⁶ m/s act as a wave?', solution: 'Yes, it has a specific, calculable de Broglie wavelength based on its mass and velocity.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Bonding and Molecular Structure', title: 'Formal Charge', 
+        formula: '\\text{Formal Charge} = V - L - \\frac{1}{2}B', desc: 'Assigned charge computed from valence, lone pair, and bonding electrons.',
+        symbols: { 'V': 'Valence electrons', 'L': 'Lone pair electrons', 'B': 'Bonding electrons' }, 
+        example: { problem: 'What is the formal charge of Oxygen in an ozone molecule?', solution: 'Depending on its structural position, Oxygen in ozone can have a +1, 0, or -1 formal charge.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Electrochemistry', title: 'Cell Potential', 
+        formula: 'E^\\circ_{cell} = E^\\circ_{cathode} - E^\\circ_{anode}', desc: 'Standard electromotive force (EMF) of a galvanic cell.',
+        symbols: { 'E°_cell': 'Standard cell potential', 'E°_cathode': 'Reduction potential at cathode', 'E°_anode': 'Reduction potential at anode' }, 
+        example: { problem: 'Find the standard potential for a Zn-Cu cell (E°_Cu = 0.34 V, E°_Zn = -0.76 V).', solution: 'E° = 0.34 V - (-0.76 V) = 1.10 V.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Electrochemistry', title: 'Faraday\'s Law', 
+        formula: 'm = \\frac{M}{nF}It', desc: 'Mass of a substance deposited or liberated during electrolysis.',
+        symbols: { 'm': 'Mass', 'I': 'Current', 't': 'Time', 'M': 'Molar mass', 'n': 'Moles of electrons', 'F': 'Faraday\'s constant' }, 
+        example: { problem: 'What does running 2 Amps for 1 hour through a CuSO₄ solution do?', solution: 'It deposits a specific calculated mass of solid copper at the cathode.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Electrochemistry', title: 'Nernst Equation', 
+        formula: 'E = E^\\circ - \\frac{0.0592}{n} \\log Q', desc: 'Cell potential calculation under non-standard concentrations at 298K.',
+        symbols: { 'E': 'Cell potential', 'E°': 'Standard potential', 'n': 'Moles transferred', 'Q': 'Reaction quotient' }, 
+        example: { problem: 'What happens to the cell voltage as reactant concentrations drop over time?', solution: 'The Nernst equation adjusts the expected voltage E downward as Q increases.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Equilibrium', title: 'Equilibrium Constant (Kc)', 
+        formula: 'K_c = \\frac{[C]^c[D]^d}{[A]^a[B]^b}', desc: 'Ratio of products to reactants concentrations at equilibrium.',
+        symbols: { '[A], [B]': 'Reactants', '[C], [D]': 'Products', 'a,b,c,d': 'Stoichiometric coefficients' }, 
+        example: { problem: 'What does a very large Kc value indicate?', solution: 'The reaction heavily favors the formation of products at equilibrium.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Equilibrium', title: 'Equilibrium Constant (Kp)', 
+        formula: 'K_p = \\frac{P_C^c P_D^d}{P_A^a P_B^b}', desc: 'Equilibrium constant calculated using partial pressures of gaseous products and reactants.',
+        symbols: { 'P': 'Partial pressure of respective gases' }, 
+        example: { problem: 'When is Kp used instead of Kc?', solution: 'It is exclusively used for gas-phase equilibrium reactions, like the Haber process.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Equilibrium', title: 'Kp and Kc Relationship', 
+        formula: 'K_p = K_c(RT)^{\\Delta n}', desc: 'Mathematical bridge converting between gas partial pressure and molar equilibrium constants.',
+        symbols: { 'R': 'Ideal gas constant', 'T': 'Temperature (K)', 'Δn': 'Change in gas moles' }, 
+        example: { problem: 'If a reaction has no change in the number of gas moles (Δn = 0), how do Kp and Kc relate?', solution: 'Because (RT)⁰ = 1, Kp will equal Kc.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Equilibrium', title: 'Reaction Quotient', 
+        formula: 'Q_c = \\frac{[C]^c[D]^d}{[A]^a[B]^b}', desc: 'Concentration ratio evaluated at any given non-equilibrium moment to predict reaction shift.',
+        symbols: { 'Q_c': 'Reaction quotient' }, 
+        example: { problem: 'If calculated Qc is less than Kc, which direction will the reaction shift?', solution: 'The reaction will shift to the right, toward the products, to reach equilibrium.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Boyle Law', 
+        formula: 'P_1V_1 = P_2V_2', desc: 'Inverse relationship between pressure and volume at constant temperature.',
+        symbols: { 'P': 'Pressure', 'V': 'Volume' }, 
+        example: { problem: 'What happens to the internal pressure if you halve the volume of a gas syringe?', solution: 'The internal pressure strictly doubles.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Charles Law', 
+        formula: '\\frac{V_1}{T_1} = \\frac{V_2}{T_2}', desc: 'Direct proportional relationship between volume and absolute temperature at constant pressure.',
+        symbols: { 'V': 'Volume', 'T': 'Temperature in Kelvin' }, 
+        example: { problem: 'What happens to the volume of a balloon when it is heated?', solution: 'Its volume expands proportionally to the absolute temperature.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Gay-Lussac Law', 
+        formula: '\\frac{P_1}{T_1} = \\frac{P_2}{T_2}', desc: 'Direct proportional relationship between pressure and absolute temperature at constant volume.',
+        symbols: { 'P': 'Pressure', 'T': 'Temperature in Kelvin' }, 
+        example: { problem: 'What happens if you rapidly heat a sealed, rigid gas canister?', solution: 'Its internal pressure increases.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Avogadro Law', 
+        formula: '\\frac{V_1}{n_1} = \\frac{V_2}{n_2}', desc: 'Direct relationship between gas volume and number of moles at uniform temperature and pressure.',
+        symbols: { 'V': 'Volume', 'n': 'Number of moles' }, 
+        example: { problem: 'If pressure and temperature are constant, what happens if you double the amount of gas moles?', solution: 'The volume exactly doubles.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Ideal Gas Law', 
+        formula: 'PV = nRT', desc: 'The universal equation of state linking pressure, volume, moles, and temperature.',
+        symbols: { 'P': 'Pressure', 'V': 'Volume', 'n': 'Moles', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
+        example: { problem: 'Calculate the volume of 1 mole of an ideal gas at STP (0°C and 1 atm).', solution: 'V = (1 * 0.0821 * 273.15) / 1 = 22.4 Liters.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Combined Gas Law', 
+        formula: '\\frac{P_1V_1}{T_1} = \\frac{P_2V_2}{T_2}', desc: 'Unified formula tracking changes when pressure, volume, and temperature vary simultaneously.',
+        symbols: { 'P': 'Pressure', 'V': 'Volume', 'T': 'Temperature' }, 
+        example: { problem: 'What is this law used to predict?', solution: 'The new volume of a gas if it rises in altitude where both pressure and temperature drop.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Density of Gas', 
+        formula: 'd = \\frac{PM}{RT}', desc: 'Equation solving for gas density utilizing pressure, molar mass, and temperature.',
+        symbols: { 'd': 'Density', 'P': 'Pressure', 'M': 'Molar Mass', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
+        example: { problem: 'Compare the density of SF₆ gas and Helium at the same conditions.', solution: 'SF₆ has a much higher density because density scales directly with molar mass (M).' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Dalton Law of Partial Pressures', 
+        formula: 'P_{\\text{total}} = P_1 + P_2 + P_3 + \\dots', desc: 'The sum of independent partial pressures yields the total pressure of a gas mixture.',
+        symbols: { 'P_{total}': 'Total Pressure', 'P_n': 'Partial pressure of gas n' }, 
+        example: { problem: 'How is total atmospheric pressure calculated?', solution: 'It is the direct sum of the partial pressures of nitrogen, oxygen, and trace gases.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Graham Law of Diffusion', 
+        formula: '\\frac{r_1}{r_2} = \\sqrt{\\frac{M_2}{M_1}}', desc: 'Inversely proportional relationship between the gas effusion/diffusion rate and the square root of its molar mass.',
+        symbols: { 'r': 'Rate of effusion', 'M': 'Molar mass' }, 
+        example: { problem: 'Which effuses faster, Helium (M=4) or Argon (M=40)?', solution: 'Helium effuses significantly faster due to its lower molar mass.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'Root-Mean-Square Speed', 
+        formula: 'v_{\\text{rms}} = \\sqrt{\\frac{3RT}{M}}', desc: 'The average molecular velocity of ideal gas particles.',
+        symbols: { 'v_{rms}': 'RMS speed', 'R': '8.314 J/(mol K)', 'T': 'Temperature', 'M': 'Molar mass in kg/mol' }, 
+        example: { problem: 'How fast do oxygen molecules move at room temperature?', solution: 'They move at approximately 500 m/s.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Gas Laws', title: 'van der Waals Equation', 
+        formula: '\\left(P + \\frac{an^2}{V^2}\\right)(V - nb) = nRT', desc: 'Modified ideal gas law adjusted for real gas particles\' finite volume and intermolecular forces.',
+        symbols: { 'a': 'Intermolecular attraction factor', 'b': 'Volume correction factor' }, 
+        example: { problem: 'When is the Ideal Gas Law no longer sufficient, requiring van der Waals?', solution: 'When modeling real gases under extremely high pressure or low temperature conditions.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Kinetics', title: 'Arrhenius Equation', 
+        formula: 'k = A e^{-E_a/RT}', desc: 'Expresses the mathematical dependence of reaction rate constants on absolute temperature and activation energy.',
+        symbols: { 'k': 'Rate constant', 'A': 'Pre-exponential factor', 'E_a': 'Activation Energy', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
+        example: { problem: 'Why does heating a reaction dramatically increase its rate?', solution: 'Because the rate constant k grows exponentially as temperature T increases.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Kinetics', title: 'Rate Law', 
+        formula: '\\text{Rate} = k[A]^m[B]^n', desc: 'General rate equation expressing empirical dependency on reactant concentrations.',
+        symbols: { 'k': 'Rate constant', '[A], [B]': 'Reactant concentrations', 'm, n': 'Reaction orders' }, 
+        example: { problem: 'If exponent m=1 and n=1, what is the overall order of the reaction?', solution: 'It is a second-order reaction overall (1 + 1 = 2).' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Kinetics', title: 'Reaction Rate Definition', 
+        formula: '\\text{Rate} = \\frac{\\Delta[\\text{substance}]}{\\Delta t}', desc: 'The primary kinetic parameter defining structural concentration change over a fixed time index.',
+        symbols: { 'Δ[substance]': 'Change in concentration', 'Δt': 'Change in time' }, 
+        example: { problem: 'How is the reaction rate physically measured?', solution: 'By measuring how fast a reactant disappears or a product appears in M/s.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Dilution', 
+        formula: 'M_1 V_1 = M_2 V_2', desc: 'Conservation of moles principle utilized when diluting a concentrated solution.',
+        symbols: { 'M': 'Molarity', 'V': 'Volume' }, 
+        example: { problem: 'How much total volume is needed to dilute 10mL of 12M HCl to a 1M solution?', solution: '12 * 10 = 1 * V2, so V2 = 120mL total.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Mass Percent', 
+        formula: '\\%m = \\frac{m_{solute}}{m_{solution}} \\times 100', desc: 'Concentration expressed via solute mass over overall sample mass percentage.',
+        symbols: { 'm_{solute}': 'Mass of solute', 'm_{solution}': 'Total mass of solution' }, 
+        example: { problem: 'Find the mass percent of 5g of NaCl dissolved in 95g of water.', solution: '%m = (5 / 100) * 100 = 5% mass solution.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Molarity', 
+        formula: 'M = \\frac{n_{solute}}{V_{solution (L)}}', desc: 'Molar concentration expressing moles of solute packed per liter of net solution.',
+        symbols: { 'n_{solute}': 'Moles of solute', 'V': 'Volume in Liters' }, 
+        example: { problem: 'Find the molarity if 2 moles of solute are dissolved in 0.5 L of solution.', solution: 'M = 2 / 0.5 = 4 Molar.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Molality', 
+        formula: 'm = \\frac{n_{solute}}{m_{solvent (kg)}}', desc: 'Concentration measuring solute moles dissolved per kilogram of solvent mass.',
+        symbols: { 'n_{solute}': 'Moles of solute', 'm_{solvent}': 'Mass of solvent in kg' }, 
+        example: { problem: 'When is molality heavily utilized instead of molarity?', solution: 'It is strictly used for colligative property calculations like boiling point elevation.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Mole Fraction', 
+        formula: 'X_A = \\frac{n_A}{n_{total}}', desc: 'The dimensionless ratio of moles of a single component against total solution components.',
+        symbols: { 'n_A': 'Moles of component A', 'n_{total}': 'Total moles in mixture' }, 
+        example: { problem: 'What is the sum of all mole fractions in any chemical mixture?', solution: 'The sum always equals exactly 1.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Henry\'s Law', 
+        formula: 'C = k P_{\\text{gas}}', desc: 'Relates the equilibrium dissolved solubility of a gas to its external gas phase partial pressure.',
+        symbols: { 'C': 'Solubility of gas', 'k': 'Henry\'s constant', 'P_{gas}': 'Partial pressure' }, 
+        example: { problem: 'Why does soda fizz intensely when you open the cap?', solution: 'The internal pressure drops, drastically decreasing the CO₂ solubility.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Boiling Point Elevation', 
+        formula: '\\Delta T_b = i K_b m', desc: 'Colligative increase in a solution\'s boiling threshold scaled via molality and the van \'t Hoff factor.',
+        symbols: { 'ΔT_b': 'Boiling point increase', 'i': 'van \'t Hoff factor', 'K_b': 'Ebullioscopic constant', 'm': 'Molality' }, 
+        example: { problem: 'What happens to the boiling point of water when you dissolve salt (i=2) into it?', solution: 'The boiling point proportionally increases above 100°C.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Freezing Point Depression', 
+        formula: '\\Delta T_f = i K_f m', desc: 'Colligative drop in freezing temperature threshold scaled via molality and the van \'t Hoff factor.',
+        symbols: { 'ΔT_f': 'Freezing point decrease', 'i': 'van \'t Hoff factor', 'K_f': 'Cryoscopic constant', 'm': 'Molality' }, 
+        example: { problem: 'Why is salt poured on icy roads in the winter?', solution: 'It depresses the freezing point of water, preventing ice formation at 0°C.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Osmotic Pressure', 
+        formula: '\\Pi = iMRT', desc: 'The specific external hydrostatic force vector required to completely halt colligative osmosis.',
+        symbols: { 'Π': 'Osmotic pressure', 'i': 'van \'t Hoff factor', 'M': 'Molarity', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
+        example: { problem: 'What does this equation calculate for water filtration systems?', solution: 'The exact reverse pressure needed to perform reverse osmosis.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Solutions', title: 'Raoult\'s Law', 
+        formula: 'P_A = X_A P_A^\\circ', desc: 'Defines the lowered vapor pressure profiles belonging to an ideal liquid component solution.',
+        symbols: { 'P_A': 'Partial vapor pressure', 'X_A': 'Mole fraction', 'P_A°': 'Pure vapor pressure' }, 
+        example: { problem: 'What happens to a pure solvent when you dissolve a non-volatile solute in it?', solution: 'The solvent\'s partial vapor pressure is directly lowered.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Stoichiometry', title: 'Number of Moles', 
+        formula: 'n = \\frac{m}{M}', desc: 'Fundamental conversion solving for moles from net operational mass.',
+        symbols: { 'n': 'Moles', 'm': 'Mass (g)', 'M': 'Molar mass (g/mol)' }, 
+        example: { problem: 'How many moles are in 18g of pure water (M=18g/mol)?', solution: 'n = 18 / 18 = exactly 1 mole.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Stoichiometry', title: 'Particles Count', 
+        formula: 'N = nN_A', desc: 'Converts chemical moles into individual count units via Avogadro\'s number.',
+        symbols: { 'N': 'Number of particles', 'n': 'Moles', 'N_A': 'Avogadro\'s number (6.022x10^23)' }, 
+        example: { problem: 'How many individual carbon atoms are in 2 moles of carbon?', solution: 'N = 2 * 6.022x10²³ = 1.2x10²⁴ carbon atoms.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Stoichiometry', title: 'Percentage Yield', 
+        formula: '\\%\\text{Yield} = \\frac{\\text{Actual}}{\\text{Theoretical}} \\times 100', desc: 'Measures structural chemical performance efficiency ratios.',
+        symbols: { 'Actual': 'Experimental mass recovered', 'Theoretical': 'Stoichiometrically calculated mass' }, 
+        example: { problem: 'If you recover 8g in an experiment where 10g was theoretically expected, what is your yield?', solution: '%Yield = (8 / 10) * 100 = 80%.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Thermochemistry', title: 'Heat Change', 
+        formula: 'q = mc\\Delta T', desc: 'Thermal energy transferred derived from mass, specific heat, and temperature change.',
+        symbols: { 'q': 'Heat energy', 'm': 'Mass', 'c': 'Specific heat capacity', 'ΔT': 'Change in temperature' }, 
+        example: { problem: 'Calculate the thermal energy required to heat 100g of water (c=4.18) by 20°C.', solution: 'q = 100 * 4.18 * 20 = 8360 J.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Thermodynamics', title: 'Gibbs Free Energy', 
+        formula: '\\Delta G = \\Delta H - T\\Delta S', desc: 'Fundamental criterion evaluating chemical reaction spontaneity at constant temperature and pressure.',
+        symbols: { 'ΔG': 'Gibbs free energy change', 'ΔH': 'Enthalpy change', 'T': 'Temperature (K)', 'ΔS': 'Entropy change' }, 
+        example: { problem: 'How do you determine if a chemical reaction is thermodynamically spontaneous?', solution: 'The reaction is spontaneous strictly if ΔG calculates as negative.' }
+    },
+    { 
+        subject: 'Chemistry', topic: 'Nuclear Chemistry', title: 'Radioactive Decay', 
+        formula: 'N = N_0e^{-\\lambda t}', desc: 'First-order kinetic decay tracing remaining nuclear mass quantities across time intervals.',
+        symbols: { 'N': 'Amount remaining', 'N_0': 'Initial amount', 'λ': 'Decay constant', 't': 'Time' }, 
+        example: { problem: 'What does this function model in archaeology?', solution: 'Predicting how much Carbon-14 remains in an excavated fossil over time.' }
+    },
+
+    // ==========================================
+    // MATHEMATICS
+    // ==========================================
+    { 
+        subject: 'Mathematics', topic: 'Absolute Value', title: 'Absolute Value Definition', 
+        formula: '|x| = \\begin{cases} x & \\text{if } x \\ge 0 \\\\ -x & \\text{if } x < 0 \\end{cases}', desc: 'Piecewise definition of the absolute value function.',
+        symbols: { 'x': 'Real number' }, 
+        example: { problem: 'Find the absolute value of -5.', solution: '|-5| = -(-5) = 5.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Algebra', title: 'Quadratic Formula', 
+        formula: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}', desc: 'Roots of ax^2 + bx + c = 0.',
+        symbols: { 'a,b,c': 'Coefficients', 'b^2-4ac': 'Discriminant' }, 
+        example: { problem: 'Find the roots of x² - 5x + 6 = 0.', solution: 'The roots are calculated as x = 2 and x = 3.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Algebra', title: 'Difference of Squares', 
+        formula: 'a^2-b^2 = (a-b)(a+b)', desc: 'Factorization identity.',
+        symbols: { 'a, b': 'Algebraic terms' }, 
+        example: { problem: 'Factor the polynomial x² - 9.', solution: 'It perfectly factors into (x-3)(x+3).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Algebra', title: 'Perfect Square', 
+        formula: '(a+b)^2 = a^2+2ab+b^2', desc: 'Expansion identity.',
+        symbols: { 'a, b': 'Algebraic terms' }, 
+        example: { problem: 'Expand the binomial square (x+3)²', solution: 'It expands to x² + 6x + 9.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Power Rule', 
+        formula: '\\frac{d}{dx}(x^n) = nx^{n-1}', desc: 'Derivative of a power.',
+        symbols: { 'n': 'Real number exponent', 'x': 'Variable' }, 
+        example: { problem: 'If f(x) = x³, find the derivative f\'(x).', solution: 'f\'(x) = 3x².' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Product Rule', 
+        formula: '(uv)\' = u\'v + uv\'', desc: 'Derivative of a product.',
+        symbols: { 'u, v': 'Differentiable functions of x' }, 
+        example: { problem: 'Find the derivative d/dx(x * sin(x)).', solution: 'sin(x) + x * cos(x).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Quotient Rule', 
+        formula: '\\left(\\frac{u}{v}\\right)\' = \\frac{u\'v - uv\'}{v^2}', desc: 'Derivative of a quotient.',
+        symbols: { 'u': 'Numerator function', 'v': 'Denominator function' }, 
+        example: { problem: 'When is this rule applied in trigonometry?', solution: 'When finding the derivative of quotients like tan(x) = sin(x)/cos(x).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Chain Rule', 
+        formula: '\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}', desc: 'Derivative of composite function.',
+        symbols: { 'y': 'Outer function', 'u': 'Inner function' }, 
+        example: { problem: 'Find the derivative d/dx(sin(x²)).', solution: 'cos(x²) * 2x.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Basic Integration', 
+        formula: '\\int x^n dx = \\frac{x^{n+1}}{n+1} + C', desc: 'Power integration rule.',
+        symbols: { 'n': 'Exponent (cannot be -1)', 'C': 'Constant of integration' }, 
+        example: { problem: 'Evaluate the indefinite integral ∫ x² dx.', solution: '(x³)/3 + C.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Calculus', title: 'Integration by Parts', 
+        formula: '\\int u \\, dv = uv - \\int v \\, du', desc: 'Product rule for integrals.',
+        symbols: { 'u': 'Function to differentiate', 'dv': 'Function to integrate' }, 
+        example: { problem: 'What is this integration technique primarily used for?', solution: 'Integrating products of complex functions, like ∫ x * e^x dx.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Coordinate Geometry', title: 'Distance Formula', 
+        formula: 'd = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}', desc: 'Distance between two points.',
+        symbols: { '(x_1, y_1)': 'Point 1', '(x_2, y_2)': 'Point 2' }, 
+        example: { problem: 'Find the precise distance between coordinates (0,0) and (3,4).', solution: 'd = √(3² + 4²) = 5.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Coordinate Geometry', title: 'Midpoint Formula', 
+        formula: 'M\\left(\\frac{x_1+x_2}{2}, \\frac{y_1+y_2}{2}\\right)', desc: 'Coordinates of midpoint of a line segment.',
+        symbols: { '(x_1, y_1)': 'Point 1', '(x_2, y_2)': 'Point 2' }, 
+        example: { problem: 'Find the midpoint connecting (0,0) and (4,6).', solution: 'M(2, 3).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Geometry and Measurement', title: 'Pythagorean Theorem', 
+        formula: 'a^2 + b^2 = c^2', desc: 'Relationship between sides of a right triangle.',
+        symbols: { 'a,b': 'Legs of triangle', 'c': 'Hypotenuse' }, 
+        example: { problem: 'If the legs of a right triangle are 3 and 4, find the hypotenuse.', solution: 'c = √(3² + 4²) = 5.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Trigonometry', title: 'Sine Rule', 
+        formula: '\\frac{a}{\\sin(A)} = \\frac{b}{\\sin(B)} = \\frac{c}{\\sin(C)}', desc: 'Relates the sides of a triangle to the sines of its angles.',
+        symbols: { 'a,b,c': 'Side lengths', 'A,B,C': 'Opposite angles' }, 
+        example: { problem: 'Under what conditions is this rule applied?', solution: 'When exactly 2 angles and 1 side of an oblique triangle are known.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Trigonometry', title: 'Cosine Rule', 
+        formula: 'c^2 = a^2 + b^2 - 2ab\\cos(C)', desc: 'Generalization of Pythagoras’ theorem for any triangle.',
+        symbols: { 'C': 'Angle opposite to side c' }, 
+        example: { problem: 'When is this rule used in trigonometry?', solution: 'To find the third side when 2 sides and the enclosed angle are provided.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Trigonometric Identities', title: 'Pythagorean Identity (Sine/Cos)', 
+        formula: '\\sin^2(\\theta) + \\cos^2(\\theta) = 1', desc: 'The primary Pythagorean identity for sine and cosine.',
+        symbols: { 'θ': 'Any angle' }, 
+        example: { problem: 'If sin(θ) = 0.6 in Quadrant 1, find cos(θ).', solution: 'cos(θ) = √(1 - 0.6²) = 0.8.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Straight Lines', title: 'Slope-Intercept Form', 
+        formula: 'y = mx + b', desc: 'Equation of a line given its slope m and y-intercept b.',
+        symbols: { 'm': 'Slope', 'b': 'y-intercept' }, 
+        example: { problem: 'Find the equation of a line with slope 2 passing through the point (0, 3).', solution: 'y = 2x + 3.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Logarithms', title: 'Product Rule for Logarithms', 
+        formula: '\\log_b(xy) = \\log_b(x) + \\log_b(y)', desc: 'The logarithm of a product is the sum of the logarithms.',
+        symbols: { 'b': 'Base', 'x, y': 'Arguments' }, 
+        example: { problem: 'Expand log(20) using this rule.', solution: 'log(4 * 5) = log(4) + log(5).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Logarithms', title: 'Change of Base Formula', 
+        formula: '\\log_b(x) = \\frac{\\log_c(x)}{\\log_c(b)}', desc: 'Allows converting logarithms from one base to another.',
+        symbols: { 'b': 'Old base', 'c': 'New base', 'x': 'Argument' }, 
+        example: { problem: 'Convert log₂(8) into natural logarithms.', solution: 'ln(8) / ln(2).' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Statistics', title: 'Mean', 
+        formula: '\\bar{x} = \\frac{\\sum x}{n}', desc: 'Arithmetic mean.',
+        symbols: { 'Σx': 'Sum of all values', 'n': 'Number of values' }, 
+        example: { problem: 'Calculate the arithmetic mean of 2, 4, and 6.', solution: 'x̄ = (2+4+6) / 3 = 4.' }
+    },
+    { 
+        subject: 'Mathematics', topic: 'Probability', title: 'Conditional Probability', 
+        formula: 'P(A|B) = \\frac{P(A \\cap B)}{P(B)}', desc: 'Probability given another event.',
+        symbols: { 'P(A|B)': 'Probability of A given B', 'P(A ∩ B)': 'Probability of A and B' }, 
+        example: { problem: 'Give a real-world example of what this computes.', solution: 'Calculating the probability of drawing a King given that the drawn card is already known to be a face card.' }
+    },
+    
+    // ==========================================
+    // PHYSICS
+    // ==========================================
+    { 
+        subject: 'Physics', topic: 'Kinematics', title: 'Velocity-Time Relation', 
+        formula: 'v = u + at', desc: 'Final velocity under constant acceleration.',
+        symbols: { 'v': 'Final velocity', 'u': 'Initial velocity', 'a': 'Acceleration', 't': 'Time' }, 
+        example: { problem: 'A car accelerates uniformly from rest at 2m/s² for 5s. Find final velocity.', solution: 'v = 0 + (2)(5) = 10 m/s.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Kinematics', title: 'Position-Time Relation', 
+        formula: 's = ut + \\frac{1}{2}at^2', desc: 'Displacement under constant acceleration.',
+        symbols: { 's': 'Displacement', 'u': 'Initial velocity', 't': 'Time', 'a': 'Acceleration' }, 
+        example: { problem: 'Drop a stone from rest (u=0, a=9.8). Find its displacement in 2s.', solution: 's = 0 + 0.5(9.8)(2²) = 19.6 m.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Kinematics', title: 'Velocity-Position', 
+        formula: 'v^2 = u^2 + 2as', desc: 'Velocity squared relation.',
+        symbols: { 'v': 'Final velocity', 'u': 'Initial velocity', 'a': 'Acceleration', 's': 'Displacement' }, 
+        example: { problem: 'What practical problem does this formula often solve?', solution: 'Calculating stopping distance given an initial velocity and a braking deceleration rate.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Dynamics', title: 'Newton\'s Second Law', 
+        formula: 'F = ma', desc: 'Force equals mass times acceleration.',
+        symbols: { 'F': 'Net Force (N)', 'm': 'Mass (kg)', 'a': 'Acceleration (m/s²)' }, 
+        example: { problem: 'A 10kg object accelerating at 2m/s² feels what net force?', solution: 'F = 10 * 2 = 20 N.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Dynamics', title: 'Momentum', 
+        formula: 'p = mv', desc: 'Linear momentum.',
+        symbols: { 'p': 'Momentum (kg·m/s)', 'm': 'Mass', 'v': 'Velocity' }, 
+        example: { problem: 'Calculate the momentum of a 1000kg car moving at 20m/s.', solution: 'p = 1000 * 20 = 20,000 kg·m/s.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Work & Energy', title: 'Kinetic Energy', 
+        formula: 'KE = \\frac{1}{2}mv^2', desc: 'Energy of motion.',
+        symbols: { 'm': 'Mass (kg)', 'v': 'Velocity (m/s)' }, 
+        example: { problem: 'Find the kinetic energy of a 2kg object moving at 3m/s.', solution: 'KE = 0.5 * 2 * 3² = 9 Joules.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Work & Energy', title: 'Gravitational Potential Energy', 
+        formula: 'PE = mgh', desc: 'Energy possessed by an object due to its height.',
+        symbols: { 'g': 'Gravity (9.81 m/s²)', 'h': 'Height (m)' }, 
+        example: { problem: 'A 1kg object is lifted 10m high. Find its potential energy.', solution: 'PE = 1 * 9.81 * 10 ≈ 98.1 J.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Work & Energy', title: 'Power', 
+        formula: 'P = \\frac{W}{\\Delta t}', desc: 'Rate at which work is done or energy is transferred.',
+        symbols: { 'P': 'Power (Watts)', 'W': 'Work (Joules)', 'Δt': 'Time interval (s)' }, 
+        example: { problem: 'Lifting a weight and doing 100J of work in 2s equals what power output?', solution: 'P = 100 / 2 = 50 W.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Electricity', title: 'Ohm\'s Law', 
+        formula: 'V = IR', desc: 'Voltage equals current times resistance.',
+        symbols: { 'V': 'Voltage (Volts)', 'I': 'Current (Amps)', 'R': 'Resistance (Ohms)' }, 
+        example: { problem: 'A 2A current pushed through a 5Ω resistor results in what voltage drop?', solution: 'V = 2 * 5 = 10 V.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Circuits', title: 'Power', 
+        formula: 'P = VI', desc: 'Electrical power.',
+        symbols: { 'P': 'Power (Watts)', 'V': 'Voltage (V)', 'I': 'Current (A)' }, 
+        example: { problem: 'A 120V electrical appliance drawing 10A of current uses what power?', solution: 'P = 120 * 10 = 1200 W.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Circuits', title: 'Series Resistance', 
+        formula: 'R_T = R_1 + R_2 + R_3 + ...', desc: 'Equivalent series resistance.',
+        symbols: { 'R_T': 'Total Resistance', 'R_n': 'Individual Resistor' }, 
+        example: { problem: 'A 2Ω and a 3Ω resistor configured in series yield what total resistance?', solution: 'R_T = 2 + 3 = 5 Ω.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Circuits', title: 'Parallel Resistance', 
+        formula: '\\frac{1}{R_T} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\dots', desc: 'Equivalent parallel resistance.',
+        symbols: { 'R_T': 'Total Resistance', 'R_n': 'Individual Resistor' }, 
+        example: { problem: 'Two 10Ω resistors configured in parallel yield what total resistance?', solution: '1/R_T = 1/10 + 1/10 = 2/10 -> R_T = 5 Ω.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Electromagnetism', title: 'Magnetic Force on Moving Charge', 
+        formula: 'F = qvB\\sin\\theta', desc: 'Force experienced by a charge moving in a magnetic field.',
+        symbols: { 'q': 'Charge', 'v': 'Velocity', 'B': 'Magnetic Field', 'θ': 'Angle' }, 
+        example: { problem: 'Under what specific condition does an electron moving in a B-field feel maximum force?', solution: 'When it moves perfectly perpendicular to the magnetic field (sin 90° = 1).' }
+    },
+    { 
+        subject: 'Physics', topic: 'Fluid Mechanics', title: 'Density', 
+        formula: '\\rho = \\frac{m}{V}', desc: 'Mass per unit volume.',
+        symbols: { 'ρ': 'Density (kg/m³)', 'm': 'Mass', 'V': 'Volume' }, 
+        example: { problem: 'Calculate the density of 1000 kg of water occupying 1 cubic meter.', solution: 'ρ = 1000 / 1 = 1000 kg/m³.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Thermodynamics & Heat', title: 'Ideal Gas Law', 
+        formula: 'PV = nRT', desc: 'Equation of state for an ideal gas.',
+        symbols: { 'P': 'Pressure', 'V': 'Volume', 'n': 'Moles', 'R': 'Gas Constant', 'T': 'Temperature' }, 
+        example: { problem: 'Find the pressure of 2 moles of gas maintained at 300K inside a 10L container.', solution: 'P = (2 * R * 300) / 10.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Oscillations & Waves', title: 'Wave Equation for Light', 
+        formula: 'c = \\lambda f', desc: 'Speed of light equals wavelength times frequency.',
+        symbols: { 'c': 'Speed of light (3x10^8 m/s)', 'λ': 'Wavelength', 'f': 'Frequency' }, 
+        example: { problem: 'Compare the frequency of Red light (700nm) and Blue light (400nm).', solution: 'Red light inherently has a lower frequency than blue light to maintain constant c.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Optics', title: 'Snell\'s Law', 
+        formula: '\\frac{\\sin i}{\\sin r} = \\frac{n_2}{n_1}', desc: 'Law of refraction.',
+        symbols: { 'i': 'Angle of incidence', 'r': 'Angle of refraction', 'n_1, n_2': 'Refractive indices' }, 
+        example: { problem: 'What optical phenomenon does this calculate?', solution: 'It accurately calculates the bending angle when light moves from one medium (like air) into another (like water).' }
+    },
+    { 
+        subject: 'Physics', topic: 'Gravitation', title: 'Gravitational Force', 
+        formula: 'F = G\\frac{m_1 m_2}{r^2}', desc: 'Attraction between two masses.',
+        symbols: { 'F': 'Gravitational force', 'G': 'Gravitational Constant', 'm_1, m_2': 'Masses', 'r': 'Distance between centers' }, 
+        example: { problem: 'Give a massive scale application of this classical mechanics formula.', solution: 'It calculates the exact gravitational force keeping the Moon firmly in orbit around Earth.' }
+    },
+    { 
+        subject: 'Physics', topic: 'Modern Physics', title: 'Mass-Energy', 
+        formula: 'E = \\Delta m c^2', desc: 'Einstein\'s equivalence principle.',
+        symbols: { 'E': 'Energy (J)', 'Δm': 'Mass defect/change (kg)', 'c': 'Speed of light' }, 
+        example: { problem: 'What macro-scale phenomenon does this principle explain?', solution: 'It mathematically explains the immense energy release witnessed during nuclear fission.' }
+    }
+];
+
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        let studentProfile = {
+            name: "Student", targetScore: 520, examDate: "2026-06-20", 
+            xp: 0, level: 1, streak: 1, lastLogin: '', theme: 'dark', sound: true
+        };
+        let examHistory = [];
+        let topicMastery = {};
+        let tasks = [];
+        let achievements = { firstExam: false, streakMaster: false, mathMaster: false, physicsExpert: false, dailyHero: false };
+        let records = { highestOverall: 0, highestStreak: 0, examsTaken: 0, highestXP: 0 };
+        let totalGeneratedAI = 0;
+        let pendingAIPool = [];
+        let pendingAITitle = "";
+        let activeExam = null;
+        let examTimerInterval = null;
+        let currentFlashcards = [];
+        let currentFlashcardIndex = 0;
+        let flashcardRatings = {};
+        let userNotes = "";
+        let formulaBookmarks = [];
+        let dailyChallengeStreak = 0;
+        let lastDailyDate = "";
+        let studyLog = [];
+
+        const MOCK_LEADERBOARD = [
+            {name: "Abebe Kebede", score: 582, avatar: "A"}, {name: "Selam Tesfaye", score: 571, avatar: "S"},
+            {name: "Dawit Girma", score: 549, avatar: "D"}, {name: "Meron Hailu", score: 538, avatar: "M"}
+        ];
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.onload = () => {
+            initPWAAssets();
+            loadLocalData();
+            if (!localStorage.getItem('ef_premium_setup')) {
+                const m = document.getElementById('welcome-modal');
+                m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
+            } else {
+                startPlatform();
+            }
+            document.documentElement.style.setProperty('--bottom-nav-height', window.innerWidth <= 768 ? '68px' : '0px');
+        };
+
+        window.onresize = () => {
+            document.documentElement.style.setProperty('--bottom-nav-height', window.innerWidth <= 768 ? '68px' : '0px');
+            if(window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('mobile-menu-btn').classList.remove('open');
+            }
+        };
+
+        function startPlatform() {
+            updateClock(); setInterval(updateClock, 60000);
+            populateAISubjects();
+            updateDashboardUI();
+            initFormulaBank();
+            renderSchedule();
+            checkPWA();
+            renderAchievements();
+            document.getElementById('stat-ai-gen').textContent = totalGeneratedAI;
+            loadNotes();
+            renderStudyCalendar();
+            try { renderMathInElement(document.body, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}
+        }
+
+        // Helper function to keep our state assignment clean
+        function applyDataToState(data) {
+            if (!data) return;
+            if (data.profile) studentProfile = {...studentProfile, ...data.profile};
+            if (data.history) examHistory = data.history;
+            if (data.mastery) topicMastery = data.mastery;
+            if (data.tasks) tasks = data.tasks;
+            if (data.achievements) achievements = {...achievements, ...data.achievements};
+            if (data.records) records = {...records, ...data.records};
+            if (data.totalGeneratedAI !== undefined) totalGeneratedAI = data.totalGeneratedAI;
+            if (data.flashcardRatings) flashcardRatings = data.flashcardRatings;
+            if (data.userNotes) userNotes = data.userNotes;
+            if (data.formulaBookmarks) formulaBookmarks = data.formulaBookmarks;
+            if (data.dailyChallengeStreak !== undefined) dailyChallengeStreak = data.dailyChallengeStreak;
+            if (data.lastDailyDate) lastDailyDate = data.lastDailyDate;
+            if (data.studyLog) studyLog = data.studyLog;
+
+            let today = new Date().toDateString();
+            if (studentProfile.lastLogin !== today) {
+                let yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                if (studentProfile.lastLogin === yesterday.toDateString()) { studentProfile.streak++; } 
+                else if (studentProfile.lastLogin !== '') { studentProfile.streak = 1; }
+                studentProfile.lastLogin = today;
+                records.highestStreak = Math.max(records.highestStreak, studentProfile.streak);
+            }
+
+            if(studentProfile.theme === 'light') document.body.classList.add('light-mode');
+            else document.body.classList.remove('light-mode');
+        }
+
+        function loadLocalData() {
+            // 1. Load instantly from localStorage for immediate UI rendering
+            const localDataString = localStorage.getItem('ef_premium_data');
+            if (localDataString) {
+                applyDataToState(JSON.parse(localDataString));
+            }
+
+            // 2. Fetch cloud data from Firebase in the background
+            if (window.firebaseLoadData) {
+                window.firebaseLoadData((firebaseData) => {
+                    if (firebaseData) {
+                        applyDataToState(firebaseData);
+                        
+                        // Re-render UI just in case cloud data was different
+                        updateDashboardUI();
+                        if(document.getElementById('view-analytics').classList.contains('active')) renderCharts();
+                        if(document.getElementById('view-achievements').classList.contains('active')) renderAchievements();
+                    }
+                });
+            }
+        }
+
+        function saveLocalData() {
+            const payload = {
+                profile: studentProfile, history: examHistory, mastery: topicMastery,
+                tasks: tasks, achievements: achievements, records: records, 
+                totalGeneratedAI: totalGeneratedAI, flashcardRatings: flashcardRatings,
+                userNotes: userNotes, formulaBookmarks: formulaBookmarks,
+                dailyChallengeStreak: dailyChallengeStreak, lastDailyDate: lastDailyDate,
+                studyLog: studyLog
+            };
+
+            // 1. Save to localStorage immediately
+            localStorage.setItem('ef_premium_data', JSON.stringify(payload));
+
+            // 2. Push to Firebase backend
+            if (window.firebaseSyncData) {
+                window.firebaseSyncData(payload);
+            }
+        }
+
+        // ==========================================
+        // PWA ASSETS (Manifest + Icons)
+        // ==========================================
+        function initPWAAssets() {
+            const sizes = [192, 512];
+            const icons = [];
+            sizes.forEach(size => {
+                const c = document.createElement('canvas');
+                c.width = size; c.height = size;
+                const ctx = c.getContext('2d');
+                const grd = ctx.createLinearGradient(0,0,size,size);
+                grd.addColorStop(0, '#2865c7'); grd.addColorStop(1, '#0ea5e9');
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.roundRect(0,0,size,size,size*0.22);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size*0.55}px Inter, sans-serif`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('E', size/2, size/2 + size*0.03);
+                icons.push({src: c.toDataURL('image/png'), sizes: `${size}x${size}`, type: 'image/png'});
+            });
+            
+            const manifest = {
+                name: 'ExamForge Premium', short_name: 'ExamForge',
+                description: 'Professional CBT & Study Platform',
+                start_url: window.location.href, display: 'standalone',
+                background_color: '#0b1120', theme_color: '#2865c7',
+                orientation: 'portrait', icons: icons, scope: '.'
+            };
+            
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest'; link.href = url;
+            document.head.appendChild(link);
+            
+            const apple = document.createElement('link');
+            apple.rel = 'apple-touch-icon'; apple.href = icons[0].src;
+            document.head.appendChild(apple);
+            
+            const favicon = document.createElement('link');
+            favicon.rel = 'icon'; favicon.type = 'image/png'; favicon.href = icons[0].src;
+            document.head.appendChild(favicon);
+        }
+
+        // ==========================================
+        // UI UTILITIES
+        // ==========================================
+        function completeOnboarding() {
+            studentProfile.name = escapeHTML(document.getElementById('onboard-name').value) || "Student";
+            studentProfile.targetScore = parseInt(document.getElementById('onboard-target').value) || 520;
+            studentProfile.examDate = escapeHTML(document.getElementById('onboard-date').value) || '2026-06-20';
+            localStorage.setItem('ef_premium_setup', 'true');
+            saveLocalData(); closeModal('welcome-modal');
+            startPlatform();
+            showToast(`Welcome, ${studentProfile.name}!`, 'success');
+        }
+
+        function showToast(message, type='success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fa-solid ${type==='success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i> ${escapeHTML(message)}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+            if(studentProfile.sound && type==='success') playBeep(800, 0.1);
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            studentProfile.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+            document.getElementById('meta-theme-color').content = studentProfile.theme === 'light' ? '#f8fafc' : '#0b1120';
+            saveLocalData();
+            if(document.getElementById('view-analytics').classList.contains('active')) renderCharts();
+        }
+
+        function toggleSound() {
+            studentProfile.sound = !studentProfile.sound;
+            document.getElementById('sound-status').textContent = studentProfile.sound ? 'On' : 'Off';
+            saveLocalData();
+        }
+
+        function playBeep(freq, dur) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.frequency.value = freq; gain.gain.value = 0.05;
+                osc.start(); setTimeout(() => osc.stop(), dur*1000);
+            } catch(e){}
+        }
+
+        function switchTab(tabId, el=null, isMobile=false) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-item').forEach(n => n.classList.remove('active'));
+            
+            if(el) {
+                if(isMobile) { el.classList.add('active'); }
+                else { el.classList.add('active'); }
+            }
+
+            if(window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+                document.getElementById('mobile-menu-btn').classList.remove('open');
+            }
+// Add this line inside switchTab()
+if (tabId === 'biology3d') initBiologySandbox();
+            if (tabId === 'dashboard') updateDashboardUI();
+            if (tabId === 'analytics') { renderCharts(); renderHeatmap(); }
+            if (tabId === 'mock') renderMockHistory();
+            if (tabId === 'physics3d') initPhysicsSandbox();
+            if (tabId === 'chemistry3d') initChemistrySandbox();
+            if (tabId === 'periodictable') initPeriodicTable();
+            if (tabId === 'achievements') { renderAchievements(); renderLeaderboard(); }
+            if (tabId === 'flashcards') initFlashcards();
+            if (tabId === 'formulas') initFormulaBank();
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const exam = new Date(studentProfile.examDate + 'T00:00:00');
+            const diff = Math.max(0, Math.floor((exam - now) / (1000*60*60*24)));
+            document.getElementById('countdown-days').textContent = diff;
+        }
+
+        function awardXP(points) {
+            studentProfile.xp += points;
+            records.highestXP = Math.max(records.highestXP, studentProfile.xp);
+            const newLevel = Math.floor(studentProfile.xp / 100) + 1;
+            if(newLevel > studentProfile.level) {
+                studentProfile.level = newLevel;
+                showToast(`Level Up! Level ${newLevel} 🎉`, 'success');
+            }
+            saveLocalData();
+            document.getElementById('xp-points').textContent = studentProfile.xp;
+            
+            let lvlEl = document.getElementById('level');
+            if (lvlEl) lvlEl.textContent = studentProfile.level;
+        }
+
+        function checkAchievements() {
+            let newlyUnlocked = [];
+            if(!achievements.firstExam && examHistory.length > 0) { achievements.firstExam = true; newlyUnlocked.push("Exam Warrior"); }
+            if(!achievements.streakMaster && studentProfile.streak >= 7) { achievements.streakMaster = true; newlyUnlocked.push("Consistency King"); }
+            if(!achievements.dailyHero && dailyChallengeStreak >= 5) { achievements.dailyHero = true; newlyUnlocked.push("Daily Hero"); }
+            
+            let mathAtt=0, mathCor=0, physAtt=0, physCor=0;
+            Object.keys(topicMastery).forEach(k => { 
+                if(k.startsWith("Mathematics")) { mathAtt+=topicMastery[k].att; mathCor+=topicMastery[k].cor; }
+                if(k.startsWith("Physics")) { physAtt+=topicMastery[k].att; physCor+=topicMastery[k].cor; }
+            });
+            if(!achievements.mathMaster && mathAtt > 10 && (mathCor/mathAtt)>=0.8) { achievements.mathMaster = true; newlyUnlocked.push("Math Master"); }
+            if(!achievements.physicsExpert && physAtt > 10 && (physCor/physAtt)>=0.8) { achievements.physicsExpert = true; newlyUnlocked.push("Physics Expert"); }
+
+            if(newlyUnlocked.length > 0) { saveLocalData(); newlyUnlocked.forEach(n => setTimeout(() => showToast(`🏆 ${n}`), 800)); }
+        }
+
+        // ==========================================
+        // PWA INSTALL
+        // ==========================================
+        let deferredPrompt;
+        function checkPWA() {
+            const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => self.clients.claim()); self.addEventListener('fetch', e => { e.respondWith(fetch(e.request).catch(()=>new Response('Offline'))); });`;
+            const swBlob = new Blob([swCode], {type: 'application/javascript'});
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+            window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwa-install-btn').style.display = 'inline-flex'; });
+        }
+        function installPWA() {
+            if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then((cr) => { if (cr.outcome === 'accepted') document.getElementById('pwa-install-btn').style.display = 'none'; deferredPrompt = null; }); }
+        }
+
+        // ==========================================
+        // DASHBOARD, POMODORO, TASKS, CALENDAR
+        // ==========================================
+        let pomoTimer = null; let pomoTimeLeft = 25 * 60;
+
+        function updateDashboardUI() {
+            document.getElementById('greeting').innerHTML = `Welcome, <strong>${escapeHTML(studentProfile.name)}</strong>`;
+            document.getElementById('streak-count').textContent = studentProfile.streak;
+            document.getElementById('xp-points').textContent = studentProfile.xp;
+            
+            // Fix: Check if level element exists before trying to update it
+            let levelEl = document.getElementById('level');
+            if (levelEl) levelEl.textContent = studentProfile.level;
+            
+            document.getElementById('dash-target').textContent = studentProfile.targetScore;
+            document.getElementById('daily-streak').textContent = dailyChallengeStreak;
+            
+            let totalQs = 0; let mastered = 0; let totalTopics = 0;
+            examHistory.forEach(ex => { totalQs += ex.totalQ; });
+            
+            let avgScore = examHistory.length ? Math.round(examHistory.reduce((a,b)=>a+b.score, 0)/examHistory.length) : '--';
+            document.getElementById('dash-pred-score').textContent = avgScore;
+            
+            let readiness = examHistory.length ? Math.min(100, Math.round((avgScore / studentProfile.targetScore) * 100)) : 0;
+            document.getElementById('dash-readiness').textContent = readiness;
+            document.getElementById('dash-readiness-bar').style.width = readiness + '%';
+            document.getElementById('dash-readiness-bar').style.background = readiness >= 80 ? 'var(--success)' : (readiness >= 50 ? 'var(--warning)' : 'var(--danger)');
+            
+            Object.keys(CORE_SUBJECTS).forEach(sub => {
+                CORE_SUBJECTS[sub].forEach(top => {
+                    totalTopics++; let key = `${sub}-${top}`;
+                    if(topicMastery[key] && topicMastery[key].att >= 3 && (topicMastery[key].cor/topicMastery[key].att) >= 0.8) mastered++;
+                });
+            });
+
+            document.getElementById('dash-mastered').textContent = mastered;
+            document.getElementById('dash-total-topics').textContent = totalTopics;
+            document.getElementById('dash-total-qs').textContent = totalQs;
+            document.getElementById('dash-formulas-mastered').textContent = formulaBookmarks.length;
+            document.getElementById('dash-formula-total').textContent = M_FORMULA_BANK.length;
+
+            if(examHistory.length === 0) document.getElementById('dash-recommendation').textContent = "Take a mock exam to establish your baseline.";
+            else document.getElementById('dash-recommendation').innerHTML = "Strong consistency detected. Check your <strong>Action Plan</strong>.";
+        }
+
+        function renderStudyCalendar() {
+            const container = document.getElementById('study-calendar');
+            const days = ['S','M','T','W','T','F','S'];
+            let html = days.map(d => `<div style="font-size:10px; font-weight:700; color:var(--text-muted); padding:4px;">${d}</div>`).join('');
+            
+            const today = new Date();
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(today.getDate() - i);
+                const dateStr = d.toDateString();
+                const hasExam = examHistory.some(e => new Date(e.date).toDateString() === dateStr);
+                const hasTask = tasks.some(t => new Date(parseInt(t.id)).toDateString() === dateStr);
+                let cls = 'calendar-day';
+                if(i===0) cls += ' active';
+                else if(hasExam || hasTask) cls += ' partial';
+                html += `<div class="${cls}">${d.getDate()}</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function startPomodoro(minutes) {
+            clearInterval(pomoTimer); pomoTimeLeft = minutes * 60;
+            document.getElementById('pomo-status').textContent = "Focusing...";
+            document.getElementById('pomo-status').style.color = "var(--danger)";
+            pomoTimer = setInterval(() => {
+                pomoTimeLeft--; let m = Math.floor(pomoTimeLeft / 60); let s = pomoTimeLeft % 60;
+                document.getElementById('pomo-display').textContent = `${m}:${s<10?'0':''}${s}`;
+                if (pomoTimeLeft <= 0) {
+                    clearInterval(pomoTimer); document.getElementById('pomo-display').textContent = "00:00";
+                    document.getElementById('pomo-status').textContent = "Done!"; document.getElementById('pomo-status').style.color = "var(--success)";
+                    awardXP(minutes === 25 ? 50 : 10); showToast('Focus complete! +XP', 'success');
+                    studyLog.push({date: new Date().toISOString(), type: 'pomodoro', duration: minutes});
+                    saveLocalData(); renderStudyCalendar();
+                }
+            }, 1000);
+        }
+        function pausePomodoro() { clearInterval(pomoTimer); document.getElementById('pomo-status').textContent = "Paused"; document.getElementById('pomo-status').style.color = "var(--text-muted)"; }
+
+        function addTask() {
+            const s = document.getElementById('task-sub').value, t = document.getElementById('task-top').value.trim();
+            if(!t) return;
+            tasks.push({ id: Date.now().toString(), subject: s, topic: t, emoji: emojiMap[s], completed: false });
+            saveLocalData(); renderSchedule(); document.getElementById('task-top').value='';
+        }
+        function renderSchedule() {
+            const c = document.getElementById('schedule-list');
+            c.innerHTML = tasks.map(t => `
+                <div style="display:flex;align-items:center;padding:10px;border:1px solid var(--glass-border);border-radius:10px;opacity:${t.completed?'0.5':'1'};background:var(--glass-input);">
+                    <input type="checkbox" ${t.completed?'checked':''} onclick="toggleTask('${t.id}')" style="margin-right:10px;width:18px;height:18px;accent-color:var(--success)">
+                    <div style="flex:1"><strong style="font-size:13px;">${t.emoji} ${escapeHTML(t.subject)}</strong><br><span style="font-size:12px;color:var(--text-muted)">${escapeHTML(t.topic)}</span></div>
+                    <button onclick="deleteTask('${t.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer; font-size:14px;"><i class="fa-solid fa-trash"></i></button>
+                </div>`).join('') || '<p style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px;">No tasks.</p>';
+        }
+        function toggleTask(id) { let t = tasks.find(x=>x.id===id); t.completed = !t.completed; if(t.completed) awardXP(10); saveLocalData(); renderSchedule(); }
+        function deleteTask(id) { tasks = tasks.filter(x=>x.id!==id); saveLocalData(); renderSchedule(); }
+
+        // ==========================================
+        // DAILY CHALLENGE
+        // ==========================================
+        function startDailyChallenge() {
+            const today = new Date().toDateString();
+            if(lastDailyDate === today) { showToast("Daily challenge already completed today!", "warning"); return; }
+            
+            const pool = [...EXTENDED_QUESTIONS].sort(() => 0.5 - Math.random()).slice(0, 5);
+            pendingAIPool = JSON.parse(JSON.stringify(pool));
+            pendingAITitle = "Daily Challenge";
+            startGeneratedExam();
+            
+            // Hook into completion
+            const origFinal = finalSubmitExam;
+            finalSubmitExam = function() {
+                origFinal();
+                lastDailyDate = new Date().toDateString();
+                dailyChallengeStreak++;
+                awardXP(100);
+                saveLocalData();
+                showToast(`Daily Challenge Complete! Streak: ${dailyChallengeStreak} 🔥`, 'success');
+                finalSubmitExam = origFinal;
+            };
+        }
+
+        // ==========================================
+        // AI EXAM BUILDER
+        // ==========================================
+        function populateAISubjects() {
+            document.getElementById('ai-subject-select').innerHTML = Object.keys(CORE_SUBJECTS).map(s => `<option value="${escapeHTML(s)}">${emojiMap[s] || ''} ${escapeHTML(s)}</option>`).join('');
+        }
+
+        async function fetchAIQuestions(promptText) {
+            let attempts = 0;
+            while (attempts < 3) {
+                try {
+                    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST", headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: "You are an expert ESLECE exam creator. Output ONLY valid JSON containing a 'questions' array. Do not wrap in markdown." },
+                                { role: "user", content: promptText }
+                            ],
+                            temperature: 0.7, response_format: { type: "json_object" }
+                        })
+                    });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    const data = await response.json();
+                    let parsed = JSON.parse(data.choices[0].message.content.trim());
+                    let qArray = parsed.questions || parsed; 
+                    if (!Array.isArray(qArray)) { for (let key in parsed) if (Array.isArray(parsed[key])) { qArray = parsed[key]; break; } }
+                    const valid = qArray.filter(q => q.q && Array.isArray(q.options) && q.options.length===4 && typeof q.answer==='number' && q.expl);
+                    if (valid.length > 0) return valid;
+                } catch (err) { attempts++; }
+            }
+            throw new Error("Failed to generate questions.");
+        }
+
+        async function handleGenerateClick() {
+            const sub = document.getElementById('ai-subject-select').value;
+            const topic = document.getElementById('ai-topic-input').value.trim();
+            const diffEl = document.querySelector('input[name="ai-diff"]:checked');
+            const countEl = document.querySelector('input[name="ai-count"]:checked');
+            if (!topic) { showToast("Enter a topic.", "error"); return; }
+            if (!sub || !diffEl || !countEl) { showToast("Invalid config.", "error"); return; }
+            const diff = diffEl.value; const count = parseInt(countEl.value);
+            
+            const btnGen = document.getElementById('btn-generate-ai');
+            const progressWrap = document.getElementById('ai-progress-wrapper');
+            const btnStart = document.getElementById('btn-start-ai');
+            const statusText = document.getElementById('ai-status-text');
+            const statusBar = document.getElementById('ai-status-bar');
+            
+            btnGen.disabled = true; btnGen.style.display = 'none';
+            progressWrap.style.display = 'block'; btnStart.style.display = 'none';
+            statusBar.style.width = '20%'; statusText.textContent = "Synthesizing...";
+            document.getElementById('ai-status-count').textContent = `0/${count}`;
+            
+            const prompt = `Generate exactly ${count} ESLECE multiple-choice questions. Subject: ${sub}, Topic: ${topic}, Difficulty: ${diff}. JSON ONLY. {"questions": [{"q":"", "options":["","","",""], "answer":0, "expl":"", "subject":"${sub}", "topic":"${topic}"}]}`;
+
+            try {
+                pendingAIPool = await fetchAIQuestions(prompt);
+                if(pendingAIPool.length > count) pendingAIPool = pendingAIPool.slice(0, count);
+                pendingAITitle = `${sub}: ${topic} (AI - ${diff})`;
+                statusText.textContent = "Complete!"; statusBar.style.width = '100%'; statusBar.style.background = "var(--success)";
+                document.getElementById('ai-status-count').textContent = `${pendingAIPool.length}/${count}`;
+                totalGeneratedAI += pendingAIPool.length; document.getElementById('stat-ai-gen').textContent = totalGeneratedAI;
+                saveLocalData(); showToast(`Generated ${pendingAIPool.length} questions!`); btnStart.style.display = 'flex';
+            } catch (err) {
+                showToast("AI failed. Check connection.", "error");
+                btnGen.disabled = false; btnGen.style.display = 'flex'; progressWrap.style.display = 'none';
+            }
+        }
+
+        function startGeneratedExam() {
+            document.getElementById('btn-generate-ai').style.display = 'flex'; document.getElementById('btn-generate-ai').disabled = false;
+            document.getElementById('ai-progress-wrapper').style.display = 'none'; document.getElementById('btn-start-ai').style.display = 'none';
+            let examPool = JSON.parse(JSON.stringify(pendingAIPool));
+            let examTitle = pendingAITitle; pendingAIPool = []; pendingAITitle = "";
+            startCBTExam(examPool, examTitle);
+        }
+
+        // ==========================================
+        // AI CHATBOT
+        // ==========================================
+        let chatHistory = [{role: "system", content: "You are ExamForge AI, a concise tutor for Ethiopian Grade 12 students. Use KaTeX ($$) for math."}];
+
+        function toggleAIChat() {
+            const panel = document.getElementById('ai-chat-panel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleChatEnter(e) { if(e.key === 'Enter') sendChatMessage(); }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const text = input.value.trim(); if(!text) return;
+            const body = document.getElementById('ai-chat-body');
+            body.innerHTML += `<div class="chat-msg user">${escapeHTML(text)}</div>`;
+            input.value = ''; body.scrollTop = body.scrollHeight;
+            chatHistory.push({role: "user", content: text});
+            const loadingId = 'loading-' + Date.now();
+            body.innerHTML += `<div class="chat-msg ai" id="${loadingId}"><i class="fa-solid fa-spinner fa-spin"></i></div>`;
+            body.scrollTop = body.scrollHeight;
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST", headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: chatHistory, temperature: 0.7 })
+                });
+                const data = await response.json();
+                const aiText = data.choices[0].message.content; chatHistory.push({role: "assistant", content: aiText});
+                document.getElementById(loadingId).remove();
+                const msgDiv = document.createElement('div'); msgDiv.className = 'chat-msg ai'; msgDiv.innerHTML = escapeHTML(aiText).replace(/\n/g, '<br>');
+                body.appendChild(msgDiv);
+                try { renderMathInElement(msgDiv, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] }); } catch(e){}
+                body.scrollTop = body.scrollHeight;
+            } catch(e) {
+                document.getElementById(loadingId).remove();
+                body.innerHTML += `<div class="chat-msg ai" style="color:var(--danger)">Error.</div>`;
+            }
+        }
+
+        // ==========================================
+        // FORMULA BANK WITH DEEP DIVE
+        // ==========================================
+        let currentFormulaSubject = 'All';
+
+        function initFormulaBank() {
+            document.getElementById('formula-count-display').textContent = M_FORMULA_BANK.length;
+            renderFormulas();
+        }
+        function setFormulaSubject(subject, btn) {
+            currentFormulaSubject = subject;
+            document.querySelectorAll('.subject-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFormulas();
+        }
+        function filterFormulas() { renderFormulas(); }
+
+        function renderFormulas() {
+            const query = document.getElementById('formula-search').value.toLowerCase();
+            const container = document.getElementById('formula-grid-container');
+            const filtered = M_FORMULA_BANK.filter(f => {
+                return (currentFormulaSubject === 'All' || f.subject === currentFormulaSubject) &&
+                       (f.title.toLowerCase().includes(query) || f.topic.toLowerCase().includes(query) || f.desc.toLowerCase().includes(query));
+            });
+
+            container.innerHTML = filtered.map((f, idx) => {
+                const isBookmarked = formulaBookmarks.includes(f.title);
+                return `
+                <div class="formula-card" onclick="openFormulaDetail(${M_FORMULA_BANK.indexOf(f)})">
+                    <button class="formula-bookmark ${isBookmarked?'active':''}" onclick="event.stopPropagation(); toggleFormulaBookmark('${escapeHTML(f.title)}')">
+                        <i class="fa-${isBookmarked?'solid':'regular'} fa-bookmark"></i>
+                    </button>
+                    <div class="formula-header">
+                        <div class="formula-title">${escapeHTML(f.title)}</div>
+                        <div class="formula-topic">${escapeHTML(f.topic)}</div>
+                    </div>
+                    <div class="formula-display">$$${f.formula}$$</div>
+                    <div class="formula-desc">${escapeHTML(f.desc)}</div>
+                </div>`;
+            }).join('') || '<div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 15px;">No formulas found.</div>';
+
+            try { renderMathInElement(container, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}
+        }
+
+        function showBookmarkedFormulas() {
+            const query = document.getElementById('formula-search');
+            query.value = ''; currentFormulaSubject = 'All';
+            document.querySelectorAll('.subject-chip').forEach(b => b.classList.remove('active'));
+            document.querySelector('.subject-chip').classList.add('active');
+            
+            const container = document.getElementById('formula-grid-container');
+            const filtered = M_FORMULA_BANK.filter(f => formulaBookmarks.includes(f.title));
+            container.innerHTML = filtered.map((f) => `
+                <div class="formula-card" onclick="openFormulaDetail(${M_FORMULA_BANK.indexOf(f)})">
+                    <button class="formula-bookmark active" onclick="event.stopPropagation(); toggleFormulaBookmark('${escapeHTML(f.title)}')"><i class="fa-solid fa-bookmark"></i></button>
+                    <div class="formula-header"><div class="formula-title">${escapeHTML(f.title)}</div><div class="formula-topic">${escapeHTML(f.topic)}</div></div>
+                    <div class="formula-display">$$${f.formula}$$</div>
+                    <div class="formula-desc">${escapeHTML(f.desc)}</div>
+                </div>`).join('') || '<div style="padding:30px; text-align:center; color:var(--text-muted);">No bookmarks yet. Tap the bookmark icon on any formula.</div>';
+            try { renderMathInElement(container, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}
+        }
+
+        function toggleFormulaBookmark(title) {
+            if(formulaBookmarks.includes(title)) formulaBookmarks = formulaBookmarks.filter(t => t !== title);
+            else formulaBookmarks.push(title);
+            saveLocalData(); renderFormulas();
+            showToast(formulaBookmarks.includes(title) ? 'Saved to bookmarks' : 'Removed from bookmarks', 'success');
+        }
+
+        function toggleDetailBookmark() {
+            const title = document.getElementById('fd-title').textContent;
+            toggleFormulaBookmark(title);
+            const btn = document.getElementById('fd-bookmark-btn');
+            const isSaved = formulaBookmarks.includes(title);
+            btn.innerHTML = `<i class="fa-${isSaved?'solid':'regular'} fa-bookmark"></i>`;
+            btn.classList.toggle('active', isSaved);
+        }
+
+        function openFormulaDetail(index) {
+            const f = M_FORMULA_BANK[index];
+            if(!f) return;
+            document.getElementById('fd-topic').textContent = `${f.subject} • ${f.topic}`;
+            document.getElementById('fd-title').textContent = f.title;
+            document.getElementById('fd-desc').textContent = f.desc;
+            document.getElementById('fd-formula').innerHTML = `$$${f.formula}$$`;
+            
+            const symTable = document.getElementById('fd-symbols');
+            if(f.symbols && Object.keys(f.symbols).length > 0) {
+                symTable.innerHTML = '<tr><th>Symbol</th><th>Meaning</th></tr>' + 
+                    Object.entries(f.symbols).map(([k,v]) => `<tr><td style="font-weight:700; color:var(--accent);">$${k}$</td><td>${escapeHTML(v)}</td></tr>`).join('');
+            } else {
+                symTable.innerHTML = '<tr><td style="color:var(--text-muted);">No symbol breakdown available.</td></tr>';
+            }
+            
+            if(f.example) {
+                document.getElementById('fd-example-prob').textContent = f.example.problem;
+                document.getElementById('fd-example-sol').innerHTML = f.example.solution;
+            } else {
+                document.getElementById('fd-example-prob').textContent = 'No example available.';
+                document.getElementById('fd-example-sol').textContent = '';
+            }
+            
+            const btn = document.getElementById('fd-bookmark-btn');
+            const isSaved = formulaBookmarks.includes(f.title);
+            btn.innerHTML = `<i class="fa-${isSaved?'solid':'regular'} fa-bookmark"></i>`;
+            btn.classList.toggle('active', isSaved);
+            
+            const sheet = document.getElementById('formula-detail-sheet');
+            sheet.style.display = 'flex'; setTimeout(() => sheet.classList.add('open'), 10);
+try { renderMathInElement(document.getElementById('formula-detail-sheet'), { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}        }
+
+        function closeFormulaSheet(e) {
+            if(e && e.target !== e.currentTarget && e.type === 'click') return;
+            const sheet = document.getElementById('formula-detail-sheet');
+            sheet.classList.remove('open'); setTimeout(() => sheet.style.display = 'none', 300);
+        }
+
+        // ==========================================
+        // FLASHCARDS
+        // ==========================================
+        function initFlashcards() {
+            currentFlashcards = [...M_FORMULA_BANK].sort(() => Math.random() - 0.5).slice(0, 8);
+            currentFlashcardIndex = 0;
+            renderCurrentFlashcard();
+            renderFlashcardStats();
+            setupFlashcardSwipe();
+        }
+
+        function renderCurrentFlashcard() {
+            if (currentFlashcards.length === 0) return;
+            const card = currentFlashcards[currentFlashcardIndex];
+            document.getElementById('flashcard-front').innerHTML = `
+                <div style="font-size:15px; font-weight:700; margin-bottom:12px; color:var(--text-muted);">${escapeHTML(card.title)}</div>
+                <div style="font-size:22px; color:var(--accent);">$${card.formula}$</div>
+                <div style="margin-top:16px; font-size:12px; color:var(--text-muted);">Tap to flip</div>
+            `;
+            document.getElementById('flashcard-answer').innerHTML = `
+                <div style="margin-bottom:10px; font-size:15px;">${escapeHTML(card.desc)}</div>
+                <div style="font-size:12px; opacity:0.9;">${escapeHTML(card.subject)} • ${escapeHTML(card.topic)}</div>
+            `;
+            document.getElementById('flashcard').classList.remove('flipped');
+            document.getElementById('flashcard-progress').textContent = `${currentFlashcardIndex + 1} / ${currentFlashcards.length}`;
+        }
+
+        function flipFlashcard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function rateFlashcard(rating) {
+            const card = currentFlashcards[currentFlashcardIndex];
+            flashcardRatings[card.title] = (flashcardRatings[card.title] || 0) + rating;
+            saveLocalData();
+            currentFlashcardIndex++;
+            if (currentFlashcardIndex >= currentFlashcards.length) {
+                showToast("Session complete!", "success"); currentFlashcardIndex = 0;
+            }
+            renderCurrentFlashcard(); renderFlashcardStats(); awardXP(5);
+        }
+
+        function renderFlashcardStats() {
+            const container = document.getElementById('flashcard-stats');
+            let html = '';
+            currentFlashcards.slice(0,4).forEach(card => {
+                const rating = flashcardRatings[card.title] || 0;
+                html += `
+                    <div class="glass-panel" style="padding:14px;">
+                        <div style="font-weight:700; font-size:13px;">${escapeHTML(card.title)}</div>
+                        <div style="color:var(--text-muted); font-size:12px;">Mastery: ${Math.min(100, rating)}%</div>
+                        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(100, rating)}%; background:var(--success);"></div></div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function setupFlashcardSwipe() {
+            const el = document.getElementById('flashcard');
+            let startX = 0;
+            el.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive:true});
+            el.addEventListener('touchend', e => {
+                const diff = startX - e.changedTouches[0].clientX;
+                if(Math.abs(diff) > 50) rateFlashcard(diff > 0 ? 3 : 1);
+            }, {passive:true});
+        }
+
+        // ==========================================
+        // NOTES PANEL
+        // ==========================================
+        function toggleNotesPanel() {
+            const panel = document.getElementById('notes-panel');
+            panel.classList.toggle('open');
+        }
+        function loadNotes() { document.getElementById('notes-textarea').value = userNotes || ""; }
+        function saveNotes() { userNotes = document.getElementById('notes-textarea').value; saveLocalData(); showToast("Notes saved", "success"); }
+
+        // ==========================================
+        // LEADERBOARD
+        // ==========================================
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            let html = '';
+            MOCK_LEADERBOARD.forEach((entry, idx) => {
+                html += `
+                    <div class="leaderboard-row">
+                        <div style="width:36px; height:36px; background:linear-gradient(135deg,var(--primary),var(--accent)); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; margin-right:14px;">${entry.avatar}</div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; font-size:14px;">${escapeHTML(entry.name)}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">Rank #${idx+1}</div>
+                        </div>
+                        <div style="font-size:20px; font-weight:800; color:var(--success);">${entry.score}</div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // CALCULATOR
+        // ==========================================
+        let calcExpression = '';
+        function toggleCalculator() {
+            const m = document.getElementById('calc-modal');
+            if(m.style.display === 'flex') { closeModal('calc-modal'); }
+            else { m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10); }
+        }
+        function calcInput(val) {
+            if(val === 'C') calcExpression = '';
+            else if(val === 'DEL') calcExpression = calcExpression.slice(0,-1);
+            else if(val === '=') {
+                try { calcExpression = String(eval(calcExpression.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')) || '0'); }
+                catch(e) { calcExpression = 'Error'; }
+            }
+            else calcExpression += val;
+            document.getElementById('calc-display').textContent = calcExpression || '0';
+        }
+
+        // ==========================================
+        // GLOBAL SEARCH
+        // ==========================================
+        function toggleGlobalSearch() {
+            const overlay = document.getElementById('global-search-overlay');
+            if(overlay.classList.contains('open')) {
+                overlay.classList.remove('open');
+            } else {
+                overlay.classList.add('open');
+                document.getElementById('global-search-input').value = '';
+                document.getElementById('global-search-input').focus();
+                document.getElementById('global-search-results').innerHTML = '';
+            }
+        }
+        function performGlobalSearch(query) {
+            const results = document.getElementById('global-search-results');
+            if(!query) { results.innerHTML = ''; return; }
+            const q = query.toLowerCase();
+            let html = '';
+            
+            // Search formulas
+            M_FORMULA_BANK.filter(f => f.title.toLowerCase().includes(q) || f.topic.toLowerCase().includes(q)).forEach(f => {
+                html += `<div class="search-result-item" onclick="toggleGlobalSearch(); switchTab('formulas'); openFormulaDetail(${M_FORMULA_BANK.indexOf(f)})">
+                    <div style="font-weight:700; font-size:14px;"><i class="fa-solid fa-square-root-variable" style="color:var(--primary); margin-right:8px;"></i>${escapeHTML(f.title)}</div>
+                    <div style="font-size:12px; color:var(--text-muted);">${escapeHTML(f.subject)} • ${escapeHTML(f.topic)}</div>
+                </div>`;
+            });
+            
+            // Search pages
+            const pages = [
+                {id:'dashboard', name:'Dashboard', icon:'fa-house'},
+                {id:'ai-builder', name:'AI Exam Builder', icon:'fa-wand-magic-sparkles'},
+                {id:'formulas', name:'Formula Bank', icon:'fa-square-root-variable'},
+                {id:'flashcards', name:'Flashcards', icon:'fa-clone'},
+                {id:'mock', name:'National Exams', icon:'fa-stopwatch'},
+                {id:'analytics', name:'Analytics', icon:'fa-chart-pie'},
+                {id:'achievements', name:'Records & Badges', icon:'fa-trophy'}
+            ];
+            pages.filter(p => p.name.toLowerCase().includes(q)).forEach(p => {
+                html += `<div class="search-result-item" onclick="toggleGlobalSearch(); switchTab('${p.id}')">
+                    <div style="font-weight:700; font-size:14px;"><i class="fa-solid ${p.icon}" style="color:var(--accent); margin-right:8px;"></i>${escapeHTML(p.name)}</div>
+                </div>`;
+            });
+            
+            results.innerHTML = html || '<div style="color:var(--text-muted); text-align:center; padding:40px;">No results found.</div>';
+        }
+
+        // ==========================================
+        // CBT ENGINE
+        // ==========================================
+        async function initiateFullExam() {
+            const btn = document.getElementById('btn-mock-start');
+            const orig = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'; btn.disabled = true;
+            const prompt = `Generate a 20-question ESLECE practice test. 4 Qs each for Math, Physics, Chem, Bio, English. JSON ONLY. {"questions": [{"q":"", "options":["","","",""], "answer":0, "expl":"", "subject":"", "topic":""}]}`;
+            try {
+                const pool = await fetchAIQuestions(prompt);
+                btn.innerHTML = orig; btn.disabled = false;
+                startCBTExam(pool.slice(0, 20), "AI National Simulation");
+            } catch(e) {
+                showToast("Using offline bank.", "warning");
+                const shuffled = [...EXTENDED_QUESTIONS].sort(() => 0.5 - Math.random());
+                startCBTExam(shuffled.slice(0, 20), "National Simulation (Offline)");
+                btn.innerHTML = orig; btn.disabled = false;
+            }
+        }
+
+        function startCBTExam(questions, title) {
+            document.getElementById('exam-fullscreen').style.display = 'flex';
+            try { document.documentElement.requestFullscreen().catch(()=>{}); } catch(e){}
+            
+            activeExam = {
+                title: title, questions: questions, currentIdx: 0,
+                answers: {}, marked: {}, timeRemaining: questions.length * 90,
+                startTime: Date.now(), violations: 0
+            };
+
+            document.getElementById('cbt-cand-name').textContent = studentProfile.name;
+            document.getElementById('cbt-cand-avatar').textContent = studentProfile.name.charAt(0).toUpperCase();
+            document.getElementById('eq-total-num').textContent = questions.length;
+            document.getElementById('cbt-header-subject').textContent = title;
+            
+            document.addEventListener('visibilitychange', tabSwitchMonitor);
+            document.addEventListener('keydown', examKeybinds);
+
+            clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                activeExam.timeRemaining--; let tr = activeExam.timeRemaining;
+                let tElem = document.getElementById('live-exam-timer');
+                tElem.innerHTML = `<i class="fa-regular fa-clock" style="font-size:18px;"></i> ${String(Math.floor(tr/3600)).padStart(2,'0')}:${String(Math.floor((tr%3600)/60)).padStart(2,'0')}:${String(tr%60).padStart(2,'0')}`;
+                if(tr <= 300) tElem.classList.add('cbt-timer-warning'); else tElem.classList.remove('cbt-timer-warning');
+                if(tr <= 0) finalSubmitExam();
+            }, 1000);
+
+            renderExamUI();
+        }
+
+        function tabSwitchMonitor() { if(document.hidden && activeExam) { activeExam.violations++; showToast("Tab switch detected!", "error"); } }
+        function examKeybinds(e) {
+            if(!activeExam || document.getElementById('submit-confirm-modal').classList.contains('show')) return;
+            if(e.key === 'ArrowRight') nextQuestion();
+            if(e.key === 'ArrowLeft') prevQuestion();
+            if(e.key === 'm' || e.key === 'M') toggleMarkReview();
+            if(['1','2','3','4','a','b','c','d','A','B','C','D'].includes(e.key)) {
+                let map = {'1':0,'a':0,'A':0, '2':1,'b':1,'B':1, '3':2,'c':2,'C':2, '4':3,'d':3,'D':3};
+                selectAnswer(map[e.key]);
+            }
+        }
+
+        function toggleExamSidebar() {
+            const sb = document.getElementById('cbt-sidebar');
+            const icon = document.getElementById('sidebar-toggle-icon');
+            sb.classList.toggle('open');
+            icon.className = sb.classList.contains('open') ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+        }
+
+        function renderExamUI() {
+            const q = activeExam.questions[activeExam.currentIdx];
+            document.getElementById('eq-current-num').textContent = activeExam.currentIdx + 1;
+            document.getElementById('eq-topic').innerHTML = `${emojiMap[q.subject]||''} ${escapeHTML(q.subject)} <span style="opacity:0.5; margin:0 6px;">|</span> ${escapeHTML(q.topic)}`;
+            document.getElementById('eq-text').innerHTML = escapeHTML(q.q);
+            
+            const optsContainer = document.getElementById('eq-options');
+            optsContainer.innerHTML = q.options.map((opt, i) => `
+                <div class="cbt-option ${activeExam.answers[activeExam.currentIdx] === i ? 'selected' : ''}" onclick="selectAnswer(${i})">
+                    <div class="cbt-option-letter">${['A','B','C','D'][i]}</div>
+                    <div class="cbt-option-text">${escapeHTML(opt)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('btn-prev').disabled = activeExam.currentIdx === 0;
+            document.getElementById('btn-prev').style.opacity = activeExam.currentIdx === 0 ? '0.4' : '1';
+            
+            if(activeExam.currentIdx === activeExam.questions.length - 1) {
+                document.getElementById('btn-next').innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Finish';
+                document.getElementById('btn-next').style.background = 'linear-gradient(135deg, var(--success), #059669)';
+            } else {
+                document.getElementById('btn-next').innerHTML = 'Next <i class="fa-solid fa-arrow-right"></i>';
+                document.getElementById('btn-next').style.background = 'var(--primary)';
+            }
+
+            const markBtn = document.getElementById('btn-mark-review');
+            if(activeExam.marked[activeExam.currentIdx]) {
+                markBtn.style.background = 'rgba(245,158,11,0.12)'; markBtn.style.color = 'var(--warning)'; markBtn.style.borderColor = 'var(--warning)';
+                markBtn.innerHTML = '<i class="fa-solid fa-flag"></i> Unmark';
+            } else {
+                markBtn.style.background = 'transparent'; markBtn.style.color = 'var(--text-muted)'; markBtn.style.borderColor = 'var(--glass-border)';
+                markBtn.innerHTML = '<i class="fa-regular fa-flag"></i> Mark';
+            }
+
+            try { renderMathInElement(document.getElementById('cbt-main-area'), { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}
+            updateSidebarGrid();
+            document.getElementById('cbt-main-area').scrollTo(0,0);
+        }
+
+        function selectAnswer(idx) { activeExam.answers[activeExam.currentIdx] = idx; renderExamUI(); }
+        function clearAnswer() { delete activeExam.answers[activeExam.currentIdx]; renderExamUI(); }
+        function toggleMarkReview() { activeExam.marked[activeExam.currentIdx] = !activeExam.marked[activeExam.currentIdx]; renderExamUI(); }
+        function prevQuestion() { if(activeExam.currentIdx > 0) { activeExam.currentIdx--; renderExamUI(); } }
+        function nextQuestion() { 
+            if(activeExam.currentIdx < activeExam.questions.length - 1) { activeExam.currentIdx++; renderExamUI(); }
+            else { confirmSubmitExam(); }
+        }
+        function jumpToQ(idx) { activeExam.currentIdx = idx; renderExamUI(); }
+
+        function updateSidebarGrid() {
+            const grid = document.getElementById('exam-nav-grid');
+            let ans = 0, mark = 0;
+            grid.innerHTML = activeExam.questions.map((_, i) => {
+                let cls = 'cbt-nav-btn';
+                if(activeExam.answers[i] !== undefined) { cls += ' answered'; ans++; }
+                if(activeExam.marked[i]) { cls += ' review'; mark++; }
+                if(activeExam.currentIdx === i) cls += ' active';
+                return `<button class="${cls}" onclick="jumpToQ(${i})">${i+1}</button>`;
+            }).join('');
+            
+            document.getElementById('count-ans').textContent = ans;
+            document.getElementById('count-unans').textContent = activeExam.questions.length - ans;
+            document.getElementById('count-mark').textContent = mark;
+            document.getElementById('cbt-progress-bar').style.width = `${(ans/activeExam.questions.length)*100}%`;
+        }
+
+        function confirmSubmitExam() {
+            let ans = Object.keys(activeExam.answers).length;
+            document.getElementById('modal-ans').textContent = ans;
+            document.getElementById('modal-unans').textContent = activeExam.questions.length - ans;
+            document.getElementById('modal-mark').textContent = Object.values(activeExam.marked).filter(Boolean).length;
+            const modal = document.getElementById('submit-confirm-modal');
+            modal.style.display = 'flex'; setTimeout(()=> modal.classList.add('show'), 10);
+        }
+
+        function finalSubmitExam() {
+            closeModal('submit-confirm-modal'); clearInterval(examTimerInterval);
+            document.removeEventListener('visibilitychange', tabSwitchMonitor); document.removeEventListener('keydown', examKeybinds);
+            try{ document.exitFullscreen().catch(()=>{}); }catch(e){}
+            document.getElementById('exam-fullscreen').style.display = 'none';
+
+            let rawScore = 0; let timeSec = (Date.now() - activeExam.startTime)/1000;
+            activeExam.questions.forEach((q, i) => {
+                let isCor = activeExam.answers[i] === q.answer;
+                if(isCor) rawScore++;
+                let key = `${q.subject}-${q.topic}`;
+                if(!topicMastery[key]) topicMastery[key] = {att:0, cor:0};
+                topicMastery[key].att++; if(isCor) topicMastery[key].cor++;
+            });
+
+            let finalScore = Math.round((rawScore / activeExam.questions.length) * 600);
+            let result = {
+                id: Date.now(), title: activeExam.title, date: new Date().toISOString(), score: finalScore,
+                rawScore: rawScore, totalQ: activeExam.questions.length, time: timeSec, violations: activeExam.violations,
+                details: activeExam.questions.map((q,i) => ({...q, userAns: activeExam.answers[i], isCorrect: activeExam.answers[i] === q.answer}))
+            };
+            // Inside finalSubmitExam(), right before switchTab('exam-review'):
+if (finalScore >= (studentProfile.targetScore * 0.8)) {
+    // Gold confetti for hitting 80% of target
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#f59e0b', '#fbbf24', '#ffffff']
+    });
+} else if (finalScore >= 300) {
+    // Standard confetti for passing
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+}
+
+            examHistory.push(result);
+            records.examsTaken++; records.highestOverall = Math.max(records.highestOverall, finalScore);
+            awardXP(Math.round(finalScore / 5)); checkAchievements(); saveLocalData();
+            studyLog.push({date: new Date().toISOString(), type: 'exam', score: finalScore});
+            saveLocalData();
+            
+            window.currentReviewDetails = result.details; activeExam = null;
+            renderReviewUI(result); switchTab('exam-review');
+        }
+
+        function renderReviewUI(res) {
+            document.getElementById('rev-score').textContent = res.score;
+            document.getElementById('rev-acc').textContent = Math.round((res.rawScore/res.totalQ)*100);
+            document.getElementById('rev-time').textContent = `${Math.floor(res.time/60)}m ${Math.floor(res.time%60)}s`;
+            document.getElementById('rev-viol').textContent = res.violations;
+            
+            let weakTopic = null, weakAcc = 1, strongTopic = null, strongAcc = 0, topicStats = {};
+            res.details.forEach(d => {
+                if(!topicStats[d.topic]) topicStats[d.topic] = {a:0, c:0};
+                topicStats[d.topic].a++; if(d.isCorrect) topicStats[d.topic].c++;
+            });
+            Object.keys(topicStats).forEach(t => {
+                let r = topicStats[t].c / topicStats[t].a;
+                if(r >= strongAcc) { strongAcc = r; strongTopic = t; }
+                if(r < weakAcc) { weakAcc = r; weakTopic = t; }
+            });
+
+            let aiText = `Readiness: <strong>${Math.round((res.score/600)*100)}%</strong>. `;
+            if(strongTopic) aiText += `Strongest: <strong>${escapeHTML(strongTopic)}</strong>. `;
+            if(weakTopic && weakAcc < 1) aiText += `Focus on <strong>${escapeHTML(weakTopic)}</strong>.`;
+            else aiText += `Balanced proficiency!`;
+            document.getElementById('ai-coach-report').innerHTML = aiText;
+
+            filterReview('all', document.querySelector('.filter-btn'));
+        }
+
+        function filterReview(type, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            let data = window.currentReviewDetails;
+            if(type === 'correct') data = data.filter(d => d.isCorrect);
+            if(type === 'incorrect') data = data.filter(d => !d.isCorrect && d.userAns !== undefined);
+            if(type === 'unanswered') data = data.filter(d => d.userAns === undefined);
+
+            const c = document.getElementById('review-questions-container');
+            c.innerHTML = data.map(q => {
+                let stCls = q.isCorrect ? 'correct' : (q.userAns === undefined ? 'unanswered' : 'incorrect');
+                let stIcon = q.isCorrect ? '<i class="fa-solid fa-check" style="color:var(--success)"></i> Correct' : (q.userAns===undefined ? '<i class="fa-solid fa-minus" style="color:var(--warning)"></i> Skip' : '<i class="fa-solid fa-xmark" style="color:var(--danger)"></i> Wrong');
+                return `
+                <div class="q-review-card ${stCls}">
+                    <div class="rev-q-meta"><span>${escapeHTML(q.subject)} > ${escapeHTML(q.topic)}</span><span>${stIcon}</span></div>
+                    <div class="rev-q-text">${escapeHTML(q.q)}</div>
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        ${q.options.map((opt, j) => {
+                            let oc = 'rev-option'; let ic = '';
+                            if(j === q.answer) { oc += ' is-correct'; ic = '<i class="fa-solid fa-check-circle"></i>'; }
+                            else if(j === q.userAns && !q.isCorrect) { oc += ' is-wrong'; ic = '<i class="fa-solid fa-circle-xmark"></i>'; }
+                            return `<div class="${oc}"><span><strong style="margin-right:10px;opacity:0.5">${['A','B','C','D'][j]}</strong> ${escapeHTML(opt)}</span>${ic}</div>`;
+                        }).join('')}
+                    </div>
+                    <div class="explanation-box">
+                        <div style="background:var(--primary); width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; flex-shrink:0; font-size:14px;"><i class="fa-solid fa-lightbulb"></i></div>
+                        <div><strong style="display:block; margin-bottom:4px; color:var(--text-main); font-size:13px;">Explanation:</strong> <span style="font-size:13px;">${escapeHTML(q.expl)}</span></div>
+                    </div>
+                </div>`;
+            }).join('') || `<div class="glass-panel text-center" style="padding:30px; color:var(--text-muted); font-size:14px;">No questions for this filter.</div>`;
+            try { renderMathInElement(c, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false }); } catch(e){}
+        }
+
+        // ==========================================
+        // ANALYTICS & ACHIEVEMENTS
+        // ==========================================
+        let histChart = null, accChart = null;
+        function renderCharts() {
+            const isLight = document.body.classList.contains('light-mode');
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            const textColor = isLight ? '#64748b' : '#94a3b8';
+
+            if(histChart) histChart.destroy();
+            histChart = new Chart(document.getElementById('examHistoryChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: examHistory.length ? examHistory.map((_,i)=>'E'+(i+1)) : ['No Data'],
+                    datasets: [{ label: 'Score', data: examHistory.length ? examHistory.map(e=>e.score) : [0], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 3, fill: true, tension: 0.4, pointRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { min:0, max:600, grid:{color:gridColor}, ticks:{color:textColor, font:{size:11}} }, x: { grid:{display:false}, ticks:{color:textColor, font:{size:11}} } }, plugins:{legend:{display:false}} }
+            });
+
+            let subStats = {};
+            Object.keys(topicMastery).forEach(k => {
+                let sub = k.split('-')[0];
+                if(!subStats[sub]) subStats[sub] = {a:0, c:0};
+                subStats[sub].a += topicMastery[k].att; subStats[sub].c += topicMastery[k].cor;
+            });
+            let labels = Object.keys(subStats);
+            let accs = labels.map(l => Math.round((subStats[l].c/subStats[l].a)*100));
+
+            if(accChart) accChart.destroy();
+            accChart = new Chart(document.getElementById('accuracyChart').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: labels.length ? labels : ['Math', 'Physics', 'Chem', 'Bio'],
+                    datasets: [{ label:'Accuracy %', data: labels.length ? accs : [0,0,0,0], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)', borderWidth:2, pointBackgroundColor: '#10b981' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { min:0, max:100, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:textColor, font:{size:12, family:"Inter"}}, ticks:{display:false} } }, plugins:{legend:{display:false}} }
+            });
+
+            let totT = 0, totQ = 0;
+            examHistory.forEach(e => { totT += e.time; totQ += e.totalQ; });
+            document.getElementById('stat-avg-time').textContent = totQ ? Math.round(totT/totQ) + 's' : '--';
+            document.getElementById('stat-fast-sub').textContent = labels.length ? labels[accs.indexOf(Math.max(...accs))] : '--';
+        }
+
+        function renderHeatmap() {
+            const cont = document.getElementById('mastery-container');
+            let html = '';
+            Object.keys(CORE_SUBJECTS).forEach(sub => {
+                let subHtml = `<div class="mastery-subject-group"><h4 style="margin-bottom:12px; color:var(--text-main); font-size:14px;"><span style="margin-right:6px;">${emojiMap[sub]||''}</span> ${escapeHTML(sub)}</h4>`;
+                let hasData = false;
+                CORE_SUBJECTS[sub].forEach(top => {
+                    let key = `${sub}-${top}`; let stats = topicMastery[key] || {att:0, cor:0};
+                    let acc = stats.att ? Math.round((stats.cor/stats.att)*100) : 0;
+                    let color = acc >= 80 ? 'var(--success)' : (acc >= 50 ? 'var(--warning)' : 'var(--danger)');
+                    if(!stats.att) color = 'var(--glass-border)';
+                    subHtml += `
+                        <div class="mastery-topic-row">
+                            <div style="flex:1; font-weight:600;">${escapeHTML(top)} <span style="color:var(--text-muted); font-size:11px; margin-left:6px;">(${stats.att})</span></div>
+                            <div style="width:100px; display:flex; align-items:center; gap:8px;">
+                                <div class="progress-bar-bg" style="margin:0; height:5px;"><div class="progress-bar-fill" style="width:${stats.att?acc:0}%; background:${color};"></div></div>
+                                <span style="font-size:12px; font-weight:800; color:${color}; width:32px; text-align:right;">${stats.att?acc+'%':'-'}</span>
+                            </div>
+                        </div>`;
+                    if(stats.att > 0) hasData = true;
+                });
+                subHtml += `</div>`;
+                if(hasData) html += subHtml;
+            });
+            cont.innerHTML = html || '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:14px;">Complete exams to generate heatmap.</div>';
+        }
+
+        function renderAchievements() {
+            document.getElementById('rec-high').textContent = records.highestOverall;
+            document.getElementById('rec-streak').textContent = studentProfile.streak;
+            document.getElementById('rec-exams').textContent = records.examsTaken;
+            document.getElementById('rec-xp').textContent = studentProfile.xp;
+
+            const c = document.getElementById('badge-container');
+            const badges = [
+                { id: 'firstExam', name: 'Exam Warrior', icon: 'fa-shield-halved', desc: 'Completed first exam' },
+                { id: 'streakMaster', name: 'Consistency King', icon: 'fa-fire', desc: '7-day login streak' },
+                { id: 'mathMaster', name: 'Math Master', icon: 'fa-calculator', desc: '80%+ Math accuracy' },
+                { id: 'physicsExpert', name: 'Physics Expert', icon: 'fa-atom', desc: '80%+ Physics accuracy' },
+                { id: 'dailyHero', name: 'Daily Hero', icon: 'fa-sun', desc: '5-day challenge streak' }
+            ];
+            c.innerHTML = badges.map(b => `
+                <div class="achievement-card ${achievements[b.id] ? 'unlocked' : ''}">
+                    <i class="fa-solid ${b.icon}"></i>
+                    <h4 style="margin-bottom:6px; font-size:14px;">${b.name}</h4>
+                    <p style="font-size:11px; color:var(--text-muted)">${b.desc}</p>
+                </div>`).join('');
+        }
+
+        function renderMockHistory() {
+            const c = document.getElementById('mock-history-list');
+            if(examHistory.length === 0) { c.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px; font-size:14px;">No exams taken yet.</div>'; return; }
+            c.innerHTML = examHistory.slice().reverse().map(ex => `
+                <div class="glass-panel" style="padding:14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="viewHistoryExam(${ex.id})">
+                    <div>
+                        <div style="font-weight:700; font-size:14px;">${escapeHTML(ex.title)}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${new Date(ex.date).toLocaleDateString()}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:20px; font-weight:800; color:${ex.score >= 400 ? 'var(--success)' : 'var(--warning)'};">${ex.score}</div>
+                        <div style="font-size:11px; color:var(--text-muted);">${Math.round((ex.rawScore/ex.totalQ)*100)}%</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewHistoryExam(id) {
+            const ex = examHistory.find(e => e.id === id);
+            if(!ex) return;
+            window.currentReviewDetails = ex.details;
+            renderReviewUI(ex); switchTab('exam-review');
+        }
+
+        // ==========================================
+        // 3D PHYSICS SANDBOX 
+        // ==========================================
+        let physicsScene, physicsCamera, physicsRenderer, physicsWorld;
+        let physicsMeshes = [], physicsBodies = [];
+        let physicsInitialized = false;
+
+        function initPhysicsSandbox() {
+            if(physicsInitialized) return;
+            physicsInitialized = true;
+            const container = document.getElementById('physics-canvas-container');
+            physicsScene = new THREE.Scene(); physicsScene.fog = new THREE.FogExp2(0x0b1120, 0.02);
+            physicsCamera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            physicsCamera.position.set(0, 12, 25); physicsCamera.lookAt(0, 0, 0);
+            physicsRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            physicsRenderer.setSize(container.clientWidth, container.clientHeight);
+            physicsRenderer.shadowMap.enabled = true; container.appendChild(physicsRenderer.domElement);
+            physicsScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10); dirLight.castShadow = true;
+            physicsScene.add(dirLight);
+            physicsWorld = new CANNON.World(); physicsWorld.gravity.set(0, -9.82, 0);
+            physicsWorld.broadphase = new CANNON.NaiveBroadphase(); physicsWorld.solver.iterations = 10;
+            const groundMat = new THREE.MeshPhongMaterial({ color: 0x1e293b });
+            const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), groundMat);
+            groundMesh.rotation.x = -Math.PI / 2; groundMesh.receiveShadow = true; physicsScene.add(groundMesh);
+            const groundBody = new CANNON.Body({ mass: 0, shape: new CANNON.Plane() });
+            groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+            physicsWorld.addBody(groundBody);
+            window.addEventListener('resize', () => {
+                if(!document.getElementById('view-physics3d').classList.contains('active')) return;
+                physicsCamera.aspect = container.clientWidth / container.clientHeight;
+                physicsCamera.updateProjectionMatrix(); physicsRenderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            animatePhysics();
+        }
+
+        const boxGeo = new THREE.BoxGeometry(2, 2, 2); const sphereGeo = new THREE.SphereGeometry(1.5, 32, 32);
+        const pColors = [0x3b82f6, 0x10b981, 0xf59e0b, 0xef4444, 0x8b5cf6];
+
+        function spawnCube() {
+            if(!physicsInitialized) return;
+            const mat = new THREE.MeshPhongMaterial({ color: pColors[Math.floor(Math.random() * pColors.length)] });
+            const mesh = new THREE.Mesh(boxGeo, mat); mesh.castShadow = true; physicsScene.add(mesh); physicsMeshes.push(mesh);
+            const body = new CANNON.Body({ mass: 5, shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)) });
+            body.position.set(Math.random() * 10 - 5, 20, Math.random() * 10 - 5);
+            body.angularVelocity.set(Math.random()*2, Math.random()*2, Math.random()*2);
+            physicsWorld.addBody(body); physicsBodies.push(body);
+        }
+
+        function spawnSphere() {
+            if(!physicsInitialized) return;
+            const mat = new THREE.MeshPhongMaterial({ color: pColors[Math.floor(Math.random() * pColors.length)] });
+            const mesh = new THREE.Mesh(sphereGeo, mat); mesh.castShadow = true; physicsScene.add(mesh); physicsMeshes.push(mesh);
+            const body = new CANNON.Body({ mass: 10, shape: new CANNON.Sphere(1.5) });
+            body.position.set(Math.random() * 10 - 5, 20, Math.random() * 10 - 5);
+            physicsWorld.addBody(body); physicsBodies.push(body);
+        }
+
+        function resetPhysicsWorld() {
+            if(!physicsInitialized) return;
+            physicsMeshes.forEach(m => physicsScene.remove(m)); physicsBodies.forEach(b => physicsWorld.removeBody(b));
+            physicsMeshes = []; physicsBodies = [];
+        }
+
+        function animatePhysics() {
+            requestAnimationFrame(animatePhysics);
+            if(document.getElementById('view-physics3d').classList.contains('active')) {
+                physicsWorld.step(1/60);
+                for (let i = 0; i < physicsMeshes.length; i++) {
+                    physicsMeshes[i].position.copy(physicsBodies[i].position);
+                    physicsMeshes[i].quaternion.copy(physicsBodies[i].quaternion);
+                }
+                physicsRenderer.render(physicsScene, physicsCamera);
+            }
+        }
+
+        // ==========================================
+        // 3D CHEMISTRY LAB
+        // ==========================================
+        let chemScene, chemCamera, chemRenderer, chemGroup;
+        let chemInitialized = false;
+        let isChemDragging = false;
+        let prevMousePos = { x: 0, y: 0 };
+
+        function initChemistrySandbox() {
+            if(chemInitialized) return;
+            chemInitialized = true;
+            const container = document.getElementById('chem-canvas-container');
+            chemScene = new THREE.Scene(); chemScene.background = new THREE.Color(0x0a0f1c);
+            chemCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            chemCamera.position.z = 20;
+            chemRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            chemRenderer.setSize(container.clientWidth, container.clientHeight);
+            chemRenderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(chemRenderer.domElement);
+            chemScene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const point = new THREE.PointLight(0xffffff, 1); point.position.set(10, 10, 10); chemScene.add(point);
+            chemGroup = new THREE.Group(); chemScene.add(chemGroup);
+            
+            chemRenderer.domElement.addEventListener('mousedown', (e) => { isChemDragging = true; prevMousePos = { x: e.offsetX, y: e.offsetY }; });
+            chemRenderer.domElement.addEventListener('mousemove', (e) => { if(isChemDragging) { chemGroup.rotation.y += (e.offsetX - prevMousePos.x) * 0.01; chemGroup.rotation.x += (e.offsetY - prevMousePos.y) * 0.01; prevMousePos = { x: e.offsetX, y: e.offsetY }; } });
+            chemRenderer.domElement.addEventListener('mouseup', () => { isChemDragging = false; });
+            chemRenderer.domElement.addEventListener('mouseleave', () => { isChemDragging = false; });
+            chemRenderer.domElement.addEventListener('touchstart', (e) => { isChemDragging = true; prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, {passive:true});
+            chemRenderer.domElement.addEventListener('touchmove', (e) => { if(isChemDragging) { chemGroup.rotation.y += (e.touches[0].clientX - prevMousePos.x) * 0.01; chemGroup.rotation.x += (e.touches[0].clientY - prevMousePos.y) * 0.01; prevMousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }, {passive:true});
+            chemRenderer.domElement.addEventListener('touchend', () => { isChemDragging = false; });
+            window.addEventListener('resize', () => {
+                if(!document.getElementById('view-chemistry3d').classList.contains('active')) return;
+                chemCamera.aspect = container.clientWidth / container.clientHeight;
+                chemCamera.updateProjectionMatrix(); chemRenderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            animateChem(); spawnMolecule('H2O');
+        }
+
+        function animateChem() {
+            requestAnimationFrame(animateChem);
+            if(document.getElementById('view-chemistry3d').classList.contains('active')) {
+                if(!isChemDragging) { chemGroup.rotation.y += 0.005; chemGroup.rotation.x += 0.002; }
+                chemRenderer.render(chemScene, chemCamera);
+            }
+        }
+
+        function spawnMolecule(type) {
+            if(!chemInitialized) return;
+            while(chemGroup.children.length > 0){ chemGroup.remove(chemGroup.children[0]); }
+            const matO = new THREE.MeshPhysicalMaterial({ color: 0xff3333, metalness: 0.2, roughness: 0.1, clearcoat: 1.0 }); 
+            const matH = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0.1, roughness: 0.4 }); 
+            const matC = new THREE.MeshPhysicalMaterial({ color: 0x333333, metalness: 0.3, roughness: 0.6 }); 
+            const matN = new THREE.MeshPhysicalMaterial({ color: 0x3333ff, metalness: 0.2, roughness: 0.2 }); 
+            const matBond = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+            const createSphere = (mat, radius, pos) => { const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 32), mat); mesh.position.set(pos[0], pos[1], pos[2]); chemGroup.add(mesh); };
+            const createBond = (pos1, pos2) => { const p1 = new THREE.Vector3(...pos1), p2 = new THREE.Vector3(...pos2); const distance = p1.distanceTo(p2); const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, distance, 16), matBond); const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5); cylinder.position.copy(mid); cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.sub(p1).normalize()); chemGroup.add(cylinder); };
+
+            if(type === 'H2O') {
+                createSphere(matO, 1.4, [0, 0, 0]); createSphere(matH, 0.8, [1.3, -1, 0]); createSphere(matH, 0.8, [-1.3, -1, 0]);
+                createBond([0,0,0], [1.3,-1,0]); createBond([0,0,0], [-1.3,-1,0]);
+            } else if(type === 'CH4') {
+                createSphere(matC, 1.6, [0, 0, 0]); createSphere(matH, 0.8, [1.5, -1, -1]); createSphere(matH, 0.8, [-1.5, -1, -1]); createSphere(matH, 0.8, [0, 1.5, -1]); createSphere(matH, 0.8, [0, 0, 1.5]);
+                createBond([0,0,0], [1.5,-1,-1]); createBond([0,0,0], [-1.5,-1,-1]); createBond([0,0,0], [0,1.5,-1]); createBond([0,0,0], [0,0,1.5]);
+            } else if(type === 'NH3') {
+                createSphere(matN, 1.5, [0, 0.5, 0]); createSphere(matH, 0.8, [1.2, -0.8, 0.7]); createSphere(matH, 0.8, [-1.2, -0.8, 0.7]); createSphere(matH, 0.8, [0, -0.8, -1.4]);
+                createBond([0,0.5,0], [1.2,-0.8,0.7]); createBond([0,0.5,0], [-1.2,-0.8,0.7]); createBond([0,0.5,0], [0,-0.8,-1.4]);
+            } else if(type === 'CO2') {
+                createSphere(matC, 1.4, [0, 0, 0]); createSphere(matO, 1.4, [3, 0, 0]); createSphere(matO, 1.4, [-3, 0, 0]);
+                createBond([0, 0.4, 0], [3, 0.4, 0]); createBond([0, -0.4, 0], [3, -0.4, 0]); createBond([0, 0.4, 0], [-3, 0.4, 0]); createBond([0, -0.4, 0], [-3, -0.4, 0]);
+            }
+            chemGroup.rotation.set(0,0,0);
+        }
+
+        // ==========================================
+        // DATA MANAGEMENT
+        // ==========================================
+        function showSettings() {
+            document.getElementById('sound-status').textContent = studentProfile.sound ? 'On' : 'Off';
+            const modal = document.getElementById('settings-modal');
+            modal.style.display = 'flex'; setTimeout(()=> modal.classList.add('show'), 10);
+        }
+        function exportData() {
+            const data = localStorage.getItem('ef_premium_data') || '{}';
+            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], {type: "application/json"}));
+            a.download = "examforge-backup.json"; a.click(); showToast("Backup exported.");
+        }
+        function importData(file) {
+            if(!file) return; const reader = new FileReader();
+            reader.onload = e => {
+                try { JSON.parse(e.target.result); localStorage.setItem('ef_premium_data', e.target.result);
+                    showToast("Restored. Reloading...", "success"); setTimeout(()=> window.location.reload(), 1500);
+                } catch(err) { showToast("Invalid file.", "error"); }
+            }; reader.readAsText(file);
+        }
+        function clearData() {
+            if(confirm("Delete ALL progress permanently?")) { localStorage.clear(); window.location.reload(); }
+        }
+
+        // ==========================================
+        // UPDATED SIDEBAR TOGGLE & EVENT LISTENERS
+        // ==========================================
+        function toggleSidebar(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('mobile-menu-btn');
+            
+            if (sidebar) sidebar.classList.toggle('open');
+            if (hamburgerBtn) hamburgerBtn.classList.toggle('open');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainWrapper = document.querySelector('.main-wrapper');
+            if (mainWrapper) {
+                mainWrapper.addEventListener('click', function(e) {
+                    const sidebar = document.getElementById('sidebar');
+                    const hamburgerBtn = document.getElementById('mobile-menu-btn');
+                    
+                    // If the sidebar is open and the click is NOT inside the sidebar
+                    if (sidebar && sidebar.classList.contains('open') && !sidebar.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                        if (hamburgerBtn) hamburgerBtn.classList.remove('open');
+                    }
+                });
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'k') { e.preventDefault(); toggleAIChat(); }
+            if (e.key === '/' && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") { e.preventDefault(); toggleGlobalSearch(); }
+            if (e.key === 'Escape') { toggleGlobalSearch(); }
+        });
+
+
+        // --- 1. FLASHCARD ENGINE STATE & STORAGE ---
+let flashcardDeck = JSON.parse(localStorage.getItem('examforge_custom_cards')) || [
+    { front: "What is the quadratic formula?", back: "The solution to $ax^2 + bx + c = 0$ is given by: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$" },
+    { front: "State Newton's Second Law of Motion", back: "The acceleration of an object depends on the mass and the net force acting upon it: $$\\vec{F} = m\\vec{a}$$" }
+];
+let currentCardIndex = 0;
+
+// Initialize Flashcards View on Load
+document.addEventListener("DOMContentLoaded", () => {
+    injectCustomCardUI();
+    displayCard();
+});
+
+// --- 2. DYNAMICALLY INJECT MANUALLY CREATED CARD WIDGET ---
+function injectCustomCardUI() {
+    const flashcardView = document.getElementById('view-flashcards');
+    if (!flashcardView) return;
+
+    // Create a panel container for adding custom cards
+    const creatorPanel = document.createElement('div');
+    creatorPanel.className = 'glass-panel mt-3';
+    creatorPanel.style.padding = 'var(--space-md)';
+    creatorPanel.innerHTML = `
+        <div class="card-header" style="font-size:14px;"><i class="fa-solid fa-plus" style="color:var(--success)"></i> Add Custom Flashcard</div>
+        <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-size: 11px;">Front Side (Question / Concept)</label>
+            <textarea id="custom-card-front" style="width:100%; height:60px; background:var(--glass-input); border:1px solid var(--glass-border); border-radius:var(--radius-md); padding:10px; color:var(--text-main); font-size:14px; resize:none;" placeholder="Use $...$ for inline formulas or $$...$$ for centered math rows."></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+            <label style="font-size: 11px;">Back Side (Answer / Explanation)</label>
+            <textarea id="custom-card-back" style="width:100%; height:80px; background:var(--glass-input); border:1px solid var(--glass-border); border-radius:var(--radius-md); padding:10px; color:var(--text-main); font-size:14px; resize:none;" placeholder="e.g. Einstein's formula is $$E = mc^2$$"></textarea>
+        </div>
+        <button onclick="saveCustomFlashcard()" class="btn-primary w-100" style="min-height:38px; font-size:13px;"><i class="fa-solid fa-floppy-disk"></i> Save Card to Deck</button>
+    `;
+    
+    // Append it below the existing interactive deck layout
+    flashcardView.appendChild(creatorPanel);
+}
+
+// Save explicit user additions
+function saveCustomFlashcard() {
+    const frontText = document.getElementById('custom-card-front').value.trim();
+    const backText = document.getElementById('custom-card-back').value.trim();
+
+    if (!frontText || !backText) {
+        showToast("Please fill in both sides of the flashcard!", "error");
+        return;
+    }
+
+    flashcardDeck.push({ front: frontText, back: backText });
+    localStorage.setItem('examforge_custom_cards', JSON.stringify(flashcardDeck));
+    
+    // Clear inputs and reload view
+    document.getElementById('custom-card-front').value = '';
+    document.getElementById('custom-card-back').value = '';
+    showToast("Flashcard successfully saved!", "success");
+    
+    currentCardIndex = flashcardDeck.length - 1;
+    displayCard();
+}
+
+// --- 3. RENDERING ENGINE WITH PROFESSIONAL MATH SUPPORT ---
+function displayCard() {
+    const frontSide = document.getElementById('flashcard-front');
+    const backSide = document.getElementById('flashcard-answer');
+    const progressText = document.getElementById('flashcard-progress');
+    const flashcardEl = document.getElementById('flashcard');
+
+    if (!frontSide || !backSide || flashcardDeck.length === 0) return;
+
+    // Reset rotation styles state
+    flashcardEl.classList.remove('flipped');
+
+    // Populate standard structural text
+    frontSide.innerHTML = `<div style="font-size:16px; text-align:center; padding:10px; font-weight:500;">${flashcardDeck[currentCardIndex].front}</div>`;
+    backSide.innerHTML = `<div style="font-size:15px; text-align:center; padding:10px;">${flashcardDeck[currentCardIndex].back}</div>`;
+    
+    if(progressText) {
+        progressText.innerText = `Card ${currentCardIndex + 1} of ${flashcardDeck.length}`;
+    }
+
+    // Crucial Step: Direct KaTeX engine to re-scan the specific nodes for math formulas immediately
+    if (window.renderMathInElement) {
+        renderMathInElement(frontSide, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}, {left: "\\(", right: "\\)", display: false}] });
+        renderMathInElement(backSide, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}, {left: "\\(", right: "\\)", display: false}] });
+    }
+}
+
+// Cycle deck forward/backward
+function flipFlashcard() {
+    document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function rateFlashcard(rating) {
+    if (flashcardDeck.length === 0) return;
+    
+    // Simple cycle progression loop for prototype scaling
+    currentCardIndex = (currentCardIndex + 1) % flashcardDeck.length;
+    displayCard();
+    showToast(`Card rated! Moving forward...`, "success");
+}
+
+// --- 4. INTEGRATE THE AI TUTOR RESPONSE TO FLASHCARD BRIDGE ---
+// Override or extend your existing AI chat generation code to output a copy action anchor
+function appendAIMessageWithCardBridge(rawText) {
+    const chatBody = document.getElementById('ai-chat-body');
+    if (!chatBody) return;
+
+    const messageContainer = document.createElement('div');
+    messageContainer.className = 'chat-msg ai';
+    messageContainer.style.position = 'relative';
+    messageContainer.style.paddingBottom = '34px'; // Make room for action button
+    
+    // Render text block safely inside window elements
+    messageContainer.innerHTML = `<div>${rawText}</div>`;
+    
+    // Action conversion link button item styling
+    const conversionBtn = document.createElement('button');
+    conversionBtn.style = "position:absolute; bottom:4px; right:6px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:6px; color:var(--text-main); font-size:10px; padding:3px 6px; cursor:pointer; font-weight:700;";
+    conversionBtn.innerHTML = `<i class="fa-solid fa-clone" style="color:var(--accent);"></i> Convert to Card`;
+    
+    conversionBtn.onclick = function() {
+        const fallbackPrompt = "AI Concept Clarification Details";
+        flashcardDeck.push({
+            front: fallbackPrompt,
+            back: rawText
+        });
+        localStorage.setItem('examforge_custom_cards', JSON.stringify(flashcardDeck));
+        showToast("AI response exported to Flashcards!", "success");
+    };
+
+    messageContainer.appendChild(conversionBtn);
+    chatBody.appendChild(messageContainer);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Trigger KaTeX inline parse formatting scan manually
+    if (window.renderMathInElement) {
+        renderMathInElement(messageContainer, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+    }
+}
+
+// Custom simple toast UI helper block if none exists yet
+function showToast(msg, type = "success") {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3200);
+}
+
+// Ripple Effect Logic
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('.btn-primary, .btn-secondary, .btn-danger, .cbt-option');
+    if (!target) return;
+
+    const circle = document.createElement('span');
+    const diameter = Math.max(target.clientWidth, target.clientHeight);
+    const radius = diameter / 2;
+
+    const rect = target.getBoundingClientRect();
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - radius}px`;
+    circle.style.top = `${e.clientY - rect.top - radius}px`;
+    circle.classList.add('ripple');
+
+    // Remove existing ripples
+    const existing = target.querySelector('.ripple');
+    if (existing) existing.remove();
+
+    target.appendChild(circle);
+});
+
+// ==========================================
+// 3D PERIODIC TABLE SANDBOX (COMPLETE 118)
+// ==========================================
+let ptInitialized = false;
+let ptCamera, ptScene, ptRenderer, ptControls;
+let ptObjects = [];
+let ptTargets = { table: [], sphere: [], helix: [] };
+
+function initPeriodicTable() {
+    if(ptInitialized) return;
+    ptInitialized = true;
+
+    // Full 118 Elements Dataset: [Symbol, Name, Weight, Column, Row]
+    const elementsData = [
+        "H", "Hydrogen", "1.008", 1, 1,
+        "He", "Helium", "4.003", 18, 1,
+        "Li", "Lithium", "6.94", 1, 2,
+        "Be", "Beryllium", "9.012", 2, 2,
+        "B", "Boron", "10.81", 13, 2,
+        "C", "Carbon", "12.011", 14, 2,
+        "N", "Nitrogen", "14.007", 15, 2,
+        "O", "Oxygen", "15.999", 16, 2,
+        "F", "Fluorine", "18.998", 17, 2,
+        "Ne", "Neon", "20.180", 18, 2,
+        "Na", "Sodium", "22.990", 1, 3,
+        "Mg", "Magnesium", "24.305", 2, 3,
+        "Al", "Aluminum", "26.982", 13, 3,
+        "Si", "Silicon", "28.085", 14, 3,
+        "P", "Phosphorus", "30.974", 15, 3,
+        "S", "Sulfur", "32.06", 16, 3,
+        "Cl", "Chlorine", "35.45", 17, 3,
+        "Ar", "Argon", "39.95", 18, 3,
+        "K", "Potassium", "39.098", 1, 4,
+        "Ca", "Calcium", "40.078", 2, 4,
+        "Sc", "Scandium", "44.956", 3, 4,
+        "Ti", "Titanium", "47.867", 4, 4,
+        "V", "Vanadium", "50.942", 5, 4,
+        "Cr", "Chromium", "51.996", 6, 4,
+        "Mn", "Manganese", "54.938", 7, 4,
+        "Fe", "Iron", "55.845", 8, 4,
+        "Co", "Cobalt", "58.933", 9, 4,
+        "Ni", "Nickel", "58.693", 10, 4,
+        "Cu", "Copper", "63.546", 11, 4,
+        "Zn", "Zinc", "65.38", 12, 4,
+        "Ga", "Gallium", "69.723", 13, 4,
+        "Ge", "Germanium", "72.63", 14, 4,
+        "As", "Arsenic", "74.922", 15, 4,
+        "Se", "Selenium", "78.971", 16, 4,
+        "Br", "Bromine", "79.904", 17, 4,
+        "Kr", "Krypton", "83.798", 18, 4,
+        "Rb", "Rubidium", "85.468", 1, 5,
+        "Sr", "Strontium", "87.62", 2, 5,
+        "Y", "Yttrium", "88.906", 3, 5,
+        "Zr", "Zirconium", "91.224", 4, 5,
+        "Nb", "Niobium", "92.906", 5, 5,
+        "Mo", "Molybdenum", "95.95", 6, 5,
+        "Tc", "Technetium", "(98)", 7, 5,
+        "Ru", "Ruthenium", "101.07", 8, 5,
+        "Rh", "Rhodium", "102.91", 9, 5,
+        "Pd", "Palladium", "106.42", 10, 5,
+        "Ag", "Silver", "107.87", 11, 5,
+        "Cd", "Cadmium", "112.41", 12, 5,
+        "In", "Indium", "114.82", 13, 5,
+        "Sn", "Tin", "118.71", 14, 5,
+        "Sb", "Antimony", "121.76", 15, 5,
+        "Te", "Tellurium", "127.60", 16, 5,
+        "I", "Iodine", "126.90", 17, 5,
+        "Xe", "Xenon", "131.29", 18, 5,
+        "Cs", "Cesium", "132.91", 1, 6,
+        "Ba", "Barium", "137.33", 2, 6,
+        "La", "Lanthanum", "138.91", 3, 6,
+        "Ce", "Cerium", "140.12", 4, 9,
+        "Pr", "Praseodymium", "140.91", 5, 9,
+        "Nd", "Neodymium", "144.24", 6, 9,
+        "Pm", "Promethium", "(145)", 7, 9,
+        "Sm", "Samarium", "150.36", 8, 9,
+        "Eu", "Europium", "151.96", 9, 9,
+        "Gd", "Gadolinium", "157.25", 10, 9,
+        "Tb", "Terbium", "158.93", 11, 9,
+        "Dy", "Dysprosium", "162.50", 12, 9,
+        "Ho", "Holmium", "164.93", 13, 9,
+        "Er", "Erbium", "167.26", 14, 9,
+        "Tm", "Thulium", "168.93", 15, 9,
+        "Yb", "Ytterbium", "173.05", 16, 9,
+        "Lu", "Lutetium", "174.97", 17, 9,
+        "Hf", "Hafnium", "178.49", 4, 6,
+        "Ta", "Tantalum", "180.95", 5, 6,
+        "W", "Tungsten", "183.84", 6, 6,
+        "Re", "Rhenium", "186.21", 7, 6,
+        "Os", "Osmium", "190.23", 8, 6,
+        "Ir", "Iridium", "192.22", 9, 6,
+        "Pt", "Platinum", "195.08", 10, 6,
+        "Au", "Gold", "196.97", 11, 6,
+        "Hg", "Mercury", "200.59", 12, 6,
+        "Tl", "Thallium", "204.38", 13, 6,
+        "Pb", "Lead", "207.2", 14, 6,
+        "Bi", "Bismuth", "208.98", 15, 6,
+        "Po", "Polonium", "(209)", 16, 6,
+        "At", "Astatine", "(210)", 17, 6,
+        "Rn", "Radon", "(222)", 18, 6,
+        "Fr", "Francium", "(223)", 1, 7,
+        "Ra", "Radium", "(226)", 2, 7,
+        "Ac", "Actinium", "(227)", 3, 7,
+        "Th", "Thorium", "232.04", 4, 10,
+        "Pa", "Protactinium", "231.04", 5, 10,
+        "U", "Uranium", "238.03", 6, 10,
+        "Np", "Neptunium", "(237)", 7, 10,
+        "Pu", "Plutonium", "(244)", 8, 10,
+        "Am", "Americium", "(243)", 9, 10,
+        "Cm", "Curium", "(247)", 10, 10,
+        "Bk", "Berkelium", "(247)", 11, 10,
+        "Cf", "Californium", "(251)", 12, 10,
+        "Es", "Einsteinium", "(252)", 13, 10,
+        "Fm", "Fermium", "(257)", 14, 10,
+        "Md", "Mendelevium", "(258)", 15, 10,
+        "No", "Nobelium", "(259)", 16, 10,
+        "Lr", "Lawrencium", "(262)", 17, 10,
+        "Rf", "Rutherfordium", "(267)", 4, 7,
+        "Db", "Dubnium", "(268)", 5, 7,
+        "Sg", "Seaborgium", "(269)", 6, 7,
+        "Bh", "Bohrium", "(270)", 7, 7,
+        "Hs", "Hassium", "(269)", 8, 7,
+        "Mt", "Meitnerium", "(278)", 9, 7,
+        "Ds", "Darmstadtium", "(281)", 10, 7,
+        "Rg", "Roentgenium", "(282)", 11, 7,
+        "Cn", "Copernicium", "(285)", 12, 7,
+        "Nh", "Nihonium", "(286)", 13, 7,
+        "Fl", "Flerovium", "(289)", 14, 7,
+        "Mc", "Moscovium", "(290)", 15, 7,
+        "Lv", "Livermorium", "(293)", 16, 7,
+        "Ts", "Tennessine", "(294)", 17, 7,
+        "Og", "Oganesson", "(294)", 18, 7
+    ];
+
+    const container = document.getElementById('pt-canvas-container');
+    
+    ptCamera = new THREE.PerspectiveCamera( 40, container.clientWidth / container.clientHeight, 1, 10000 );
+// Pull camera back much further on mobile screens
+ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;    ptScene = new THREE.Scene();
+
+    // Build the Elements
+    for ( let i = 0; i < elementsData.length; i += 5 ) {
+        
+       const element = document.createElement( 'div' );
+        
+        // --- ADD COLOR MAPPING LOGIC ---
+        let groupClass = 'transition'; // Default
+        const col = elementsData[i+3];
+        const symbol = elementsData[i];
+        
+        if (col === 1 && symbol !== 'H') groupClass = 'alkali';
+        else if (col === 2) groupClass = 'alkaline';
+        else if (col === 18) groupClass = 'noble';
+        else if (col === 17) groupClass = 'halogen';
+        else if ((col >= 13 && col <= 16) || symbol === 'H') groupClass = 'nonmetal';
+        
+        element.className = `pt-element ${groupClass}`;
+        // -------------------------------
+        
+        // --- ADD THESE TWO LINES ---
+        element.style.pointerEvents = 'auto'; // Ensures the 3D element catches the mouse click
+        element.onclick = () => openElementModal((i/5)+1, elementsData[i], elementsData[i+1], elementsData[i+2], elementsData[i+3], elementsData[i+4]);
+        
+        const number = document.createElement( 'div' );
+        number.className = 'number';
+        number.textContent = (i/5) + 1;
+        element.appendChild( number );
+
+        const symbols = document.createElement( 'div' );
+        symbols.className = 'symbol';
+        symbols.textContent = elementsData[ i ];
+        element.appendChild( symbols );
+
+        const details = document.createElement( 'div' );
+        details.className = 'details';
+        details.innerHTML = elementsData[ i + 1 ] + '<br>' + elementsData[ i + 2 ];
+        element.appendChild( details );
+
+        const objectCSS = new THREE.CSS3DObject( element );
+        objectCSS.position.x = Math.random() * 4000 - 2000;
+        objectCSS.position.y = Math.random() * 4000 - 2000;
+        objectCSS.position.z = Math.random() * 4000 - 2000;
+        ptScene.add( objectCSS );
+        ptObjects.push( objectCSS );
+
+        // Dynamic authentic grid alignments
+        const objectTable = new THREE.Object3D();
+        objectTable.position.x = ( elementsData[ i + 3 ] * 140 ) - 1330;
+        objectTable.position.y = - ( elementsData[ i + 4 ] * 180 ) + 990;
+        ptTargets.table.push( objectTable );
+    }
+
+    // Sphere Transformation
+    const vector = new THREE.Vector3();
+    for ( let i = 0, l = ptObjects.length; i < l; i ++ ) {
+        const phi = Math.acos( - 1 + ( 2 * i ) / l );
+        const theta = Math.sqrt( l * Math.PI ) * phi;
+        const objectSphere = new THREE.Object3D();
+        objectSphere.position.setFromSphericalCoords( 900, phi, theta );
+        vector.copy( objectSphere.position ).multiplyScalar( 2 );
+        objectSphere.lookAt( vector );
+        ptTargets.sphere.push( objectSphere );
+    }
+
+    // Helix Transformation
+    for ( let i = 0, l = ptObjects.length; i < l; i ++ ) {
+        const theta = i * 0.175 + Math.PI;
+        const y = - ( i * 8 ) + 450;
+        const objectHelix = new THREE.Object3D();
+        objectHelix.position.setFromCylindricalCoords( 900, theta, y );
+        vector.x = objectHelix.position.x * 2;
+        vector.y = objectHelix.position.y;
+        vector.z = objectHelix.position.z * 2;
+        objectHelix.lookAt( vector );
+        ptTargets.helix.push( objectHelix );
+    }
+
+    ptRenderer = new THREE.CSS3DRenderer();
+    ptRenderer.setSize( container.clientWidth, container.clientHeight );
+    container.appendChild( ptRenderer.domElement );
+
+    ptControls = new THREE.TrackballControls( ptCamera, ptRenderer.domElement );
+    ptControls.minDistance = 500;
+    ptControls.maxDistance = 6000;
+
+    transformPT('table');
+
+   window.addEventListener('resize', () => {
+        if(!document.getElementById('view-periodictable').classList.contains('active')) return;
+        
+        // Adjust zoom dynamically if screen flips or resizes
+        ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;
+        
+        ptCamera.aspect = container.clientWidth / container.clientHeight;
+        ptCamera.updateProjectionMatrix();
+        ptRenderer.setSize( container.clientWidth, container.clientHeight );
+    });
+
+    animatePT();
+}
+
+function transformPT( shape ) {
+    const targets = ptTargets[shape];
+    for ( let i = 0; i < ptObjects.length; i ++ ) {
+        const object = ptObjects[ i ];
+        const target = targets[ i ];
+        object.position.copy( target.position );
+        object.rotation.copy( target.rotation );
+    }
+}
+
+function animatePT() {
+    requestAnimationFrame( animatePT );
+    if(document.getElementById('view-periodictable').classList.contains('active')) {
+        ptControls.update();
+        ptRenderer.render( ptScene, ptCamera );
+    }
+}
+
+
+
+// ==========================================
+// DYNAMIC ELEMENT MODAL & ATOM GENERATOR
+// ==========================================
+function openElementModal(atomicNum, symbol, name, weight, col, row) {
+    // 1. Populate standard text data
+    document.getElementById('modal-el-symbol').textContent = symbol;
+    document.getElementById('modal-el-name').textContent = name;
+    document.getElementById('modal-el-num').textContent = atomicNum;
+    document.getElementById('modal-el-weight').textContent = weight;
+    document.getElementById('modal-el-shells').textContent = row; // Row = Number of shells
+    
+    // Determine roughly what kind of element it is based on column
+    let block = "Transition Metal";
+    if (col === 1) block = "Alkali Metal";
+    else if (col === 2) block = "Alkaline Earth Metal";
+    else if (col === 17) block = "Halogen";
+    else if (col === 18) block = "Noble Gas";
+    else if (col >= 13 && col <= 16) block = "Post-Transition / Metalloid";
+    
+    // Edge cases for specific rows/elements
+    if(row >= 8) block = "Lanthanide / Actinide"; 
+    if(symbol === "H" || symbol === "C" || symbol === "N" || symbol === "O" || symbol === "P" || symbol === "S") block = "Reactive Nonmetal";
+
+    document.getElementById('modal-el-block').textContent = block;
+
+    let state = "Solid";
+    if (["H", "He", "N", "O", "F", "Ne", "Cl", "Ar", "Kr", "Xe", "Rn", "Og"].includes(symbol)) state = "Gas";
+    if (["Hg", "Br"].includes(symbol)) state = "Liquid";
+    document.getElementById('modal-el-state').textContent = state;
+
+    // 2. Procedurally Generate the 3D Atom Animation
+    const viewport = document.getElementById('atom-viewport');
+    viewport.innerHTML = '<div class="atom-nucleus"></div>';
+    
+    const numShells = parseInt(row) > 7 ? 7 : parseInt(row); // Max 7 standard shells
+    
+    for (let i = 1; i <= numShells; i++) {
+        // Calculate orbit size and speed
+        const size = 60 + (i * 35); // Base size + expanding rings
+        const duration = 12 - i; // Inner orbits spin faster, outer slower
+        
+        // Generate random 3D tilt vectors for chaos/beauty
+        const rx = (Math.random() * 2) - 1;
+        const ry = (Math.random() * 2) - 1;
+        const rz = (Math.random() * 2) - 1;
+
+        // Visual approximation of electrons per shell (cap visual rendering at 8 per ring so it isn't a mess)
+        let visualElectrons = i === 1 ? Math.min(atomicNum, 2) : 8;
+        if(atomicNum < 3 && i > 1) visualElectrons = 0; // Don't draw electrons if element is H/He and we are on shell 2+
+
+        let orbitHTML = `<div class="atom-orbit" style="width:${size}px; height:${size}px; --rx:${rx}; --ry:${ry}; --rz:${rz}; animation-duration:${duration}s;">`;
+        
+        // Distribute electrons evenly around the ring
+        for (let e = 0; e < visualElectrons; e++) {
+            const rot = (360 / visualElectrons) * e;
+            // The electron container counter-rotates or just sits on the perimeter
+            orbitHTML += `
+                <div style="position:absolute; top:50%; left:50%; width:100%; height:100%; transform:translate(-50%,-50%) rotate(${rot}deg);">
+                    <div class="atom-electron"></div>
+                </div>`;
+        }
+        orbitHTML += `</div>`;
+        viewport.innerHTML += orbitHTML;
+    }
+
+    // 3. Trigger Modal
+    const modal = document.getElementById('element-modal');
+    modal.style.display = 'flex';
+    // Small delay to allow CSS transitions to trigger
+    setTimeout(() => { modal.classList.add('show'); }, 10);
+}
+
+function closeElementModal(e) {
+    // If an event is passed, check if the user clicked outside the modal content
+    if(e && e.target !== e.currentTarget) return;
+    
+    const modal = document.getElementById('element-modal');
+    modal.classList.remove('show');
+    setTimeout(() => { modal.style.display = 'none'; }, 300); // Matches CSS transition duration
+}
+
+
+
+
+
+
+
+
+
+
+// ==========================================
+// 3D BIOLOGY ANATOMY LAB
+// ==========================================
+let bioScene, bioCamera, bioRenderer, bioGroup;
+let bioInitialized = false, isBioDragging = false;
+let prevBioMouse = { x: 0, y: 0 };
+let currentBioAnimSpeed = 1.0;
+let activeBioSystem = 'circulatory';
+let bioAnimatedMeshes = {}; // Stores meshes that need real-time updates
+
+const bioData = {
+    circulatory: { title: "Circulatory System", color: "#f43f5e", desc: "The body's primary transport network. The heart pumps oxygenated blood through arteries and returns deoxygenated blood through veins.", label: "Heart Rate", val: "72 BPM", min: 40, max: 180, default: 72 },
+    respiratory: { title: "Respiratory System", color: "#06b6d4", desc: "Facilitates gas exchange. The lungs expand to draw in oxygen (inhalation) and contract to expel carbon dioxide (exhalation).", label: "Breathing Rate", val: "16 Breaths/min", min: 8, max: 40, default: 16 },
+    nervous: { title: "Nervous System", color: "#a855f7", desc: "The control center. The brain processes sensory data and fires electrical impulses through a vast network of synapses.", label: "Synaptic Speed", val: "120 m/s", min: 10, max: 200, default: 120 },
+    skeletal: { title: "Skeletal System", color: "#e2e8f0", desc: "The structural framework. Bones protect organs, produce blood cells, and provide anchor points for muscular movement.", label: "Mineral Density", val: "Standard", min: 1, max: 10, default: 5 },
+    muscular: { title: "Muscular System", color: "#f97316", desc: "Contractile tissues responsible for kinetic motion, posture, and heat generation via ATP hydrolysis.", label: "Muscle Tension", val: "Resting", min: 1, max: 10, default: 2 },
+    digestive: { title: "Digestive System", color: "#10b981", desc: "Breaks down food via enzymes and muscular contractions (peristalsis) to extract essential cellular nutrients.", label: "Peristalsis Rate", val: "Normal", min: 1, max: 10, default: 3 }
+};
+
+function initBiologySandbox() {
+    if(bioInitialized) return;
+    bioInitialized = true;
+    
+    const container = document.getElementById('bio-canvas-container');
+    bioScene = new THREE.Scene(); 
+    bioScene.background = new THREE.Color(0x050810);
+    
+    bioCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+    bioCamera.position.z = 15;
+    
+    bioRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    bioRenderer.setSize(container.clientWidth, container.clientHeight);
+    bioRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(bioRenderer.domElement);
+    
+    // Lighting setup for biological forms
+    bioScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 15);
+    bioScene.add(dirLight);
+    const pointLight = new THREE.PointLight(0xffffff, 0.5);
+    pointLight.position.set(-5, -5, -5);
+    bioScene.add(pointLight);
+    
+    bioGroup = new THREE.Group();
+    bioScene.add(bioGroup);
+    
+    // Drag/Touch Interaction
+    const handleMove = (deltaX, deltaY) => {
+        bioGroup.rotation.y += deltaX * 0.01;
+        bioGroup.rotation.x += deltaY * 0.01;
+    };
+    
+    bioRenderer.domElement.addEventListener('mousedown', e => { isBioDragging = true; prevBioMouse = { x: e.offsetX, y: e.offsetY }; });
+    bioRenderer.domElement.addEventListener('mousemove', e => { if(isBioDragging) { handleMove(e.offsetX - prevBioMouse.x, e.offsetY - prevBioMouse.y); prevBioMouse = { x: e.offsetX, y: e.offsetY }; }});
+    bioRenderer.domElement.addEventListener('mouseup', () => isBioDragging = false);
+    bioRenderer.domElement.addEventListener('mouseleave', () => isBioDragging = false);
+    
+    bioRenderer.domElement.addEventListener('touchstart', e => { isBioDragging = true; prevBioMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }, {passive:true});
+    bioRenderer.domElement.addEventListener('touchmove', e => { if(isBioDragging) { handleMove(e.touches[0].clientX - prevBioMouse.x, e.touches[0].clientY - prevBioMouse.y); prevBioMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY }; } }, {passive:true});
+    bioRenderer.domElement.addEventListener('touchend', () => isBioDragging = false);
+    
+    window.addEventListener('resize', () => {
+        if(!document.getElementById('view-biology3d').classList.contains('active')) return;
+        bioCamera.aspect = container.clientWidth / (container.clientHeight || 350);
+        bioCamera.updateProjectionMatrix();
+        bioRenderer.setSize(container.clientWidth, container.clientHeight || 350);
+    });
+    
+    loadBioSystem('circulatory', document.querySelector('.bio-sys-btn.active'));
+    animateBiology();
+}
+
+function loadBioSystem(sysId, btnElement) {
+    activeBioSystem = sysId;
+    const data = bioData[sysId];
+    
+    // Update UI Elements
+    if(btnElement) {
+        document.querySelectorAll('.bio-sys-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+    }
+    
+    document.getElementById('bio-overlay-title').textContent = data.title;
+    document.getElementById('bio-overlay-title').style.color = data.color;
+    document.getElementById('bio-info-title').textContent = data.title;
+    document.getElementById('bio-info-title').style.color = data.color;
+    document.getElementById('bio-info-desc').textContent = data.desc;
+    
+    const slider = document.getElementById('bio-sim-slider');
+    slider.min = data.min; slider.max = data.max; slider.value = data.default;
+    slider.style.accentColor = data.color;
+    document.getElementById('bio-slider-label').innerHTML = `<span>${data.label}</span> <span id="bio-slider-val">${data.val}</span>`;
+    currentBioAnimSpeed = 1.0;
+    
+    // Clear old 3D objects cleanly
+    while(bioGroup.children.length > 0){ bioGroup.remove(bioGroup.children[0]); }
+    bioAnimatedMeshes = {};
+    bioGroup.rotation.set(0,0,0);
+    
+    // Procedural Geometry Generation based on system
+    const matOpts = { wireframe: true, transparent: true, opacity: 0.85 };
+    
+    if(sysId === 'circulatory') {
+        // Heart
+        const heartGeo = new THREE.SphereGeometry(2, 32, 32); heartGeo.scale(1, 1.2, 0.8);
+        const heartMat = new THREE.MeshPhongMaterial({ color: 0xf43f5e, ...matOpts, wireframe:false, shininess:100 });
+        const heart = new THREE.Mesh(heartGeo, heartMat);
+        bioGroup.add(heart);
+        bioAnimatedMeshes.core = heart;
+        
+        // Aorta curve
+        const curve = new THREE.CatmullRomCurve3([ new THREE.Vector3(0,1,0), new THREE.Vector3(1,3,-1), new THREE.Vector3(0,4,-2), new THREE.Vector3(-1,2,-1) ]);
+        const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.4, 8, false);
+        bioGroup.add(new THREE.Mesh(tubeGeo, new THREE.MeshPhongMaterial({color:0xff0000})));
+    } 
+    else if(sysId === 'respiratory') {
+        const lungGeo = new THREE.ConeGeometry(1.8, 4.5, 16); lungGeo.rotateZ(-0.2);
+        const lungMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, ...matOpts });
+        const leftLung = new THREE.Mesh(lungGeo, lungMat); leftLung.position.set(-1.8, 0, 0);
+        const rightLung = leftLung.clone(); rightLung.position.set(1.8, 0, 0); rightLung.rotation.z = 0.4;
+        bioGroup.add(leftLung, rightLung);
+        bioAnimatedMeshes.left = leftLung; bioAnimatedMeshes.right = rightLung;
+    }
+    else if(sysId === 'nervous') {
+        const brainGeo = new THREE.IcosahedronGeometry(2.2, 3);
+        const brainMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true });
+        bioAnimatedMeshes.core = new THREE.Mesh(brainGeo, brainMat);
+        bioGroup.add(bioAnimatedMeshes.core);
+    }
+    else if(sysId === 'skeletal') {
+        const boneMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 });
+        const spine = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 6, 12), boneMat);
+        bioGroup.add(spine);
+        bioAnimatedMeshes.ribs = [];
+        for(let i=0; i<6; i++) {
+            const rib = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.15, 8, 24), boneMat);
+            rib.position.y = i * 0.8 - 2; rib.rotation.x = Math.PI/2;
+            bioGroup.add(rib); bioAnimatedMeshes.ribs.push(rib);
+        }
+    }
+    else if(sysId === 'muscular') {
+        const fiberMat = new THREE.MeshStandardMaterial({ color: 0xf97316, wireframe:true });
+        const bundle = new THREE.Group();
+        for(let i=0; i<8; i++) {
+            const fiber = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 5, 8), fiberMat);
+            fiber.position.x = Math.sin(i * Math.PI/4) * 0.8;
+            fiber.position.z = Math.cos(i * Math.PI/4) * 0.8;
+            bundle.add(fiber);
+        }
+        bioGroup.add(bundle);
+        bioAnimatedMeshes.core = bundle;
+    }
+    else if(sysId === 'digestive') {
+        const track = [];
+        for (let i = 0; i < 50; i++) {
+            track.push(new THREE.Vector3(Math.sin(i*0.6)*1.5, 3-(i*0.12), Math.cos(i*0.6)*1.5));
+        }
+        const intestineGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(track), 64, 0.5, 8, false);
+        const intestine = new THREE.Mesh(intestineGeo, new THREE.MeshPhongMaterial({color: 0x10b981, ...matOpts}));
+        bioGroup.add(intestine);
+        bioAnimatedMeshes.core = intestine;
+    }
+}
+
+function updateBioSim(val) {
+    // Maps slider value to animation speed and updates UI text
+    const data = bioData[activeBioSystem];
+    currentBioAnimSpeed = val / data.default;
+    let unit = data.val.split(' ')[1] || '';
+    document.getElementById('bio-slider-val').textContent = `${val} ${unit}`;
+}
+
+function resetBioView() {
+    if(bioGroup) { bioGroup.rotation.set(0,0,0); }
+}
+
+function animateBiology() {
+    requestAnimationFrame(animateBiology);
+    if(document.getElementById('view-biology3d').classList.contains('active')) {
+        const time = Date.now() * 0.001 * currentBioAnimSpeed;
+        
+        // Auto-rotation if user isn't dragging
+        if(!isBioDragging) bioGroup.rotation.y += 0.003;
+        
+        // System-specific animations
+        if (activeBioSystem === 'circulatory' && bioAnimatedMeshes.core) {
+            const pulse = 1.0 + Math.sin(time * 6) * 0.1;
+            bioAnimatedMeshes.core.scale.set(pulse, pulse * 1.1, pulse * 0.9);
+        } 
+        else if (activeBioSystem === 'respiratory' && bioAnimatedMeshes.left) {
+            const breath = 1.0 + Math.sin(time * 3) * 0.12;
+            bioAnimatedMeshes.left.scale.set(breath, breath, breath);
+            bioAnimatedMeshes.right.scale.set(breath, breath, breath);
+        }
+        else if (activeBioSystem === 'nervous' && bioAnimatedMeshes.core) {
+            bioAnimatedMeshes.core.rotation.x = Math.sin(time) * 0.1;
+        }
+        else if (activeBioSystem === 'muscular' && bioAnimatedMeshes.core) {
+            const contract = 1.0 + Math.sin(time * 4) * 0.1;
+            bioAnimatedMeshes.core.scale.set(contract, 1/contract, contract); // Muscle flexes
+        }
+        else if (activeBioSystem === 'digestive' && bioAnimatedMeshes.core) {
+            bioAnimatedMeshes.core.rotation.z = Math.sin(time * 2) * 0.05; // Peristalsis wiggle
+        }
+        
+        bioRenderer.render(bioScene, bioCamera);
+    }
+}
