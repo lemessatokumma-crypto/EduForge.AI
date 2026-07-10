@@ -3425,7 +3425,7 @@ function handleContextualSearch(query) {
         });
     }
 }
-  // Futuristic Boot Sequence Logic
+        // Futuristic Boot Sequence Logic
         window.addEventListener('load', () => {
             const splash = document.getElementById('splash-screen');
             const bootText = document.getElementById('boot-text');
@@ -3433,16 +3433,27 @@ function handleContextualSearch(query) {
             
             if(!splash) return;
 
-            // Boot sequence stages
+            // CHECK: Is the user new?
+            // We look for a flag in localStorage. If it's missing, it's their first time.
+            const isReturningUser = localStorage.getItem('hasVisitedBefore');
+
+            if (!isReturningUser) {
+                // If it's a new user, hide the splash instantly so they see registration
+                splash.style.display = 'none';
+                // Set the flag so next time they visit, they see the cool animation
+                localStorage.setItem('hasVisitedBefore', 'true');
+                return;
+            }
+
+            // Boot sequence for returning users
             const stages = [
                 { time: 0, text: "Initializing AI Core...", fill: "10%" },
-                { time: 600, text: "Loading National Exam Data...", fill: "45%" },
-                { time: 1400, text: "Calibrating 3D Simulators...", fill: "75%" },
+                { time: 600, text: "Syncing User Profile...", fill: "45%" },
+                { time: 1400, text: "Loading Learning Modules...", fill: "75%" },
                 { time: 2200, text: "Establishing Secure Connection...", fill: "95%" },
                 { time: 2600, text: "System Ready.", fill: "100%" }
             ];
 
-            // Execute stages
             stages.forEach(stage => {
                 setTimeout(() => {
                     bootText.textContent = stage.text;
@@ -3450,9 +3461,9 @@ function handleContextualSearch(query) {
                 }, stage.time);
             });
 
-            // Fade out and remove
             setTimeout(() => {
                 splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 600); // Wait for CSS transition
+                setTimeout(() => splash.remove(), 600);
             }, 3000);
         });
+    
