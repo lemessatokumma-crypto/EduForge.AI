@@ -1,7 +1,47 @@
-  // ==========================================
+
+
+
+
+
+// ==========================================
+// FIREBASE SETUP
+// ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAaJgHV_2rvy7_Zz77rBvZBvziGKMKHBnc",
+  authDomain: "project-2103346420048829294.firebaseapp.com",
+  projectId: "project-2103346420048829294",
+  storageBucket: "project-2103346420048829294.firebasestorage.app",
+  messagingSenderId: "53960115907",
+  appId: "1:53960115907:web:215dea3620d43d46834476"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // ==========================================
         // CONSTANTS & CONFIG
         // ==========================================
-        const GROQ_API_KEY = "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";
+        const GROQ_API_KEY = "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";
 
         const CORE_SUBJECTS = {
             "Mathematics": ["Algebra", "Calculus", "Geometry", "Trigonometry", "Probability", "Statistics", "Vectors", "Matrices"],
@@ -31,7 +71,7 @@
         // ==========================================
         // FORMULA BANK WITH RICH METADATA
         // ==========================================
-       const M_FORMULA_BANK = [
+     const M_FORMULA_BANK = [
     // ==========================================
     // BIOLOGY
     // ==========================================
@@ -39,85 +79,91 @@
         subject: 'Biology', topic: 'Biochemistry', title: 'ATP Hydrolysis', 
         formula: 'ATP + H_2O \\rightarrow ADP + P_i + \\text{Energy}', desc: 'Cellular energy release.',
         symbols: { 'ATP': 'Adenosine Triphosphate', 'ADP': 'Adenosine Diphosphate', 'P_i': 'Inorganic Phosphate' }, 
-        example: { problem: 'What provides energy for cellular functions like muscle contraction?', solution: 'The energy released from ATP hydrolysis.' }
+        example: { problem: 'What is an example of ATP hydrolysis in the body?', solution: 'Energy from ATP hydrolysis powers muscle contraction.' }
     },
     { 
         subject: 'Biology', topic: 'Cellular Respiration', title: 'Respiration Equation', 
         formula: 'C_6H_{12}O_6 + 6O_2 \\rightarrow 6CO_2 + 6H_2O + ATP', desc: 'Overall aerobic respiration.',
         symbols: { 'C_6H_{12}O_6': 'Glucose', 'O_2': 'Oxygen', 'CO_2': 'Carbon Dioxide', 'H_2O': 'Water' }, 
-        example: { problem: 'How much energy is produced by breaking down 1 glucose molecule?', solution: 'Cells yield up to 38 ATP.' }
+        example: { problem: 'How much ATP is produced from one glucose molecule in cellular respiration?', solution: 'Cells break down 1 glucose molecule to yield up to 38 ATP.' }
     },
     { 
         subject: 'Biology', topic: 'Ecology', title: 'Logistic Growth', 
         formula: '\\frac{dN}{dt} = rN\\left(1-\\frac{N}{K}\\right)', desc: 'Population growth with carrying capacity.',
         symbols: { 'N': 'Population size', 'r': 'Intrinsic growth rate', 'K': 'Carrying capacity', 't': 'Time' }, 
-        example: { problem: 'What happens to the growth rate as a population N approaches its carrying capacity K?', solution: 'The growth rate (dN/dt) slows to 0.' }
+        example: { problem: 'What happens to the growth rate as a population approaches its carrying capacity?', solution: 'As a deer population N approaches K, growth dN/dt slows to 0.' }
     },
     { 
         subject: 'Biology', topic: 'Ecology', title: 'Population Growth', 
         formula: '\\frac{dN}{dt} = rN', desc: 'Exponential population growth.',
         symbols: { 'N': 'Population size', 'r': 'Growth rate', 't': 'Time' }, 
-        example: { problem: 'Describe the growth pattern of bacteria doubling every hour.', solution: 'They show exponential growth represented by rN.' }
+        example: { problem: 'What is a common example of exponential population growth?', solution: 'Bacteria doubling every hour show rN exponential growth.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Allele Frequencies', 
         formula: 'p + q = 1', desc: 'Sum of dominant and recessive alleles.',
         symbols: { 'p': 'Frequency of dominant allele', 'q': 'Frequency of recessive allele' }, 
-        example: { problem: 'If the frequency of the dominant allele p is 0.7, find the recessive allele frequency.', solution: 'q = 1 - 0.7 = 0.3' }
+        example: { problem: 'If the frequency of a dominant allele p is 0.7, what is the frequency of the recessive allele q?', solution: 'Since p + q = 1, the recessive allele q must be 0.3.' }
+    },
+    { 
+        subject: 'Biology', topic: 'Genetics', title: 'Allele Frequency', 
+        formula: 'p + q = 1', desc: 'Allele frequency equation.',
+        symbols: { 'p': 'Dominant allele', 'q': 'Recessive allele' }, 
+        example: { problem: 'How is baseline allele distribution checked?', solution: 'It is used to check baseline allele distribution in Hardy-Weinberg calculations.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Dihybrid Ratio', 
         formula: '9:3:3:1', desc: 'Phenotypic ratio in dihybrid cross.',
         symbols: { '9': 'Dom/Dom', '3': 'Dom/Rec', '1': 'Rec/Rec' }, 
-        example: { problem: 'What is the expected phenotypic outcome of crossing RrYy x RrYy?', solution: '9 round/yellow, 3 round/green, 3 wrinkled/yellow, 1 wrinkled/green.' }
+        example: { problem: 'What is the expected phenotypic ratio when crossing RrYy x RrYy?', solution: 'Crossing RrYy x RrYy yields 9 round/yellow, 3 round/green, 3 wrinkled/yellow, 1 wrinkled/green.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Hardy-Weinberg Frequency', 
         formula: 'p^2 + 2pq + q^2 = 1', desc: 'Genotype frequency equation.',
         symbols: { 'p^2': 'Homozygous dominant', '2pq': 'Heterozygous', 'q^2': 'Homozygous recessive' }, 
-        example: { problem: 'If the homozygous recessive frequency (q²) is 0.04 (4%), what is q?', solution: 'q = √0.04 = 0.2' }
+        example: { problem: 'If q^2 is 0.04 (4%), what is the recessive allele frequency q?', solution: 'If q^2 is 0.04, then taking the square root gives q = 0.2.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Hardy-Weinberg Principle', 
         formula: 'p^2 + 2pq + q^2 = 1', desc: 'Genotype frequencies in equilibrium.',
         symbols: { 'p': 'Dominant allele frequency', 'q': 'Recessive allele frequency' }, 
-        example: { problem: 'What does the Hardy-Weinberg equation calculate?', solution: 'It calculates expected genetic stability in a non-evolving population.' }
+        example: { problem: 'What does the Hardy-Weinberg principle calculate?', solution: 'It calculates expected genetic stability in a non-evolving population.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Monohybrid Genotypic Ratio', 
         formula: '1:2:1', desc: 'Genotypic ratio in monohybrid cross.',
         symbols: { '1': 'Homozygous dominant or recessive', '2': 'Heterozygous' }, 
-        example: { problem: 'What is the genotypic ratio of crossing Aa x Aa?', solution: '1 AA, 2 Aa, and 1 aa.' }
+        example: { problem: 'What is the genotypic ratio when crossing Aa x Aa?', solution: 'Crossing Aa x Aa gives 1 AA, 2 Aa, and 1 aa.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Monohybrid Ratio', 
         formula: '3:1', desc: 'Phenotypic ratio in monohybrid cross.',
         symbols: { '3': 'Dominant phenotype', '1': 'Recessive phenotype' }, 
-        example: { problem: 'What is the phenotypic outcome of crossing two heterozygous pea plants?', solution: '3 tall plants to 1 short plant.' }
+        example: { problem: 'What is the phenotypic ratio when crossing two heterozygous pea plants?', solution: 'Crossing two heterozygous pea plants yields 3 tall to 1 short.' }
     },
     { 
         subject: 'Biology', topic: 'Genetics', title: 'Recombination Frequency', 
         formula: '\\text{RF} = \\frac{\\text{Recombinants}}{\\text{Total Offspring}} \\times 100', desc: 'Genetic mapping formula.',
         symbols: { 'RF': 'Recombination Frequency' }, 
-        example: { problem: 'If there are 15 recombinants out of 100 offspring, what is the gene distance?', solution: 'RF = (15/100) * 100 = 15 map units.' }
+        example: { problem: 'If there are 15 recombinants out of 100 offspring, what is the genetic map distance?', solution: '15 recombinants out of 100 offspring means genes are 15 map units apart.' }
     },
     { 
         subject: 'Biology', topic: 'Microscopy', title: 'Magnification', 
         formula: '\\text{Magnification} = \\frac{\\text{Image Size}}{\\text{Actual Size}}', desc: 'Magnification formula.',
         symbols: { 'Image Size': 'Measured size', 'Actual Size': 'Real specimen size' }, 
-        example: { problem: 'An image measuring 10mm represents a 0.1mm cell. Find the magnification.', solution: 'Magnification = 10mm / 0.1mm = 100x.' }
+        example: { problem: 'What is the magnification if an image measuring 10mm represents a 0.1mm cell?', solution: 'An image measuring 10mm of a 0.1mm cell has 100x magnification.' }
     },
     { 
         subject: 'Biology', topic: 'Photosynthesis', title: 'Photosynthesis Equation', 
         formula: '6CO_2 + 6H_2O \\rightarrow C_6H_{12}O_6 + 6O_2', desc: 'Overall photosynthesis reaction.',
         symbols: { 'CO_2': 'Carbon Dioxide', 'H_2O': 'Water', 'C_6H_{12}O_6': 'Glucose' }, 
-        example: { problem: 'How many moles of glucose are produced from 6 moles of CO₂?', solution: 'Plants convert 6 moles of CO₂ into exactly 1 mole of glucose.' }
+        example: { problem: 'How many moles of carbon dioxide are needed to produce 1 mole of glucose?', solution: 'Plants convert 6 moles of CO2 into 1 mole of glucose.' }
     },
     { 
         subject: 'Biology', topic: 'Population Ecology', title: 'Population Density', 
         formula: '\\text{Density} = \\frac{\\text{Population}}{\\text{Area}}', desc: 'Population per unit area.',
         symbols: { 'Population': 'Total individuals', 'Area': 'Square units' }, 
-        example: { problem: 'Find the density of 500 oak trees in a 10 sq km forest.', solution: 'Density = 500 / 10 = 50 trees/sq km.' }
+        example: { problem: 'What is the population density of 500 oak trees in a 10 sq km forest?', solution: '500 oak trees in a 10 sq km forest is 50 trees/sq km.' }
     },
 
     // ==========================================
@@ -127,169 +173,169 @@
         subject: 'Chemistry', topic: 'Acid-Base', title: 'Henderson-Hasselbalch', 
         formula: 'pH = pK_a + \\log\\frac{[\\text{Base}]}{[\\text{Acid}]}', desc: 'pH of a buffer solution.',
         symbols: { 'pK_a': 'Acid dissociation constant', '[Base]': 'Conjugate base concentration', '[Acid]': 'Weak acid concentration' }, 
-        example: { problem: 'What is this formula primarily used for?', solution: 'It is used to find the pH of a buffer system, such as human blood.' }
+        example: { problem: 'What is a common application of the Henderson-Hasselbalch equation?', solution: 'It is used to find the pH of a blood buffer system.' }
     },
     { 
         subject: 'Chemistry', topic: 'Acid-Base', title: 'pH', 
         formula: 'pH = -\\log[H^+]', desc: 'Measure of hydrogen ion concentration (acidity).',
         symbols: { '[H^+]': 'Hydrogen ion concentration (M)' }, 
-        example: { problem: 'Find the pH if the [H⁺] is 1.0 x 10⁻³ M.', solution: 'pH = -log(1.0 x 10⁻³) = 3.' }
+        example: { problem: 'What is the pH if the hydrogen ion concentration [H+] is 1.0 x 10^-3 M?', solution: 'If [H+] is 1.0 x 10^-3 M, then pH = 3.' }
     },
     { 
         subject: 'Chemistry', topic: 'Acid-Base', title: 'pOH', 
         formula: 'pOH = -\\log[OH^-]', desc: 'Measure of hydroxide ion concentration (alkalinity).',
         symbols: { '[OH^-]': 'Hydroxide ion concentration (M)' }, 
-        example: { problem: 'Find the pOH if the [OH⁻] is 1.0 x 10⁻⁴ M.', solution: 'pOH = -log(1.0 x 10⁻⁴) = 4.' }
+        example: { problem: 'What is the pOH if the hydroxide ion concentration [OH-] is 1.0 x 10^-4 M?', solution: 'If [OH-] is 1.0 x 10^-4 M, then pOH = 4.' }
     },
     { 
         subject: 'Chemistry', topic: 'Acid-Base', title: 'pH and pOH Relation', 
         formula: 'pH + pOH = 14', desc: 'The constant sum of pH and pOH in aqueous solutions at 25°C.',
         symbols: { 'pH': 'Acidity scale', 'pOH': 'Basicity scale' }, 
-        example: { problem: 'If a solution has a pH of 5, what is its pOH?', solution: 'pOH = 14 - 5 = 9.' }
+        example: { problem: 'If the pH of an aqueous solution is 5, what is its pOH?', solution: 'If pH is 5, pOH must be 9.' }
     },
     { 
         subject: 'Chemistry', topic: 'Acid-Base', title: 'Water Autoionization Constant', 
         formula: 'K_w = [H^+][OH^-] = 1.0 \\times 10^{-14}', desc: 'Equilibrium constant for the autoionization of water at 25°C.',
         symbols: { 'K_w': 'Ion-product constant for water' }, 
-        example: { problem: 'What are the ion concentrations in pure water at 25°C?', solution: 'In pure water, [H⁺] and [OH⁻] are both 1.0 x 10⁻⁷ M.' }
+        example: { problem: 'What are the concentrations of [H+] and [OH-] in pure water at 25°C?', solution: 'In pure water, [H+] and [OH-] are both 1.0 x 10^-7 M.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Mass Number', 
         formula: 'A = Z + N', desc: 'Total number of protons (Z) and neutrons (N) in the atomic nucleus.',
         symbols: { 'A': 'Mass Number', 'Z': 'Protons (Atomic Number)', 'N': 'Neutrons' }, 
-        example: { problem: 'Carbon-14 has Z=6 and N=8. What is its mass number?', solution: 'A = 6 + 8 = 14.' }
+        example: { problem: 'What is the mass number of Carbon-14 given it has 6 protons and 8 neutrons?', solution: 'Carbon-14 has Z=6 and N=8, giving A=14.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Energy of Photon (Frequency)', 
         formula: 'E = hf', desc: 'Energy carried by a photon using frequency.',
         symbols: { 'E': 'Energy (J)', 'h': 'Planck\'s constant', 'f': 'Frequency (Hz)' }, 
-        example: { problem: 'Find the energy of a photon with frequency 5x10¹⁴ Hz.', solution: 'E = h * (5x10¹⁴ Hz).' }
+        example: { problem: 'What is the energy of a photon with a frequency of 5x10^14 Hz?', solution: 'A photon with frequency 5x10^14 Hz has energy E = h * 5x10^14.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Energy of Photon (Wavelength)', 
         formula: 'E = \\frac{hc}{\\lambda}', desc: 'Energy carried by a photon using wavelength.',
         symbols: { 'h': 'Planck\'s constant', 'c': 'Speed of light', 'λ': 'Wavelength (m)' }, 
-        example: { problem: 'Which has more energy: light with λ = 400 nm or λ = 700 nm?', solution: 'Light with λ = 400 nm has more energy because energy is inversely proportional to wavelength.' }
+        example: { problem: 'Which has more energy: light with a wavelength of 400 nm or 700 nm?', solution: 'Light with λ = 400 nm has more energy than λ = 700 nm because energy is inversely proportional to wavelength.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Planck Relation', 
         formula: 'c = f\\lambda', desc: 'Wave relationship between the speed of light, frequency, and wavelength.',
         symbols: { 'c': 'Speed of light', 'f': 'Frequency', 'λ': 'Wavelength' }, 
-        example: { problem: 'How are frequency and wavelength related for an electromagnetic wave in a vacuum?', solution: 'The product of frequency (f) and wavelength (λ) always equals the speed of light (c).' }
+        example: { problem: 'How do frequency and wavelength relate to the speed of light?', solution: 'For any electromagnetic wave in a vacuum, f times λ equals c.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Photoelectric Effect', 
         formula: 'KE_e = h\\nu - h\\nu_0', desc: 'Kinetic energy of an ejected electron after exceeding threshold frequency.',
         symbols: { 'KE_e': 'Kinetic energy of electron', 'h\\nu': 'Incident photon energy', 'h\\nu_0': 'Work function (binding energy)' }, 
-        example: { problem: 'What happens if incident photon energy exceeds the binding energy?', solution: 'An electron is ejected with kinetic energy equal to the difference.' }
+        example: { problem: 'What happens when incident photon energy exceeds the work function of a metal?', solution: 'If photon energy exceeds the work function, an electron is ejected with kinetic energy (KE).' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Bohr Hydrogen Orbit Energy', 
         formula: 'E_n = -R_H \\frac{1}{n^2}', desc: 'Quantized energy level of an electron in a hydrogen-like atom.',
         symbols: { 'E_n': 'Energy of level n', 'R_H': 'Rydberg energy constant', 'n': 'Principal quantum number' }, 
-        example: { problem: 'What does n=1 represent in this equation?', solution: 'For n=1, E₁ represents the lowest possible energy state, or ground state energy.' }
+        example: { problem: 'What does E_1 represent in the Bohr model?', solution: 'For n=1, E1 is the ground state energy.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Rydberg Energy Transition', 
         formula: '\\Delta E = R_H \\left(\\frac{1}{n_i^2} - \\frac{1}{n_f^2}\\right)', desc: 'Energy difference when an electron transitions between initial and final energy levels.',
         symbols: { 'n_i': 'Initial state', 'n_f': 'Final state', 'R_H': 'Rydberg constant' }, 
-        example: { problem: 'What is this formula used to calculate?', solution: 'The specific energy emitted or absorbed when a Hydrogen electron transitions between levels (e.g., n=3 to n=2).' }
+        example: { problem: 'How is the energy emitted during an electron transition calculated?', solution: 'Calculating energy emitted when an H electron falls from n=3 to n=2.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'Heisenberg Uncertainty Principle', 
         formula: '\\Delta x \\Delta p \\ge \\frac{h}{4\\pi}', desc: 'Fundamental limit on simultaneously measuring an electron\'s position and momentum.',
         symbols: { 'Δx': 'Uncertainty in position', 'Δp': 'Uncertainty in momentum', 'h': 'Planck\'s constant' }, 
-        example: { problem: 'Can you know an electron\'s exact location and speed simultaneously?', solution: 'No, minimizing uncertainty in position inherently maximizes uncertainty in momentum.' }
+        example: { problem: 'Can you precisely know an electron\'s location and speed at the same time?', solution: 'No, you cannot precisely know an electron\'s exact location and speed simultaneously.' }
     },
     { 
         subject: 'Chemistry', topic: 'Atomic Structure', title: 'De Broglie Wavelength', 
         formula: '\\lambda = \\frac{h}{mv}', desc: 'The wavelength associated with a particle of matter possessing mass and velocity.',
         symbols: { 'λ': 'Wavelength', 'h': 'Planck\'s constant', 'm': 'Mass', 'v': 'Velocity' }, 
-        example: { problem: 'Does an electron moving at 10⁶ m/s act as a wave?', solution: 'Yes, it has a specific, calculable de Broglie wavelength based on its mass and velocity.' }
+        example: { problem: 'Does an electron moving at 10^6 m/s have a wavelength?', solution: 'Yes, an electron moving at 10^6 m/s has a calculable de Broglie wavelength.' }
     },
     { 
         subject: 'Chemistry', topic: 'Bonding and Molecular Structure', title: 'Formal Charge', 
-        formula: '\\text{Formal Charge} = V - L - \\frac{1}{2}B', desc: 'Assigned charge computed from valence, lone pair, and bonding electrons.',
+        formula: '\\text{Formal Charge} = V - L - \\frac{1}{2}B', desc: 'The assigned charge of an atom computed as valence electrons (V) minus lone pair electrons (L) and half of bonding electrons (B).',
         symbols: { 'V': 'Valence electrons', 'L': 'Lone pair electrons', 'B': 'Bonding electrons' }, 
-        example: { problem: 'What is the formal charge of Oxygen in an ozone molecule?', solution: 'Depending on its structural position, Oxygen in ozone can have a +1, 0, or -1 formal charge.' }
+        example: { problem: 'What is the formal charge of Oxygen in an ozone molecule?', solution: 'Oxygen in ozone can have a +1 or -1 formal charge depending on its position.' }
     },
     { 
         subject: 'Chemistry', topic: 'Electrochemistry', title: 'Cell Potential', 
         formula: 'E^\\circ_{cell} = E^\\circ_{cathode} - E^\\circ_{anode}', desc: 'Standard electromotive force (EMF) of a galvanic cell.',
         symbols: { 'E°_cell': 'Standard cell potential', 'E°_cathode': 'Reduction potential at cathode', 'E°_anode': 'Reduction potential at anode' }, 
-        example: { problem: 'Find the standard potential for a Zn-Cu cell (E°_Cu = 0.34 V, E°_Zn = -0.76 V).', solution: 'E° = 0.34 V - (-0.76 V) = 1.10 V.' }
+        example: { problem: 'What is the standard cell potential for a Zn-Cu galvanic cell?', solution: 'For a Zn-Cu cell, E° = 0.34 V - (-0.76 V) = 1.10 V.' }
     },
     { 
         subject: 'Chemistry', topic: 'Electrochemistry', title: 'Faraday\'s Law', 
-        formula: 'm = \\frac{M}{nF}It', desc: 'Mass of a substance deposited or liberated during electrolysis.',
+        formula: 'm = ZIt = \\frac{M}{nF}It', desc: 'Mass of a substance deposited or liberated during electrolysis.',
         symbols: { 'm': 'Mass', 'I': 'Current', 't': 'Time', 'M': 'Molar mass', 'n': 'Moles of electrons', 'F': 'Faraday\'s constant' }, 
-        example: { problem: 'What does running 2 Amps for 1 hour through a CuSO₄ solution do?', solution: 'It deposits a specific calculated mass of solid copper at the cathode.' }
+        example: { problem: 'What is the effect of running 2 Amps of current for 1 hour during electrolysis?', solution: 'Running 2 Amps for 1 hour deposits a specific mass of copper.' }
     },
     { 
         subject: 'Chemistry', topic: 'Electrochemistry', title: 'Nernst Equation', 
         formula: 'E = E^\\circ - \\frac{0.0592}{n} \\log Q', desc: 'Cell potential calculation under non-standard concentrations at 298K.',
         symbols: { 'E': 'Cell potential', 'E°': 'Standard potential', 'n': 'Moles transferred', 'Q': 'Reaction quotient' }, 
-        example: { problem: 'What happens to the cell voltage as reactant concentrations drop over time?', solution: 'The Nernst equation adjusts the expected voltage E downward as Q increases.' }
+        example: { problem: 'What happens to cell voltage when reactant concentrations drop?', solution: 'The equation adjusts cell voltage downwards when reactant concentrations drop.' }
     },
     { 
         subject: 'Chemistry', topic: 'Equilibrium', title: 'Equilibrium Constant (Kc)', 
         formula: 'K_c = \\frac{[C]^c[D]^d}{[A]^a[B]^b}', desc: 'Ratio of products to reactants concentrations at equilibrium.',
         symbols: { '[A], [B]': 'Reactants', '[C], [D]': 'Products', 'a,b,c,d': 'Stoichiometric coefficients' }, 
-        example: { problem: 'What does a very large Kc value indicate?', solution: 'The reaction heavily favors the formation of products at equilibrium.' }
+        example: { problem: 'What does a large Kc value indicate about a chemical reaction?', solution: 'A large Kc means the reaction heavily favors products.' }
     },
     { 
         subject: 'Chemistry', topic: 'Equilibrium', title: 'Equilibrium Constant (Kp)', 
         formula: 'K_p = \\frac{P_C^c P_D^d}{P_A^a P_B^b}', desc: 'Equilibrium constant calculated using partial pressures of gaseous products and reactants.',
         symbols: { 'P': 'Partial pressure of respective gases' }, 
-        example: { problem: 'When is Kp used instead of Kc?', solution: 'It is exclusively used for gas-phase equilibrium reactions, like the Haber process.' }
+        example: { problem: 'When is the equilibrium constant Kp utilized?', solution: 'Used for gas-phase reactions like Haber process.' }
     },
     { 
         subject: 'Chemistry', topic: 'Equilibrium', title: 'Kp and Kc Relationship', 
         formula: 'K_p = K_c(RT)^{\\Delta n}', desc: 'Mathematical bridge converting between gas partial pressure and molar equilibrium constants.',
         symbols: { 'R': 'Ideal gas constant', 'T': 'Temperature (K)', 'Δn': 'Change in gas moles' }, 
-        example: { problem: 'If a reaction has no change in the number of gas moles (Δn = 0), how do Kp and Kc relate?', solution: 'Because (RT)⁰ = 1, Kp will equal Kc.' }
+        example: { problem: 'When does Kp equal Kc?', solution: 'If Δn = 0, Kp equals Kc.' }
     },
     { 
         subject: 'Chemistry', topic: 'Equilibrium', title: 'Reaction Quotient', 
         formula: 'Q_c = \\frac{[C]^c[D]^d}{[A]^a[B]^b}', desc: 'Concentration ratio evaluated at any given non-equilibrium moment to predict reaction shift.',
         symbols: { 'Q_c': 'Reaction quotient' }, 
-        example: { problem: 'If calculated Qc is less than Kc, which direction will the reaction shift?', solution: 'The reaction will shift to the right, toward the products, to reach equilibrium.' }
+        example: { problem: 'In which direction will a reaction shift if Qc < Kc?', solution: 'If Qc < Kc, the reaction will shift right toward products.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Boyle Law', 
         formula: 'P_1V_1 = P_2V_2', desc: 'Inverse relationship between pressure and volume at constant temperature.',
         symbols: { 'P': 'Pressure', 'V': 'Volume' }, 
-        example: { problem: 'What happens to the internal pressure if you halve the volume of a gas syringe?', solution: 'The internal pressure strictly doubles.' }
+        example: { problem: 'What happens to the internal pressure if the volume of a gas syringe is halved at a constant temperature?', solution: 'Halving the volume of a gas syringe doubles the internal pressure.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Charles Law', 
         formula: '\\frac{V_1}{T_1} = \\frac{V_2}{T_2}', desc: 'Direct proportional relationship between volume and absolute temperature at constant pressure.',
         symbols: { 'V': 'Volume', 'T': 'Temperature in Kelvin' }, 
-        example: { problem: 'What happens to the volume of a balloon when it is heated?', solution: 'Its volume expands proportionally to the absolute temperature.' }
+        example: { problem: 'What happens to the volume of a balloon when it is heated at constant pressure?', solution: 'Heating a balloon causes its volume to expand.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Gay-Lussac Law', 
         formula: '\\frac{P_1}{T_1} = \\frac{P_2}{T_2}', desc: 'Direct proportional relationship between pressure and absolute temperature at constant volume.',
         symbols: { 'P': 'Pressure', 'T': 'Temperature in Kelvin' }, 
-        example: { problem: 'What happens if you rapidly heat a sealed, rigid gas canister?', solution: 'Its internal pressure increases.' }
+        example: { problem: 'What happens when a rigid gas canister is heated?', solution: 'Heating a rigid gas canister increases its internal pressure.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Avogadro Law', 
         formula: '\\frac{V_1}{n_1} = \\frac{V_2}{n_2}', desc: 'Direct relationship between gas volume and number of moles at uniform temperature and pressure.',
         symbols: { 'V': 'Volume', 'n': 'Number of moles' }, 
-        example: { problem: 'If pressure and temperature are constant, what happens if you double the amount of gas moles?', solution: 'The volume exactly doubles.' }
+        example: { problem: 'What happens to gas volume if you double the number of moles at constant pressure and temperature?', solution: 'Doubling the amount of gas moles doubles the volume if P and T are constant.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Ideal Gas Law', 
         formula: 'PV = nRT', desc: 'The universal equation of state linking pressure, volume, moles, and temperature.',
         symbols: { 'P': 'Pressure', 'V': 'Volume', 'n': 'Moles', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
-        example: { problem: 'Calculate the volume of 1 mole of an ideal gas at STP (0°C and 1 atm).', solution: 'V = (1 * 0.0821 * 273.15) / 1 = 22.4 Liters.' }
+        example: { problem: 'What is the volume of 1 mole of an ideal gas at STP?', solution: 'Calculate volume of 1 mole of gas at STP (22.4 L).' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Combined Gas Law', 
         formula: '\\frac{P_1V_1}{T_1} = \\frac{P_2V_2}{T_2}', desc: 'Unified formula tracking changes when pressure, volume, and temperature vary simultaneously.',
         symbols: { 'P': 'Pressure', 'V': 'Volume', 'T': 'Temperature' }, 
-        example: { problem: 'What is this law used to predict?', solution: 'The new volume of a gas if it rises in altitude where both pressure and temperature drop.' }
+        example: { problem: 'How do you predict the new volume of a gas as it rises in altitude?', solution: 'It predicts new volume if a gas rises in altitude (changing P and T).' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Density of Gas', 
@@ -307,133 +353,133 @@
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Graham Law of Diffusion', 
         formula: '\\frac{r_1}{r_2} = \\sqrt{\\frac{M_2}{M_1}}', desc: 'Inversely proportional relationship between the gas effusion/diffusion rate and the square root of its molar mass.',
         symbols: { 'r': 'Rate of effusion', 'M': 'Molar mass' }, 
-        example: { problem: 'Which effuses faster, Helium (M=4) or Argon (M=40)?', solution: 'Helium effuses significantly faster due to its lower molar mass.' }
+        example: { problem: 'Which gas effuses faster: Helium (M=4) or Argon (M=40)?', solution: 'Helium (M=4) effuses faster than Argon (M=40).' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'Root-Mean-Square Speed', 
         formula: 'v_{\\text{rms}} = \\sqrt{\\frac{3RT}{M}}', desc: 'The average molecular velocity of ideal gas particles.',
         symbols: { 'v_{rms}': 'RMS speed', 'R': '8.314 J/(mol K)', 'T': 'Temperature', 'M': 'Molar mass in kg/mol' }, 
-        example: { problem: 'How fast do oxygen molecules move at room temperature?', solution: 'They move at approximately 500 m/s.' }
+        example: { problem: 'What is the approximate RMS speed of oxygen molecules at room temperature?', solution: 'Oxygen molecules move at ~500 m/s at room temperature.' }
     },
     { 
         subject: 'Chemistry', topic: 'Gas Laws', title: 'van der Waals Equation', 
         formula: '\\left(P + \\frac{an^2}{V^2}\\right)(V - nb) = nRT', desc: 'Modified ideal gas law adjusted for real gas particles\' finite volume and intermolecular forces.',
         symbols: { 'a': 'Intermolecular attraction factor', 'b': 'Volume correction factor' }, 
-        example: { problem: 'When is the Ideal Gas Law no longer sufficient, requiring van der Waals?', solution: 'When modeling real gases under extremely high pressure or low temperature conditions.' }
+        example: { problem: 'When is the van der Waals equation necessary?', solution: 'Used for gases under extremely high pressure or low temperature.' }
     },
     { 
         subject: 'Chemistry', topic: 'Kinetics', title: 'Arrhenius Equation', 
         formula: 'k = A e^{-E_a/RT}', desc: 'Expresses the mathematical dependence of reaction rate constants on absolute temperature and activation energy.',
         symbols: { 'k': 'Rate constant', 'A': 'Pre-exponential factor', 'E_a': 'Activation Energy', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
-        example: { problem: 'Why does heating a reaction dramatically increase its rate?', solution: 'Because the rate constant k grows exponentially as temperature T increases.' }
+        example: { problem: 'Why does heating a reaction dramatically increase its rate?', solution: 'Shows why heating a reaction dramatically increases its rate due to the exponential relationship.' }
     },
     { 
         subject: 'Chemistry', topic: 'Kinetics', title: 'Rate Law', 
         formula: '\\text{Rate} = k[A]^m[B]^n', desc: 'General rate equation expressing empirical dependency on reactant concentrations.',
         symbols: { 'k': 'Rate constant', '[A], [B]': 'Reactant concentrations', 'm, n': 'Reaction orders' }, 
-        example: { problem: 'If exponent m=1 and n=1, what is the overall order of the reaction?', solution: 'It is a second-order reaction overall (1 + 1 = 2).' }
+        example: { problem: 'What is the overall order of a reaction if the reaction orders with respect to reactants are m=1 and n=1?', solution: 'If m=1 and n=1, the reaction is second order overall.' }
     },
     { 
         subject: 'Chemistry', topic: 'Kinetics', title: 'Reaction Rate Definition', 
         formula: '\\text{Rate} = \\frac{\\Delta[\\text{substance}]}{\\Delta t}', desc: 'The primary kinetic parameter defining structural concentration change over a fixed time index.',
         symbols: { 'Δ[substance]': 'Change in concentration', 'Δt': 'Change in time' }, 
-        example: { problem: 'How is the reaction rate physically measured?', solution: 'By measuring how fast a reactant disappears or a product appears in M/s.' }
+        example: { problem: 'How is a reaction rate practically measured?', solution: 'Measuring how fast a reactant disappears in M/s.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Dilution', 
         formula: 'M_1 V_1 = M_2 V_2', desc: 'Conservation of moles principle utilized when diluting a concentrated solution.',
         symbols: { 'M': 'Molarity', 'V': 'Volume' }, 
-        example: { problem: 'How much total volume is needed to dilute 10mL of 12M HCl to a 1M solution?', solution: '12 * 10 = 1 * V2, so V2 = 120mL total.' }
+        example: { problem: 'How do you dilute 10mL of 12M HCl to a 1M solution?', solution: 'Diluting 10mL of 12M HCl to 1M requires adding solvent up to 120mL.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Mass Percent', 
         formula: '\\%m = \\frac{m_{solute}}{m_{solution}} \\times 100', desc: 'Concentration expressed via solute mass over overall sample mass percentage.',
         symbols: { 'm_{solute}': 'Mass of solute', 'm_{solution}': 'Total mass of solution' }, 
-        example: { problem: 'Find the mass percent of 5g of NaCl dissolved in 95g of water.', solution: '%m = (5 / 100) * 100 = 5% mass solution.' }
+        example: { problem: 'What is the mass percent of 5g of NaCl dissolved in 95g of water?', solution: '5g of NaCl in 95g water gives a 5% mass solution.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Molarity', 
         formula: 'M = \\frac{n_{solute}}{V_{solution (L)}}', desc: 'Molar concentration expressing moles of solute packed per liter of net solution.',
         symbols: { 'n_{solute}': 'Moles of solute', 'V': 'Volume in Liters' }, 
-        example: { problem: 'Find the molarity if 2 moles of solute are dissolved in 0.5 L of solution.', solution: 'M = 2 / 0.5 = 4 Molar.' }
+        example: { problem: 'What is the molarity of 2 moles of solute dissolved in 0.5 L of solution?', solution: '2 moles in 0.5 L gives a 4 Molar solution.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Molality', 
         formula: 'm = \\frac{n_{solute}}{m_{solvent (kg)}}', desc: 'Concentration measuring solute moles dissolved per kilogram of solvent mass.',
         symbols: { 'n_{solute}': 'Moles of solute', 'm_{solvent}': 'Mass of solvent in kg' }, 
-        example: { problem: 'When is molality heavily utilized instead of molarity?', solution: 'It is strictly used for colligative property calculations like boiling point elevation.' }
+        example: { problem: 'Why is molality used instead of molarity in certain calculations?', solution: 'Important for calculating boiling point elevation because it doesn\'t change with temperature.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Mole Fraction', 
         formula: 'X_A = \\frac{n_A}{n_{total}}', desc: 'The dimensionless ratio of moles of a single component against total solution components.',
         symbols: { 'n_A': 'Moles of component A', 'n_{total}': 'Total moles in mixture' }, 
-        example: { problem: 'What is the sum of all mole fractions in any chemical mixture?', solution: 'The sum always equals exactly 1.' }
+        example: { problem: 'What is the sum of all mole fractions in a mixture?', solution: 'Sum of all mole fractions in a mixture equals 1.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Henry\'s Law', 
         formula: 'C = k P_{\\text{gas}}', desc: 'Relates the equilibrium dissolved solubility of a gas to its external gas phase partial pressure.',
         symbols: { 'C': 'Solubility of gas', 'k': 'Henry\'s constant', 'P_{gas}': 'Partial pressure' }, 
-        example: { problem: 'Why does soda fizz intensely when you open the cap?', solution: 'The internal pressure drops, drastically decreasing the CO₂ solubility.' }
+        example: { problem: 'Why does soda fizz when you open the cap?', solution: 'Explains why soda fizzes when you open the cap (pressure drops).' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Boiling Point Elevation', 
         formula: '\\Delta T_b = i K_b m', desc: 'Colligative increase in a solution\'s boiling threshold scaled via molality and the van \'t Hoff factor.',
         symbols: { 'ΔT_b': 'Boiling point increase', 'i': 'van \'t Hoff factor', 'K_b': 'Ebullioscopic constant', 'm': 'Molality' }, 
-        example: { problem: 'What happens to the boiling point of water when you dissolve salt (i=2) into it?', solution: 'The boiling point proportionally increases above 100°C.' }
+        example: { problem: 'What happens to the boiling point of water when you add salt (NaCl)?', solution: 'Adding salt (i=2) to water increases its boiling point.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Freezing Point Depression', 
         formula: '\\Delta T_f = i K_f m', desc: 'Colligative drop in freezing temperature threshold scaled via molality and the van \'t Hoff factor.',
         symbols: { 'ΔT_f': 'Freezing point decrease', 'i': 'van \'t Hoff factor', 'K_f': 'Cryoscopic constant', 'm': 'Molality' }, 
-        example: { problem: 'Why is salt poured on icy roads in the winter?', solution: 'It depresses the freezing point of water, preventing ice formation at 0°C.' }
+        example: { problem: 'Why do we salt roads in the winter?', solution: 'Salting roads drops the freezing point of water to prevent ice.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Osmotic Pressure', 
         formula: '\\Pi = iMRT', desc: 'The specific external hydrostatic force vector required to completely halt colligative osmosis.',
         symbols: { 'Π': 'Osmotic pressure', 'i': 'van \'t Hoff factor', 'M': 'Molarity', 'R': 'Gas Constant', 'T': 'Temperature (K)' }, 
-        example: { problem: 'What does this equation calculate for water filtration systems?', solution: 'The exact reverse pressure needed to perform reverse osmosis.' }
+        example: { problem: 'What is osmotic pressure used to calculate in water purification?', solution: 'Calculates pressure needed for reverse osmosis.' }
     },
     { 
         subject: 'Chemistry', topic: 'Solutions', title: 'Raoult\'s Law', 
         formula: 'P_A = X_A P_A^\\circ', desc: 'Defines the lowered vapor pressure profiles belonging to an ideal liquid component solution.',
         symbols: { 'P_A': 'Partial vapor pressure', 'X_A': 'Mole fraction', 'P_A°': 'Pure vapor pressure' }, 
-        example: { problem: 'What happens to a pure solvent when you dissolve a non-volatile solute in it?', solution: 'The solvent\'s partial vapor pressure is directly lowered.' }
+        example: { problem: 'How does dissolving a non-volatile solute affect a solvent?', solution: 'Dissolving a non-volatile solute lowers the solvent\'s vapor pressure.' }
     },
     { 
         subject: 'Chemistry', topic: 'Stoichiometry', title: 'Number of Moles', 
         formula: 'n = \\frac{m}{M}', desc: 'Fundamental conversion solving for moles from net operational mass.',
         symbols: { 'n': 'Moles', 'm': 'Mass (g)', 'M': 'Molar mass (g/mol)' }, 
-        example: { problem: 'How many moles are in 18g of pure water (M=18g/mol)?', solution: 'n = 18 / 18 = exactly 1 mole.' }
+        example: { problem: 'How many moles are in 18g of water?', solution: '18g of water (M=18g/mol) is exactly 1 mole.' }
     },
     { 
         subject: 'Chemistry', topic: 'Stoichiometry', title: 'Particles Count', 
         formula: 'N = nN_A', desc: 'Converts chemical moles into individual count units via Avogadro\'s number.',
         symbols: { 'N': 'Number of particles', 'n': 'Moles', 'N_A': 'Avogadro\'s number (6.022x10^23)' }, 
-        example: { problem: 'How many individual carbon atoms are in 2 moles of carbon?', solution: 'N = 2 * 6.022x10²³ = 1.2x10²⁴ carbon atoms.' }
+        example: { problem: 'How many carbon atoms are in 2 moles of carbon?', solution: '2 moles of carbon contain 1.2x10^24 carbon atoms.' }
     },
     { 
         subject: 'Chemistry', topic: 'Stoichiometry', title: 'Percentage Yield', 
         formula: '\\%\\text{Yield} = \\frac{\\text{Actual}}{\\text{Theoretical}} \\times 100', desc: 'Measures structural chemical performance efficiency ratios.',
         symbols: { 'Actual': 'Experimental mass recovered', 'Theoretical': 'Stoichiometrically calculated mass' }, 
-        example: { problem: 'If you recover 8g in an experiment where 10g was theoretically expected, what is your yield?', solution: '%Yield = (8 / 10) * 100 = 80%.' }
+        example: { problem: 'What is the percentage yield if you recover 8g when 10g was expected?', solution: 'Recovering 8g when 10g was expected gives an 80% yield.' }
     },
     { 
         subject: 'Chemistry', topic: 'Thermochemistry', title: 'Heat Change', 
         formula: 'q = mc\\Delta T', desc: 'Thermal energy transferred derived from mass, specific heat, and temperature change.',
         symbols: { 'q': 'Heat energy', 'm': 'Mass', 'c': 'Specific heat capacity', 'ΔT': 'Change in temperature' }, 
-        example: { problem: 'Calculate the thermal energy required to heat 100g of water (c=4.18) by 20°C.', solution: 'q = 100 * 4.18 * 20 = 8360 J.' }
+        example: { problem: 'How do you calculate the energy required to heat 100g of water by 20°C?', solution: 'Calculate energy to heat 100g of water by 20°C using q = mcΔT.' }
     },
     { 
         subject: 'Chemistry', topic: 'Thermodynamics', title: 'Gibbs Free Energy', 
         formula: '\\Delta G = \\Delta H - T\\Delta S', desc: 'Fundamental criterion evaluating chemical reaction spontaneity at constant temperature and pressure.',
         symbols: { 'ΔG': 'Gibbs free energy change', 'ΔH': 'Enthalpy change', 'T': 'Temperature (K)', 'ΔS': 'Entropy change' }, 
-        example: { problem: 'How do you determine if a chemical reaction is thermodynamically spontaneous?', solution: 'The reaction is spontaneous strictly if ΔG calculates as negative.' }
+        example: { problem: 'How do you know if a chemical reaction is spontaneous?', solution: 'If ΔG is negative, the reaction is spontaneous.' }
     },
     { 
         subject: 'Chemistry', topic: 'Nuclear Chemistry', title: 'Radioactive Decay', 
         formula: 'N = N_0e^{-\\lambda t}', desc: 'First-order kinetic decay tracing remaining nuclear mass quantities across time intervals.',
         symbols: { 'N': 'Amount remaining', 'N_0': 'Initial amount', 'λ': 'Decay constant', 't': 'Time' }, 
-        example: { problem: 'What does this function model in archaeology?', solution: 'Predicting how much Carbon-14 remains in an excavated fossil over time.' }
+        example: { problem: 'How can we determine the age of a fossil?', solution: 'Predicting how much Carbon-14 remains in a fossil.' }
     },
 
     // ==========================================
@@ -443,127 +489,127 @@
         subject: 'Mathematics', topic: 'Absolute Value', title: 'Absolute Value Definition', 
         formula: '|x| = \\begin{cases} x & \\text{if } x \\ge 0 \\\\ -x & \\text{if } x < 0 \\end{cases}', desc: 'Piecewise definition of the absolute value function.',
         symbols: { 'x': 'Real number' }, 
-        example: { problem: 'Find the absolute value of -5.', solution: '|-5| = -(-5) = 5.' }
+        example: { problem: 'What is the absolute value of -5?', solution: '|-5| = -(-5) = 5.' }
     },
     { 
         subject: 'Mathematics', topic: 'Algebra', title: 'Quadratic Formula', 
         formula: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}', desc: 'Roots of ax^2 + bx + c = 0.',
         symbols: { 'a,b,c': 'Coefficients', 'b^2-4ac': 'Discriminant' }, 
-        example: { problem: 'Find the roots of x² - 5x + 6 = 0.', solution: 'The roots are calculated as x = 2 and x = 3.' }
+        example: { problem: 'What are the roots of the equation x^2 - 5x + 6 = 0?', solution: 'For x^2 - 5x + 6 = 0, roots are 2 and 3.' }
     },
     { 
         subject: 'Mathematics', topic: 'Algebra', title: 'Difference of Squares', 
         formula: 'a^2-b^2 = (a-b)(a+b)', desc: 'Factorization identity.',
         symbols: { 'a, b': 'Algebraic terms' }, 
-        example: { problem: 'Factor the polynomial x² - 9.', solution: 'It perfectly factors into (x-3)(x+3).' }
+        example: { problem: 'How do you factor the expression x^2 - 9?', solution: 'x^2 - 9 factors into (x-3)(x+3).' }
     },
     { 
         subject: 'Mathematics', topic: 'Algebra', title: 'Perfect Square', 
         formula: '(a+b)^2 = a^2+2ab+b^2', desc: 'Expansion identity.',
         symbols: { 'a, b': 'Algebraic terms' }, 
-        example: { problem: 'Expand the binomial square (x+3)²', solution: 'It expands to x² + 6x + 9.' }
+        example: { problem: 'How do you expand the expression (x+3)^2?', solution: '(x+3)^2 expands to x^2 + 6x + 9.' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Power Rule', 
         formula: '\\frac{d}{dx}(x^n) = nx^{n-1}', desc: 'Derivative of a power.',
         symbols: { 'n': 'Real number exponent', 'x': 'Variable' }, 
-        example: { problem: 'If f(x) = x³, find the derivative f\'(x).', solution: 'f\'(x) = 3x².' }
+        example: { problem: 'What is the derivative of f(x) = x^3?', solution: 'If f(x) = x^3, then f\'(x) = 3x^2.' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Product Rule', 
         formula: '(uv)\' = u\'v + uv\'', desc: 'Derivative of a product.',
         symbols: { 'u, v': 'Differentiable functions of x' }, 
-        example: { problem: 'Find the derivative d/dx(x * sin(x)).', solution: 'sin(x) + x * cos(x).' }
+        example: { problem: 'What is the derivative of x * sin(x)?', solution: 'd/dx(x * sin x) = sin x + x * cos x.' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Quotient Rule', 
         formula: '\\left(\\frac{u}{v}\\right)\' = \\frac{u\'v - uv\'}{v^2}', desc: 'Derivative of a quotient.',
         symbols: { 'u': 'Numerator function', 'v': 'Denominator function' }, 
-        example: { problem: 'When is this rule applied in trigonometry?', solution: 'When finding the derivative of quotients like tan(x) = sin(x)/cos(x).' }
+        example: { problem: 'How do you find the derivative of tan(x)?', solution: 'Apply when finding derivative of tan(x) = sin(x)/cos(x).' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Chain Rule', 
         formula: '\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}', desc: 'Derivative of composite function.',
         symbols: { 'y': 'Outer function', 'u': 'Inner function' }, 
-        example: { problem: 'Find the derivative d/dx(sin(x²)).', solution: 'cos(x²) * 2x.' }
+        example: { problem: 'What is the derivative of sin(x^2)?', solution: 'd/dx(sin(x^2)) = cos(x^2) * 2x.' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Basic Integration', 
         formula: '\\int x^n dx = \\frac{x^{n+1}}{n+1} + C', desc: 'Power integration rule.',
         symbols: { 'n': 'Exponent (cannot be -1)', 'C': 'Constant of integration' }, 
-        example: { problem: 'Evaluate the indefinite integral ∫ x² dx.', solution: '(x³)/3 + C.' }
+        example: { problem: 'What is the integral of x^2 dx?', solution: '∫ x^2 dx = (x^3)/3 + C.' }
     },
     { 
         subject: 'Mathematics', topic: 'Calculus', title: 'Integration by Parts', 
         formula: '\\int u \\, dv = uv - \\int v \\, du', desc: 'Product rule for integrals.',
         symbols: { 'u': 'Function to differentiate', 'dv': 'Function to integrate' }, 
-        example: { problem: 'What is this integration technique primarily used for?', solution: 'Integrating products of complex functions, like ∫ x * e^x dx.' }
+        example: { problem: 'How do you integrate x * e^x dx?', solution: 'Used for ∫ x * e^x dx.' }
     },
     { 
         subject: 'Mathematics', topic: 'Coordinate Geometry', title: 'Distance Formula', 
         formula: 'd = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}', desc: 'Distance between two points.',
         symbols: { '(x_1, y_1)': 'Point 1', '(x_2, y_2)': 'Point 2' }, 
-        example: { problem: 'Find the precise distance between coordinates (0,0) and (3,4).', solution: 'd = √(3² + 4²) = 5.' }
+        example: { problem: 'What is the distance between the points (0,0) and (3,4)?', solution: 'Distance between (0,0) and (3,4) is 5.' }
     },
     { 
         subject: 'Mathematics', topic: 'Coordinate Geometry', title: 'Midpoint Formula', 
         formula: 'M\\left(\\frac{x_1+x_2}{2}, \\frac{y_1+y_2}{2}\\right)', desc: 'Coordinates of midpoint of a line segment.',
         symbols: { '(x_1, y_1)': 'Point 1', '(x_2, y_2)': 'Point 2' }, 
-        example: { problem: 'Find the midpoint connecting (0,0) and (4,6).', solution: 'M(2, 3).' }
+        example: { problem: 'What is the midpoint of the line segment connecting (0,0) and (4,6)?', solution: 'Midpoint of (0,0) and (4,6) is (2,3).' }
     },
     { 
         subject: 'Mathematics', topic: 'Geometry and Measurement', title: 'Pythagorean Theorem', 
         formula: 'a^2 + b^2 = c^2', desc: 'Relationship between sides of a right triangle.',
         symbols: { 'a,b': 'Legs of triangle', 'c': 'Hypotenuse' }, 
-        example: { problem: 'If the legs of a right triangle are 3 and 4, find the hypotenuse.', solution: 'c = √(3² + 4²) = 5.' }
+        example: { problem: 'What is the hypotenuse of a right triangle with legs of length 3 and 4?', solution: 'Legs 3 and 4 give hypotenuse 5.' }
     },
     { 
         subject: 'Mathematics', topic: 'Trigonometry', title: 'Sine Rule', 
         formula: '\\frac{a}{\\sin(A)} = \\frac{b}{\\sin(B)} = \\frac{c}{\\sin(C)}', desc: 'Relates the sides of a triangle to the sines of its angles.',
         symbols: { 'a,b,c': 'Side lengths', 'A,B,C': 'Opposite angles' }, 
-        example: { problem: 'Under what conditions is this rule applied?', solution: 'When exactly 2 angles and 1 side of an oblique triangle are known.' }
+        example: { problem: 'When is the sine rule typically used?', solution: 'Use when 2 angles and 1 side are known.' }
     },
     { 
         subject: 'Mathematics', topic: 'Trigonometry', title: 'Cosine Rule', 
         formula: 'c^2 = a^2 + b^2 - 2ab\\cos(C)', desc: 'Generalization of Pythagoras’ theorem for any triangle.',
         symbols: { 'C': 'Angle opposite to side c' }, 
-        example: { problem: 'When is this rule used in trigonometry?', solution: 'To find the third side when 2 sides and the enclosed angle are provided.' }
+        example: { problem: 'When do you apply the cosine rule?', solution: 'Find third side when 2 sides and enclosed angle are known.' }
     },
     { 
         subject: 'Mathematics', topic: 'Trigonometric Identities', title: 'Pythagorean Identity (Sine/Cos)', 
         formula: '\\sin^2(\\theta) + \\cos^2(\\theta) = 1', desc: 'The primary Pythagorean identity for sine and cosine.',
         symbols: { 'θ': 'Any angle' }, 
-        example: { problem: 'If sin(θ) = 0.6 in Quadrant 1, find cos(θ).', solution: 'cos(θ) = √(1 - 0.6²) = 0.8.' }
+        example: { problem: 'If sin(θ) = 0.6 in quadrant I, what is cos(θ)?', solution: 'If sin θ = 0.6, then cos θ = 0.8 (in Q1).' }
     },
     { 
         subject: 'Mathematics', topic: 'Straight Lines', title: 'Slope-Intercept Form', 
         formula: 'y = mx + b', desc: 'Equation of a line given its slope m and y-intercept b.',
         symbols: { 'm': 'Slope', 'b': 'y-intercept' }, 
-        example: { problem: 'Find the equation of a line with slope 2 passing through the point (0, 3).', solution: 'y = 2x + 3.' }
+        example: { problem: 'What is the equation of a line with slope 2 passing through the y-intercept (0, 3)?', solution: 'Line with slope 2 passing through (0, 3) is y = 2x + 3.' }
     },
     { 
         subject: 'Mathematics', topic: 'Logarithms', title: 'Product Rule for Logarithms', 
         formula: '\\log_b(xy) = \\log_b(x) + \\log_b(y)', desc: 'The logarithm of a product is the sum of the logarithms.',
         symbols: { 'b': 'Base', 'x, y': 'Arguments' }, 
-        example: { problem: 'Expand log(20) using this rule.', solution: 'log(4 * 5) = log(4) + log(5).' }
+        example: { problem: 'How can log(20) be expanded?', solution: 'log(20) = log(4) + log(5).' }
     },
     { 
         subject: 'Mathematics', topic: 'Logarithms', title: 'Change of Base Formula', 
         formula: '\\log_b(x) = \\frac{\\log_c(x)}{\\log_c(b)}', desc: 'Allows converting logarithms from one base to another.',
         symbols: { 'b': 'Old base', 'c': 'New base', 'x': 'Argument' }, 
-        example: { problem: 'Convert log₂(8) into natural logarithms.', solution: 'ln(8) / ln(2).' }
+        example: { problem: 'How do you calculate log_2(8) using natural logarithms?', solution: 'log_2(8) = ln(8) / ln(2).' }
     },
     { 
         subject: 'Mathematics', topic: 'Statistics', title: 'Mean', 
         formula: '\\bar{x} = \\frac{\\sum x}{n}', desc: 'Arithmetic mean.',
         symbols: { 'Σx': 'Sum of all values', 'n': 'Number of values' }, 
-        example: { problem: 'Calculate the arithmetic mean of 2, 4, and 6.', solution: 'x̄ = (2+4+6) / 3 = 4.' }
+        example: { problem: 'What is the mean of the numbers 2, 4, and 6?', solution: 'Mean of 2, 4, 6 is (12)/3 = 4.' }
     },
     { 
         subject: 'Mathematics', topic: 'Probability', title: 'Conditional Probability', 
         formula: 'P(A|B) = \\frac{P(A \\cap B)}{P(B)}', desc: 'Probability given another event.',
         symbols: { 'P(A|B)': 'Probability of A given B', 'P(A ∩ B)': 'Probability of A and B' }, 
-        example: { problem: 'Give a real-world example of what this computes.', solution: 'Calculating the probability of drawing a King given that the drawn card is already known to be a face card.' }
+        example: { problem: 'What is the probability of drawing a King given that the card drawn is a face card?', solution: 'Probability of drawing a King given the card is a face card.' }
     },
     
     // ==========================================
@@ -573,116 +619,119 @@
         subject: 'Physics', topic: 'Kinematics', title: 'Velocity-Time Relation', 
         formula: 'v = u + at', desc: 'Final velocity under constant acceleration.',
         symbols: { 'v': 'Final velocity', 'u': 'Initial velocity', 'a': 'Acceleration', 't': 'Time' }, 
-        example: { problem: 'A car accelerates uniformly from rest at 2m/s² for 5s. Find final velocity.', solution: 'v = 0 + (2)(5) = 10 m/s.' }
+        example: { problem: 'What is the final velocity of a car that accelerates from rest at 2m/s² for 5s?', solution: 'Car accelerates from 0 at 2m/s² for 5s: v = 10m/s.' }
     },
     { 
         subject: 'Physics', topic: 'Kinematics', title: 'Position-Time Relation', 
         formula: 's = ut + \\frac{1}{2}at^2', desc: 'Displacement under constant acceleration.',
         symbols: { 's': 'Displacement', 'u': 'Initial velocity', 't': 'Time', 'a': 'Acceleration' }, 
-        example: { problem: 'Drop a stone from rest (u=0, a=9.8). Find its displacement in 2s.', solution: 's = 0 + 0.5(9.8)(2²) = 19.6 m.' }
+        example: { problem: 'How far does a stone fall from rest in 2 seconds?', solution: 'Drop stone from rest (u=0, a=9.8): in 2s, s = 19.6m.' }
     },
     { 
         subject: 'Physics', topic: 'Kinematics', title: 'Velocity-Position', 
         formula: 'v^2 = u^2 + 2as', desc: 'Velocity squared relation.',
         symbols: { 'v': 'Final velocity', 'u': 'Initial velocity', 'a': 'Acceleration', 's': 'Displacement' }, 
-        example: { problem: 'What practical problem does this formula often solve?', solution: 'Calculating stopping distance given an initial velocity and a braking deceleration rate.' }
+        example: { problem: 'How do you find the stopping distance of a vehicle?', solution: 'Find stopping distance given initial velocity and braking acceleration.' }
     },
     { 
         subject: 'Physics', topic: 'Dynamics', title: 'Newton\'s Second Law', 
         formula: 'F = ma', desc: 'Force equals mass times acceleration.',
         symbols: { 'F': 'Net Force (N)', 'm': 'Mass (kg)', 'a': 'Acceleration (m/s²)' }, 
-        example: { problem: 'A 10kg object accelerating at 2m/s² feels what net force?', solution: 'F = 10 * 2 = 20 N.' }
+        example: { problem: 'What force is experienced by a 10kg object accelerating at 2m/s²?', solution: '10kg object accelerating at 2m/s² feels 20N force.' }
     },
     { 
         subject: 'Physics', topic: 'Dynamics', title: 'Momentum', 
         formula: 'p = mv', desc: 'Linear momentum.',
         symbols: { 'p': 'Momentum (kg·m/s)', 'm': 'Mass', 'v': 'Velocity' }, 
-        example: { problem: 'Calculate the momentum of a 1000kg car moving at 20m/s.', solution: 'p = 1000 * 20 = 20,000 kg·m/s.' }
+        example: { problem: 'What is the momentum of a 1000kg car moving at 20m/s?', solution: 'A 1000kg car moving at 20m/s has 20,000 kg·m/s momentum.' }
     },
     { 
         subject: 'Physics', topic: 'Work & Energy', title: 'Kinetic Energy', 
         formula: 'KE = \\frac{1}{2}mv^2', desc: 'Energy of motion.',
         symbols: { 'm': 'Mass (kg)', 'v': 'Velocity (m/s)' }, 
-        example: { problem: 'Find the kinetic energy of a 2kg object moving at 3m/s.', solution: 'KE = 0.5 * 2 * 3² = 9 Joules.' }
+        example: { problem: 'What is the kinetic energy of a 2kg object moving at 3m/s?', solution: '2kg object moving at 3m/s has 9 Joules of KE.' }
     },
     { 
         subject: 'Physics', topic: 'Work & Energy', title: 'Gravitational Potential Energy', 
         formula: 'PE = mgh', desc: 'Energy possessed by an object due to its height.',
         symbols: { 'g': 'Gravity (9.81 m/s²)', 'h': 'Height (m)' }, 
-        example: { problem: 'A 1kg object is lifted 10m high. Find its potential energy.', solution: 'PE = 1 * 9.81 * 10 ≈ 98.1 J.' }
+        example: { problem: 'What is the potential energy of a 1kg object lifted 10m high?', solution: '1kg object 10m high has ~98.1J of PE.' }
     },
     { 
         subject: 'Physics', topic: 'Work & Energy', title: 'Power', 
         formula: 'P = \\frac{W}{\\Delta t}', desc: 'Rate at which work is done or energy is transferred.',
         symbols: { 'P': 'Power (Watts)', 'W': 'Work (Joules)', 'Δt': 'Time interval (s)' }, 
-        example: { problem: 'Lifting a weight and doing 100J of work in 2s equals what power output?', solution: 'P = 100 / 2 = 50 W.' }
+        example: { problem: 'What is the power output when lifting a weight doing 100J of work in 2s?', solution: 'Lifting a weight doing 100J of work in 2s equals 50W.' }
     },
     { 
         subject: 'Physics', topic: 'Electricity', title: 'Ohm\'s Law', 
         formula: 'V = IR', desc: 'Voltage equals current times resistance.',
         symbols: { 'V': 'Voltage (Volts)', 'I': 'Current (Amps)', 'R': 'Resistance (Ohms)' }, 
-        example: { problem: 'A 2A current pushed through a 5Ω resistor results in what voltage drop?', solution: 'V = 2 * 5 = 10 V.' }
+        example: { problem: 'What is the voltage drop across a 5Ω resistor with a 2A current?', solution: '2A current through 5Ω resistor gives 10V drop.' }
     },
     { 
         subject: 'Physics', topic: 'Circuits', title: 'Power', 
         formula: 'P = VI', desc: 'Electrical power.',
         symbols: { 'P': 'Power (Watts)', 'V': 'Voltage (V)', 'I': 'Current (A)' }, 
-        example: { problem: 'A 120V electrical appliance drawing 10A of current uses what power?', solution: 'P = 120 * 10 = 1200 W.' }
+        example: { problem: 'How much power does a 120V appliance drawing 10A use?', solution: 'A 120V appliance drawing 10A uses 1200W of power.' }
     },
     { 
         subject: 'Physics', topic: 'Circuits', title: 'Series Resistance', 
         formula: 'R_T = R_1 + R_2 + R_3 + ...', desc: 'Equivalent series resistance.',
         symbols: { 'R_T': 'Total Resistance', 'R_n': 'Individual Resistor' }, 
-        example: { problem: 'A 2Ω and a 3Ω resistor configured in series yield what total resistance?', solution: 'R_T = 2 + 3 = 5 Ω.' }
+        example: { problem: 'What is the total resistance of a 2Ω and 3Ω resistor in series?', solution: 'A 2Ω and 3Ω resistor in series give 5Ω total.' }
     },
     { 
         subject: 'Physics', topic: 'Circuits', title: 'Parallel Resistance', 
         formula: '\\frac{1}{R_T} = \\frac{1}{R_1} + \\frac{1}{R_2} + \\dots', desc: 'Equivalent parallel resistance.',
         symbols: { 'R_T': 'Total Resistance', 'R_n': 'Individual Resistor' }, 
-        example: { problem: 'Two 10Ω resistors configured in parallel yield what total resistance?', solution: '1/R_T = 1/10 + 1/10 = 2/10 -> R_T = 5 Ω.' }
+        example: { problem: 'What is the total equivalent resistance of two 10Ω resistors in parallel?', solution: 'Two 10Ω resistors in parallel give 5Ω total resistance.' }
     },
     { 
         subject: 'Physics', topic: 'Electromagnetism', title: 'Magnetic Force on Moving Charge', 
         formula: 'F = qvB\\sin\\theta', desc: 'Force experienced by a charge moving in a magnetic field.',
         symbols: { 'q': 'Charge', 'v': 'Velocity', 'B': 'Magnetic Field', 'θ': 'Angle' }, 
-        example: { problem: 'Under what specific condition does an electron moving in a B-field feel maximum force?', solution: 'When it moves perfectly perpendicular to the magnetic field (sin 90° = 1).' }
+        example: { problem: 'When does a moving charge experience the maximum magnetic force?', solution: 'Electron moving perpendicular to B-field feels max force.' }
     },
     { 
         subject: 'Physics', topic: 'Fluid Mechanics', title: 'Density', 
         formula: '\\rho = \\frac{m}{V}', desc: 'Mass per unit volume.',
         symbols: { 'ρ': 'Density (kg/m³)', 'm': 'Mass', 'V': 'Volume' }, 
-        example: { problem: 'Calculate the density of 1000 kg of water occupying 1 cubic meter.', solution: 'ρ = 1000 / 1 = 1000 kg/m³.' }
+        example: { problem: 'What is the density of 1000 kg of water occupying 1 cubic meter?', solution: '1000 kg of water in 1 cubic meter gives ρ = 1000 kg/m³.' }
     },
     { 
         subject: 'Physics', topic: 'Thermodynamics & Heat', title: 'Ideal Gas Law', 
         formula: 'PV = nRT', desc: 'Equation of state for an ideal gas.',
         symbols: { 'P': 'Pressure', 'V': 'Volume', 'n': 'Moles', 'R': 'Gas Constant', 'T': 'Temperature' }, 
-        example: { problem: 'Find the pressure of 2 moles of gas maintained at 300K inside a 10L container.', solution: 'P = (2 * R * 300) / 10.' }
+        example: { problem: 'How do you find the pressure of 2 moles of gas at 300K in a 10L container?', solution: 'Find the pressure of 2 moles of gas at 300K in a 10L container using P = nRT/V.' }
     },
     { 
         subject: 'Physics', topic: 'Oscillations & Waves', title: 'Wave Equation for Light', 
         formula: 'c = \\lambda f', desc: 'Speed of light equals wavelength times frequency.',
         symbols: { 'c': 'Speed of light (3x10^8 m/s)', 'λ': 'Wavelength', 'f': 'Frequency' }, 
-        example: { problem: 'Compare the frequency of Red light (700nm) and Blue light (400nm).', solution: 'Red light inherently has a lower frequency than blue light to maintain constant c.' }
+        example: { problem: 'How does the frequency of red light compare to blue light?', solution: 'Red light (700nm) has a lower frequency than blue light (400nm).' }
     },
     { 
         subject: 'Physics', topic: 'Optics', title: 'Snell\'s Law', 
         formula: '\\frac{\\sin i}{\\sin r} = \\frac{n_2}{n_1}', desc: 'Law of refraction.',
         symbols: { 'i': 'Angle of incidence', 'r': 'Angle of refraction', 'n_1, n_2': 'Refractive indices' }, 
-        example: { problem: 'What optical phenomenon does this calculate?', solution: 'It accurately calculates the bending angle when light moves from one medium (like air) into another (like water).' }
+        example: { problem: 'How do you calculate the bending angle when light moves from air into water?', solution: 'Calculates the bending angle when light moves from air into water.' }
     },
     { 
         subject: 'Physics', topic: 'Gravitation', title: 'Gravitational Force', 
         formula: 'F = G\\frac{m_1 m_2}{r^2}', desc: 'Attraction between two masses.',
         symbols: { 'F': 'Gravitational force', 'G': 'Gravitational Constant', 'm_1, m_2': 'Masses', 'r': 'Distance between centers' }, 
-        example: { problem: 'Give a massive scale application of this classical mechanics formula.', solution: 'It calculates the exact gravitational force keeping the Moon firmly in orbit around Earth.' }
+        example: { problem: 'How do you calculate the force keeping the Moon in orbit around Earth?', solution: 'Calculates the force keeping the Moon in orbit around Earth.' }
     },
     { 
         subject: 'Physics', topic: 'Modern Physics', title: 'Mass-Energy', 
         formula: 'E = \\Delta m c^2', desc: 'Einstein\'s equivalence principle.',
         symbols: { 'E': 'Energy (J)', 'Δm': 'Mass defect/change (kg)', 'c': 'Speed of light' }, 
-        example: { problem: 'What macro-scale phenomenon does this principle explain?', solution: 'It mathematically explains the immense energy release witnessed during nuclear fission.' }
-    }
+        example: { problem: 'What explains the immense energy release during nuclear fission?', solution: 'Explains the immense energy release during nuclear fission.' }
+    },
+    
+
+
 ];
 
         // ==========================================
@@ -719,18 +768,12 @@
         // ==========================================
         // INITIALIZATION
         // ==========================================
-        window.onload = () => {
-            initPWAAssets();
-            loadLocalData();
-            if (!localStorage.getItem('ef_premium_setup')) {
-                const m = document.getElementById('welcome-modal');
-                m.style.display = 'flex'; setTimeout(()=>m.classList.add('show'), 10);
-            } else {
-                startPlatform();
-            }
-            document.documentElement.style.setProperty('--bottom-nav-height', window.innerWidth <= 768 ? '68px' : '0px');
-        };
-
+     window.onload = () => {
+    initPWAAssets();
+    // Firebase auth.onAuthStateChanged will take over from here to either 
+    // load the user's data or show the welcome modal.
+    document.documentElement.style.setProperty('--bottom-nav-height', window.innerWidth <= 768 ? '68px' : '0px');
+};
         window.onresize = () => {
             document.documentElement.style.setProperty('--bottom-nav-height', window.innerWidth <= 768 ? '68px' : '0px');
             if(window.innerWidth > 768) {
@@ -873,15 +916,146 @@
         // ==========================================
         // UI UTILITIES
         // ==========================================
-        function completeOnboarding() {
-            studentProfile.name = escapeHTML(document.getElementById('onboard-name').value) || "Student";
-            studentProfile.targetScore = parseInt(document.getElementById('onboard-target').value) || 520;
-            studentProfile.examDate = escapeHTML(document.getElementById('onboard-date').value) || '2026-06-20';
-            localStorage.setItem('ef_premium_setup', 'true');
-            saveLocalData(); closeModal('welcome-modal');
-            startPlatform();
-            showToast(`Welcome, ${studentProfile.name}!`, 'success');
-        }
+      // ==========================================
+// FIREBASE AUTHENTICATION & SYNC
+// ==========================================
+
+// This listener fires automatically when the page loads or when the user logs in/out
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        // User is logged in, fetch their data from Firestore
+        db.collection("users").doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                applyDataToState(doc.data());
+                startPlatform();
+            }
+        }).catch((error) => {
+            console.error("Error getting user data:", error);
+            showToast("Failed to load data.", "error");
+        });
+    } else {
+        // No user is logged in, show the welcome modal
+        document.getElementById('welcome-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('welcome-modal').classList.add('show'), 10);
+    }
+});
+
+async function completeOnboarding() {
+    const name = escapeHTML(document.getElementById('onboard-name').value.trim()) || "Student";
+    const email = document.getElementById('onboard-email').value.trim();
+    const password = document.getElementById('onboard-password').value;
+    const target = parseInt(document.getElementById('onboard-target').value) || 520;
+    const date = escapeHTML(document.getElementById('onboard-date').value) || '2026-06-20';
+    
+    if(!email || password.length < 6) {
+        showToast("Please provide a valid email and a password (min 6 chars).", "error");
+        return;
+    }
+
+    const btn = document.getElementById('btn-register');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+    btn.disabled = true;
+
+    try {
+        // 1. Create the user in Firebase Auth
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        // 2. Set up their initial profile data
+        studentProfile.name = name;
+        studentProfile.targetScore = target;
+        studentProfile.examDate = date;
+
+        // 3. Save the blank slate to Firestore
+        await saveToFirestore(user.uid);
+
+        closeModal('welcome-modal');
+        showToast(`Welcome, ${name}!`, 'success');
+        
+    } catch (error) {
+        showToast(error.message, "error");
+    } finally {
+        btn.innerHTML = 'Initialize Workspace <i class="fa-solid fa-rocket"></i>';
+        btn.disabled = false;
+    }
+}
+
+async function performLogin() {
+    const email = document.getElementById('login-username').value.trim();
+    const pass = document.getElementById('login-password').value.trim();
+    
+    if(!email || !pass) { 
+        showToast("Please enter both email and password", "error"); 
+        return; 
+    }
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        closeModal('login-modal');
+        showToast("Successfully logged in!", 'success');
+    } catch(error) {
+        showToast("Login failed. Check email/password.", "error");
+    }
+}
+
+function signOut() {
+    if(confirm("Are you sure you want to sign out?")) {
+        auth.signOut().then(() => {
+            // Clear the local state variables
+            studentProfile = { name: "Student", targetScore: 520, xp: 0, level: 1, streak: 1, lastLogin: '' };
+            examHistory = []; topicMastery = {}; tasks = [];
+            // Refresh page to reset UI completely
+            window.location.reload();
+        });
+    }
+}
+
+// Replaces your old saveLocalData function
+async function saveLocalData() {
+    const user = auth.currentUser;
+    if (user) {
+        await saveToFirestore(user.uid);
+    }
+}
+
+async function saveToFirestore(uid) {
+    const payload = {
+        profile: studentProfile, history: examHistory, mastery: topicMastery,
+        tasks: tasks, achievements: achievements, records: records, 
+        totalGeneratedAI: totalGeneratedAI, flashcardRatings: flashcardRatings,
+        userNotes: userNotes, formulaBookmarks: formulaBookmarks,
+        dailyChallengeStreak: dailyChallengeStreak, lastDailyDate: lastDailyDate,
+        studyLog: studyLog
+    };
+    
+    try {
+        await db.collection("users").doc(uid).set(payload, { merge: true });
+    } catch (error) {
+        console.error("Error saving to cloud:", error);
+    }
+}
+
+
+
+// --- Authentication & Modal Switching Logic ---
+
+function showLoginModal() {
+    closeModal('welcome-modal');
+    const m = document.getElementById('login-modal');
+    m.style.display = 'flex'; 
+    setTimeout(() => m.classList.add('show'), 10);
+}
+
+function showRegisterModal() {
+    closeModal('login-modal');
+    const m = document.getElementById('welcome-modal');
+    m.style.display = 'flex'; 
+    setTimeout(() => m.classList.add('show'), 10);
+}
+
+
+
+
 
         function showToast(message, type='success') {
             const container = document.getElementById('toast-container');
@@ -944,17 +1118,24 @@
                 document.getElementById('mobile-menu-btn').classList.remove('open');
             }
 // Add this line inside switchTab()
-if (tabId === 'biology3d') initBiologySandbox();
-            if (tabId === 'dashboard') updateDashboardUI();
-            if (tabId === 'analytics') { renderCharts(); renderHeatmap(); }
-            if (tabId === 'mock') renderMockHistory();
-            if (tabId === 'physics3d') initPhysicsSandbox();
-            if (tabId === 'chemistry3d') initChemistrySandbox();
-            if (tabId === 'periodictable') initPeriodicTable();
-            if (tabId === 'achievements') { renderAchievements(); renderLeaderboard(); }
-            if (tabId === 'flashcards') initFlashcards();
-            if (tabId === 'formulas') initFormulaBank();
-            window.scrollTo({top:0, behavior:'smooth'});
+           // Add a 50ms delay to allow the browser to calculate the container dimensions on mobile
+    if (tabId === 'dashboard') updateDashboardUI();
+    if (tabId === 'analytics') { renderCharts(); renderHeatmap(); }
+    if (tabId === 'mock') renderMockHistory();
+    if (tabId === 'physics3d') setTimeout(initPhysicsSandbox, 50);
+    if (tabId === 'chemistry3d') setTimeout(initChemistrySandbox, 50);
+    if (tabId === 'biology3d') setTimeout(initBiologySandbox, 50);
+   if (tabId === 'periodictable') {
+        setTimeout(() => {
+            initPeriodicTable();
+            // Force the browser to trigger our new resize function above
+            window.dispatchEvent(new Event('resize')); 
+        }, 150); // 150ms guarantees the mobile DOM is fully settled
+    }
+    if (tabId === 'achievements') { renderAchievements(); renderLeaderboard(); }
+    if (tabId === 'flashcards') initFlashcards();
+    if (tabId === 'formulas') initFormulaBank();
+    window.scrollTo({top:0, behavior:'smooth'});
         }
 
         function updateClock() {
@@ -2032,23 +2213,207 @@ if (finalScore >= (studentProfile.targetScore * 0.8)) {
             const matN = new THREE.MeshPhysicalMaterial({ color: 0x3333ff, metalness: 0.2, roughness: 0.2 }); 
             const matBond = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
             const createSphere = (mat, radius, pos) => { const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 32, 32), mat); mesh.position.set(pos[0], pos[1], pos[2]); chemGroup.add(mesh); };
-            const createBond = (pos1, pos2) => { const p1 = new THREE.Vector3(...pos1), p2 = new THREE.Vector3(...pos2); const distance = p1.distanceTo(p2); const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, distance, 16), matBond); const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5); cylinder.position.copy(mid); cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), p2.sub(p1).normalize()); chemGroup.add(cylinder); };
+const createBond = (pos1, pos2, order = 1) => { 
+    const p1 = new THREE.Vector3(...pos1), p2 = new THREE.Vector3(...pos2); 
+    const distance = p1.distanceTo(p2); 
+    const direction = new THREE.Vector3().subVectors(p2, p1).normalize();
+    let perp = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0,1,0));
+    if (perp.lengthSq() < 0.01) perp.crossVectors(direction, new THREE.Vector3(1,0,0));
+    perp.normalize().multiplyScalar(0.35);
 
+    const drawC = (offset) => {
+        const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, distance, 16), matBond); 
+        const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5).add(offset); 
+        cylinder.position.copy(mid); 
+        cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction); 
+        chemGroup.add(cylinder); 
+    };
+
+    if (order === 1) { drawC(new THREE.Vector3(0,0,0)); } 
+    else if (order === 2) { drawC(perp); drawC(perp.clone().negate()); }
+    else if (order === 3) { drawC(new THREE.Vector3(0,0,0)); drawC(perp); drawC(perp.clone().negate()); }
+};
             if(type === 'H2O') {
                 createSphere(matO, 1.4, [0, 0, 0]); createSphere(matH, 0.8, [1.3, -1, 0]); createSphere(matH, 0.8, [-1.3, -1, 0]);
-                createBond([0,0,0], [1.3,-1,0]); createBond([0,0,0], [-1.3,-1,0]);
+                createBond([0,0,0], [1.3,-1,0], 1); createBond([0,0,0], [-1.3,-1,0], 1);
             } else if(type === 'CH4') {
                 createSphere(matC, 1.6, [0, 0, 0]); createSphere(matH, 0.8, [1.5, -1, -1]); createSphere(matH, 0.8, [-1.5, -1, -1]); createSphere(matH, 0.8, [0, 1.5, -1]); createSphere(matH, 0.8, [0, 0, 1.5]);
                 createBond([0,0,0], [1.5,-1,-1]); createBond([0,0,0], [-1.5,-1,-1]); createBond([0,0,0], [0,1.5,-1]); createBond([0,0,0], [0,0,1.5]);
             } else if(type === 'NH3') {
                 createSphere(matN, 1.5, [0, 0.5, 0]); createSphere(matH, 0.8, [1.2, -0.8, 0.7]); createSphere(matH, 0.8, [-1.2, -0.8, 0.7]); createSphere(matH, 0.8, [0, -0.8, -1.4]);
                 createBond([0,0.5,0], [1.2,-0.8,0.7]); createBond([0,0.5,0], [-1.2,-0.8,0.7]); createBond([0,0.5,0], [0,-0.8,-1.4]);
-            } else if(type === 'CO2') {
-                createSphere(matC, 1.4, [0, 0, 0]); createSphere(matO, 1.4, [3, 0, 0]); createSphere(matO, 1.4, [-3, 0, 0]);
-                createBond([0, 0.4, 0], [3, 0.4, 0]); createBond([0, -0.4, 0], [3, -0.4, 0]); createBond([0, 0.4, 0], [-3, 0.4, 0]); createBond([0, -0.4, 0], [-3, -0.4, 0]);
-            }
+           } else if(type === 'CO2') {
+    createSphere(matC, 1.4, [0, 0, 0]); createSphere(matO, 1.4, [3, 0, 0]); createSphere(matO, 1.4, [-3, 0, 0]);
+    createBond([0, 0, 0], [3, 0, 0], 2); // Double bond
+    createBond([0, 0, 0], [-3, 0, 0], 2); // Double bond
+}
             chemGroup.rotation.set(0,0,0);
         }
+
+
+
+
+
+
+
+
+
+// Universal Element Material Dictionary
+const elementMaterials = {
+    "H": { color: 0xffffff, radius: 0.6 },
+    "C": { color: 0x333333, radius: 1.2 },
+    "O": { color: 0xff3333, radius: 1.0 },
+    "N": { color: 0x3333ff, radius: 1.1 },
+    "S": { color: 0xeab308, radius: 1.4 },
+    "F": { color: 0x4ade80, radius: 0.9 },
+    "Cl": { color: 0x22c55e, radius: 1.3 },
+    "default": { color: 0xa855f7, radius: 1.0 }
+};
+function renderDynamicMolecule(molData) {
+    if(!chemInitialized) return;
+    
+    // Clear existing scene
+    while(chemGroup.children.length > 0){ chemGroup.remove(chemGroup.children[0]); }
+    
+    // Update UI Panel
+    document.getElementById('chem-info-name').textContent = molData.name;
+    document.getElementById('chem-info-formula').textContent = molData.formula;
+    document.getElementById('chem-info-geo').textContent = molData.geometry;
+    document.getElementById('chem-info-desc').textContent = molData.description;
+// Add to your renderDynamicMolecule function
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+chemScene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 5, 5);
+chemScene.add(dirLight);
+    const matBond = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
+    const atomMeshes = [];
+
+    // 1. Draw Atoms
+    molData.atoms.forEach((atom, index) => {
+        const props = elementMaterials[atom.element] || elementMaterials["default"];
+        const mat = new THREE.MeshPhysicalMaterial({ color: props.color, metalness: 0.2, roughness: 0.4 });
+        const mesh = new THREE.Mesh(new THREE.SphereGeometry(props.radius, 32, 32), mat);
+        
+        mesh.position.set(atom.pos[0], atom.pos[1], atom.pos[2]);
+        chemGroup.add(mesh);
+        atomMeshes.push(mesh);
+    });
+
+    // 2. Draw Bonds (with Single, Double, Triple support)
+    molData.bonds.forEach(bond => {
+        const p1 = atomMeshes[bond[0]].position;
+        const p2 = atomMeshes[bond[1]].position;
+        const order = bond[2] || 1; // Default to single bond if not provided
+        
+        const distance = p1.distanceTo(p2);
+        const direction = new THREE.Vector3().subVectors(p2, p1).normalize();
+        
+        // Calculate a perpendicular vector to offset the multiple bonds
+        const up = new THREE.Vector3(0, 1, 0);
+        let perp = new THREE.Vector3().crossVectors(direction, up);
+        // If the bond is pointing straight up, use the X-axis for cross product instead
+        if (perp.lengthSq() < 0.01) {
+            perp.crossVectors(direction, new THREE.Vector3(1, 0, 0));
+        }
+        perp.normalize().multiplyScalar(0.35); // The distance between multiple bonds
+
+        const drawCylinder = (offset) => {
+            // Slightly thinner cylinder (0.15) looks better for multiple bonds
+            const cylinder = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, distance, 16), matBond);
+            const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5).add(offset);
+            
+            cylinder.position.copy(mid);
+            cylinder.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+            chemGroup.add(cylinder);
+        };
+
+        if (order === 1) {
+            drawCylinder(new THREE.Vector3(0,0,0));
+        } else if (order === 2) {
+            drawCylinder(perp);
+            drawCylinder(perp.clone().negate());
+        } else if (order === 3) {
+            drawCylinder(new THREE.Vector3(0,0,0));
+            drawCylinder(perp);
+            drawCylinder(perp.clone().negate());
+        }
+    });
+
+    chemGroup.rotation.set(0,0,0);
+}
+
+
+
+async function fetchAIMolecule() {
+    const query = document.getElementById('ai-molecule-input').value.trim();
+    if (!query) return;
+
+    const btn = document.querySelector('#view-chemistry3d .btn-primary');
+    const originalBtnHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Building...';
+    btn.disabled = true;
+
+    const promptText = `
+    Act as an expert computational chemist. Generate a 3D molecular structure for "${query}".
+    You must reply with ONLY a raw JSON object. No markdown, no conversational text.
+    Format exactly like this:
+    {
+      "name": "Common Name",
+      "formula": "Chemical Formula",
+      "geometry": "Primary VSEPR Geometry",
+      "description": "A 2-sentence explanation of its structure suitable for a 12th-grade chemistry student.",
+      "atoms": [
+        {"element": "C", "pos": [0, 0, 0]},
+        {"element": "O", "pos": [1.2, 0, 0]}
+      ],
+      "bonds": [
+        [0, 1, 2] // [Atom_1_Index, Atom_2_Index, Bond_Order(1, 2, or 3)]
+      ]
+    }
+    Ensure the 3D coordinates (pos) create the scientifically accurate geometry. Keep coordinate scale between -3 and 3. Ensure "bonds" arrays always have 3 numbers.
+    `;
+
+    try {
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST", 
+            headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [{ role: "user", content: promptText }],
+                temperature: 0.2, // Low temperature for factual coordinates
+                response_format: { type: "json_object" }
+            })
+        });
+
+        const data = await response.json();
+        const moleculeData = JSON.parse(data.choices[0].message.content.trim());
+        
+        renderDynamicMolecule(moleculeData);
+        document.getElementById('ai-molecule-input').value = '';
+        showToast(`${moleculeData.name} generated!`, "success");
+
+    } catch (err) {
+        console.error("AI Generation Error:", err);
+        showToast("Failed to generate molecule. Try a simpler compound.", "error");
+    } finally {
+        btn.innerHTML = originalBtnHTML;
+        btn.disabled = false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // ==========================================
         // DATA MANAGEMENT
@@ -2088,6 +2453,44 @@ if (finalScore >= (studentProfile.targetScore * 0.8)) {
             if (sidebar) sidebar.classList.toggle('open');
             if (hamburgerBtn) hamburgerBtn.classList.toggle('open');
         }
+
+
+
+// ==========================================
+// TELEGRAM-STYLE 15-SEC AUTO-HIDE BUTTONS
+// ==========================================
+let scrollTimeoutToken = null;
+let hideButtonsTimer = null;
+
+window.addEventListener('scroll', () => {
+    const aiBtn = document.querySelector('.ai-chat-btn');
+    const calcBtn = document.querySelector('.fab-quick');
+    
+    if (!aiBtn || !calcBtn) return;
+
+    // 1. If scrolling down past 60px, instantly pop the buttons into view
+    if (window.scrollY > 60) {
+        aiBtn.classList.add('show-on-scroll');
+        calcBtn.classList.add('show-on-scroll');
+        
+        // Clear any previous countdown timers because the user is actively interacting/scrolling
+        clearTimeout(hideButtonsTimer);
+        
+        // 2. Start a fresh 15-second countdown to auto-hide them
+        hideButtonsTimer = setTimeout(() => {
+            aiBtn.classList.remove('show-on-scroll');
+            calcBtn.classList.remove('show-on-scroll');
+        }, 3000); // 15000 milliseconds = 15 seconds
+        
+    } else {
+        // Safe-zone: If they scroll all the way back to the exact top, clean up and hide immediately
+        clearTimeout(hideButtonsTimer);
+        aiBtn.classList.remove('show-on-scroll');
+        calcBtn.classList.remove('show-on-scroll');
+    }
+}, { passive: true });
+
+
 
         document.addEventListener('DOMContentLoaded', () => {
             const mainWrapper = document.querySelector('.main-wrapper');
@@ -2449,11 +2852,29 @@ ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;    ptScene = new TH
         
         element.className = `pt-element ${groupClass}`;
         // -------------------------------
+       // --- MOBILE TOUCH & DESKTOP CLICK FIX ---
+        element.style.pointerEvents = 'auto'; 
         
-        // --- ADD THESE TWO LINES ---
-        element.style.pointerEvents = 'auto'; // Ensures the 3D element catches the mouse click
+        // 1. Native click for desktop users
         element.onclick = () => openElementModal((i/5)+1, elementsData[i], elementsData[i+1], elementsData[i+2], elementsData[i+3], elementsData[i+4]);
         
+        // 2. Custom touch logic for mobile (Bypasses TrackballControls blocking)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        element.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        element.addEventListener('touchend', (e) => {
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            
+            // If the finger moved less than 10 pixels, treat it as a tap, not a swipe/rotation
+            if (Math.abs(touchEndX - touchStartX) < 10 && Math.abs(touchEndY - touchStartY) < 10) {
+                openElementModal((i/5)+1, elementsData[i], elementsData[i+1], elementsData[i+2], elementsData[i+3], elementsData[i+4]);
+            }
+        }, { passive: true });
         const number = document.createElement( 'div' );
         number.className = 'number';
         number.textContent = (i/5) + 1;
@@ -2532,6 +2953,7 @@ ptCamera.position.z = window.innerWidth < 768 ? 5500 : 3000;    ptScene = new TH
     animatePT();
 }
 
+
 function transformPT( shape ) {
     const targets = ptTargets[shape];
     for ( let i = 0; i < ptObjects.length; i ++ ) {
@@ -2550,64 +2972,168 @@ function animatePT() {
     }
 }
 
-
-
 // ==========================================
-// DYNAMIC ELEMENT MODAL & ATOM GENERATOR
+// DYNAMIC ELEMENT MODAL & ATOM GENERATOR (ALL 118 ELEMENTS supported)
 // ==========================================
 function openElementModal(atomicNum, symbol, name, weight, col, row) {
+    // Convert inputs safely to numbers
+    const num = parseInt(atomicNum);
+    const c = parseInt(col);
+    const r = parseInt(row);
+
     // 1. Populate standard text data
     document.getElementById('modal-el-symbol').textContent = symbol;
     document.getElementById('modal-el-name').textContent = name;
-    document.getElementById('modal-el-num').textContent = atomicNum;
+    document.getElementById('modal-el-num').textContent = num;
     document.getElementById('modal-el-weight').textContent = weight;
-    document.getElementById('modal-el-shells').textContent = row; // Row = Number of shells
+    document.getElementById('modal-el-shells').textContent = r;
     
-    // Determine roughly what kind of element it is based on column
+    // Determine the category / block based on position
     let block = "Transition Metal";
-    if (col === 1) block = "Alkali Metal";
-    else if (col === 2) block = "Alkaline Earth Metal";
-    else if (col === 17) block = "Halogen";
-    else if (col === 18) block = "Noble Gas";
-    else if (col >= 13 && col <= 16) block = "Post-Transition / Metalloid";
+    if (c === 1 && symbol !== 'H') block = "Alkali Metal";
+    else if (c === 2) block = "Alkaline Earth Metal";
+    else if (c === 17) block = "Halogen";
+    else if (c === 18) block = "Noble Gas";
+    else if (c >= 13 && c <= 16) block = "Post-Transition Metal / Metalloid";
     
-    // Edge cases for specific rows/elements
-    if(row >= 8) block = "Lanthanide / Actinide"; 
-    if(symbol === "H" || symbol === "C" || symbol === "N" || symbol === "O" || symbol === "P" || symbol === "S") block = "Reactive Nonmetal";
+    // Actinides and Lanthanides edge placement case checking
+    if (r === 9) block = "Lanthanide"; 
+    if (r === 10) block = "Actinide"; 
+    if (["H", "C", "N", "O", "P", "S", "Se"].includes(symbol)) block = "Reactive Nonmetal";
 
     document.getElementById('modal-el-block').textContent = block;
 
+    // Phase / State at STP
     let state = "Solid";
     if (["H", "He", "N", "O", "F", "Ne", "Cl", "Ar", "Kr", "Xe", "Rn", "Og"].includes(symbol)) state = "Gas";
     if (["Hg", "Br"].includes(symbol)) state = "Liquid";
     document.getElementById('modal-el-state').textContent = state;
 
+    // --- ALGORITHMIC FIELD GENERATION FOR ALL 118 ELEMENTS ---
+    
+    // A. Generate True Nobel Gas Core Configurations dynamically
+    const nobleGases = [
+        { num: 118, sym: "Og", config: "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶" },
+        { num: 86,  sym: "Rn", config: "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶" },
+        { num: 54,  sym: "Xe", config: "[Kr] 4d¹⁰ 5s² 5p⁶" },
+        { num: 36,  sym: "Kr", config: "[Ar] 3d¹⁰ 4s² 4p⁶" },
+        { num: 18,  sym: "Ar", config: "[Ne] 3s² 3p⁶" },
+        { num: 10,  sym: "Ne", config: "[He] 2s² 2p⁶" },
+        { num: 2,   sym: "He", config: "1s²" }
+    ];
+
+    let computedConfig = "";
+    if (num === 1) computedConfig = "1s¹";
+    else if (num === 2) computedConfig = "1s²";
+    else {
+        // Find closest preceding noble gas
+        const core = nobleGases.find(g => g.num < num);
+        
+        // Define outer valence filling approximations based on period rows
+        let valence = "";
+        let diff = num - core.num;
+
+        if (core.sym === "He") { // Period 2
+            if (diff <= 2) valence = `2s${diff}`;
+            else valence = `2s² 2p${diff - 2}`;
+        } else if (core.sym === "Ne") { // Period 3
+            if (diff <= 2) valence = `3s${diff}`;
+            else valence = `3s² 3p${diff - 2}`;
+        } else if (core.sym === "Ar") { // Period 4
+            if (diff <= 2) valence = `4s${diff}`;
+            else if (diff <= 12) valence = `3d${diff - 2} 4s²`;
+            else valence = `3d¹⁰ 4s² 4p${diff - 12}`;
+        } else if (core.sym === "Kr") { // Period 5
+            if (diff <= 2) valence = `5s${diff}`;
+            else if (diff <= 12) valence = `4d${diff - 2} 5s²`;
+            else valence = `4d¹⁰ 5s² 5p${diff - 12}`;
+        } else if (core.sym === "Xe") { // Period 6 (Handles Lanthanides)
+            if (diff <= 2) valence = `6s${diff}`;
+            else if (diff <= 16) valence = `4f${diff - 2} 6s²`; // Lanthanides offset
+            else if (diff <= 26) valence = `4f¹⁴ 5d${diff - 16} 6s²`;
+            else valence = `4f¹⁴ 5d¹⁰ 6s² 6p${diff - 26}`;
+        } else if (core.sym === "Rn") { // Period 7 (Handles Actinides)
+            if (diff <= 2) valence = `7s${diff}`;
+            else if (diff <= 16) valence = `5f${diff - 2} 7s²`; // Actinides offset
+            else if (diff <= 26) valence = `5f¹⁴ 6d${diff - 16} 7s²`;
+            else valence = `5f¹⁴ 6d¹⁰ 7s² 7p${diff - 26}`;
+        }
+
+        // Apply standard superscript formatting converters
+        const supMap = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
+        let prettyValence = valence.replace(/[0-9]/g, m => supMap[m] || m);
+        
+        // Handle common configuration exceptions gracefully
+        if (symbol === "Cr") prettyValence = "3d⁵ 4s¹";
+        if (symbol === "Cu") prettyValence = "3d¹⁰ 4s¹";
+        if (symbol === "Ag") prettyValence = "4d¹⁰ 5s¹";
+        if (symbol === "Au") prettyValence = "4f¹⁴ 5d¹⁰ 6s¹";
+
+        computedConfig = `[${core.sym}] ${prettyValence}`;
+    }
+    document.getElementById('modal-el-config').textContent = computedConfig;
+
+    // B. Calculate Dynamic Electronegativity using Pauling Scale approximations
+    let electroValue = "N/A";
+    if (block !== "Noble Gas" && num !== 118 && num <= 104) {
+        // Standard Periodic Trend Calculation Engine
+        let base = 1.0;
+        if (r === 2) base = 1.0 + (c - 1) * 0.5;
+        else if (r === 3) base = 0.9 + (c - 1) * 0.4;
+        else if (r === 4) base = 0.8 + (c - 1) * 0.25;
+        else if (r === 5) base = 0.7 + (c - 1) * 0.2;
+        else if (r === 6 || r === 9) base = 0.7 + (c - 1) * 0.15;
+        else if (r === 7 || r === 10) base = 0.7 + (c - 1) * 0.12;
+        
+        if (symbol === "H") base = 2.20;
+        if (symbol === "F") base = 3.98;
+        if (symbol === "O") base = 3.44;
+        if (symbol === "Cl") base = 3.16;
+        if (symbol === "N") base = 3.04;
+
+        electroValue = Math.min(3.98, Math.max(0.7, base)).toFixed(2);
+    }
+    document.getElementById('modal-el-electro').textContent = electroValue;
+
+    // C. Determine Common Oxidation States matching groups
+    let oxState = "0";
+    if (block === "Alkali Metal") oxState = "+1";
+    else if (block === "Alkaline Earth Metal") oxState = "+2";
+    else if (block === "Halogen") oxState = "-1, +1, +5";
+    else if (symbol === "O") oxState = "-2";
+    else if (symbol === "H") oxState = "+1, -1";
+    else if (c === 13) oxState = "+3";
+    else if (c === 14) oxState = "+4, -4, +2";
+    else if (c === 15) oxState = "-3, +3, +5";
+    else if (c === 16) oxState = "-2, +4, +6";
+    else if (block === "Transition Metal") oxState = "+2, +3";
+    else if (block === "Lanthanide" || block === "Actinide") oxState = "+3";
+    else if (block === "Noble Gas") oxState = "0";
+
+    document.getElementById('modal-el-ox').textContent = oxState;
+
     // 2. Procedurally Generate the 3D Atom Animation
     const viewport = document.getElementById('atom-viewport');
     viewport.innerHTML = '<div class="atom-nucleus"></div>';
     
-    const numShells = parseInt(row) > 7 ? 7 : parseInt(row); // Max 7 standard shells
+    // Cap rendered rings visually at 7 maximum so it fits beautifully
+    const numShells = r > 7 ? 7 : r; 
     
     for (let i = 1; i <= numShells; i++) {
-        // Calculate orbit size and speed
-        const size = 60 + (i * 35); // Base size + expanding rings
-        const duration = 12 - i; // Inner orbits spin faster, outer slower
+        const size = 60 + (i * 35); 
+        const duration = 12 - i; 
         
-        // Generate random 3D tilt vectors for chaos/beauty
         const rx = (Math.random() * 2) - 1;
         const ry = (Math.random() * 2) - 1;
         const rz = (Math.random() * 2) - 1;
 
-        // Visual approximation of electrons per shell (cap visual rendering at 8 per ring so it isn't a mess)
-        let visualElectrons = i === 1 ? Math.min(atomicNum, 2) : 8;
-        if(atomicNum < 3 && i > 1) visualElectrons = 0; // Don't draw electrons if element is H/He and we are on shell 2+
+        let visualElectrons = i === 1 ? Math.min(num, 2) : 8;
+        if (num < 3 && i > 1) visualElectrons = 0; 
 
         let orbitHTML = `<div class="atom-orbit" style="width:${size}px; height:${size}px; --rx:${rx}; --ry:${ry}; --rz:${rz}; animation-duration:${duration}s;">`;
         
-        // Distribute electrons evenly around the ring
         for (let e = 0; e < visualElectrons; e++) {
             const rot = (360 / visualElectrons) * e;
-            // The electron container counter-rotates or just sits on the perimeter
             orbitHTML += `
                 <div style="position:absolute; top:50%; left:50%; width:100%; height:100%; transform:translate(-50%,-50%) rotate(${rot}deg);">
                     <div class="atom-electron"></div>
@@ -2617,12 +3143,12 @@ function openElementModal(atomicNum, symbol, name, weight, col, row) {
         viewport.innerHTML += orbitHTML;
     }
 
-    // 3. Trigger Modal
+    // 3. Trigger Modal Presentation
     const modal = document.getElementById('element-modal');
     modal.style.display = 'flex';
-    // Small delay to allow CSS transitions to trigger
     setTimeout(() => { modal.classList.add('show'); }, 10);
 }
+
 
 function closeElementModal(e) {
     // If an event is passed, check if the user clicked outside the modal content
@@ -2851,3 +3377,82 @@ function animateBiology() {
         bioRenderer.render(bioScene, bioCamera);
     }
 }
+// Global placeholder tracking state for contextual search mutations
+let currentSearchScope = 'dashboard';
+
+function updateContextualSearch(scope) {
+    currentSearchScope = scope;
+    const inputElement = document.getElementById('contextual-header-search');
+    if (!inputElement) return;
+
+    // Fluid transformation of input styling and dynamic placeholders depending on target tab routes
+    switch(scope) {
+        case 'dashboard':
+            inputElement.placeholder = "Search topics and active tasks...";
+            break;
+        case 'formulas':
+            inputElement.placeholder = "Search formula strings, laws, constants...";
+            break;
+        case 'exams':
+            inputElement.placeholder = "Filter exams, past papers, score limits...";
+            break;
+        case 'flashcards':
+            inputElement.placeholder = "Search smart flashcard decks...";
+            break;
+        default:
+            inputElement.placeholder = "Global configuration search...";
+    }
+    inputElement.value = ""; // Dynamic context clean clear out
+}
+
+function handleContextualSearch(query) {
+    const sanitizedQuery = query.toLowerCase().trim();
+    
+    // Transparent routing map back to structural filtering methods depending on structural visibility state
+    if (currentSearchScope === 'formulas') {
+        const structuralSearchBox = document.getElementById('formula-search');
+        if (structuralSearchBox) {
+            structuralSearchBox.value = query;
+            // Native function execution
+            if (typeof filterFormulas === "function") filterFormulas();
+        }
+    } else if (currentSearchScope === 'dashboard') {
+        // Instant micro-filtering logic for action plan scheduling module items
+        const tasks = document.querySelectorAll('#schedule-list > div');
+        tasks.forEach(task => {
+            const innerContent = task.textContent.toLowerCase();
+            task.style.display = innerContent.includes(sanitizedQuery) ? "flex" : "none";
+        });
+    }
+}
+  // Futuristic Boot Sequence Logic
+        window.addEventListener('load', () => {
+            const splash = document.getElementById('splash-screen');
+            const bootText = document.getElementById('boot-text');
+            const progress = document.getElementById('splash-progress');
+            
+            if(!splash) return;
+
+            // Boot sequence stages
+            const stages = [
+                { time: 0, text: "Initializing AI Core...", fill: "10%" },
+                { time: 600, text: "Loading National Exam Data...", fill: "45%" },
+                { time: 1400, text: "Calibrating 3D Simulators...", fill: "75%" },
+                { time: 2200, text: "Establishing Secure Connection...", fill: "95%" },
+                { time: 2600, text: "System Ready.", fill: "100%" }
+            ];
+
+            // Execute stages
+            stages.forEach(stage => {
+                setTimeout(() => {
+                    bootText.textContent = stage.text;
+                    progress.style.width = stage.fill;
+                }, stage.time);
+            });
+
+            // Fade out and remove
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+                setTimeout(() => splash.remove(), 600); // Wait for CSS transition
+            }, 3000);
+        });
