@@ -1,5 +1,144 @@
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+/* ==========================================
+           FUTURISTIC SPLASH SCREEN
+        ========================================== */
+/* ==========================================
+           NEXT-GEN HUD SPLASH SCREEN
+        ========================================== */
+        .modern-splash {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at center, #0f172a 0%, #050810 100%);
+            z-index: 999999; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.6s cubic-bezier(0.8, 0, 0.2, 1), transform 0.6s cubic-bezier(0.8, 0, 0.2, 1), visibility 0.6s;
+        }
 
+        .modern-splash.fade-out {
+            opacity: 0;
+            transform: scale(1.1);
+            visibility: hidden;
+        }
+
+        /* Subtle CRT/HUD scanline effect */
+        .splash-overlay-scanline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px; z-index: 1; pointer-events: none; opacity: 0.3;
+        }
+
+        .splash-content {
+            position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Atomic/Forge Logo Animation */
+        .forge-logo-container {
+            position: relative; width: 140px; height: 140px; 
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px; perspective: 1000px;
+        }
+
+        .glowing-core {
+            position: absolute; width: 60px; height: 60px; border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 40px var(--primary), inset 0 0 20px #fff;
+            animation: pulseCore 2s ease-in-out infinite alternate;
+            opacity: 0.2;
+        }
+
+        .orbit-ring {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 50%; border: 1px solid rgba(14, 165, 233, 0.3);
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.1) inset;
+        }
+
+        .orbit-x { animation: spinX 3s linear infinite; border-top: 2px solid var(--accent); }
+        .orbit-y { animation: spinY 4s linear infinite; border-right: 2px solid var(--primary); }
+        .orbit-z { animation: spinZ 5s linear infinite; border-bottom: 2px solid var(--success); }
+
+        .forge-icon {
+            font-size: 42px; color: #fff; z-index: 10;
+            text-shadow: 0 0 20px var(--primary);
+            animation: floatIcon 3s ease-in-out infinite;
+        }
+
+        /* Typography */
+        .splash-text-container { text-align: center; margin-bottom: 40px; }
+        
+        .splash-title {
+            font-size: 32px; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; color: transparent;
+        }
+
+        .splash-badge {
+            display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 3px;
+            color: var(--accent); border: 1px solid rgba(14, 165, 233, 0.3);
+            padding: 4px 12px; border-radius: 20px; background: rgba(14, 165, 233, 0.05);
+        }
+
+        /* Boot Sequence Bar */
+        .boot-sequence { width: 240px; text-align: center; }
+        
+        .progress-track {
+            width: 100%; height: 4px; background: rgba(255,255,255,0.05);
+            border-radius: 2px; overflow: hidden; margin-bottom: 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+        
+        .progress-fill {
+            height: 100%; width: 0%; background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            transition: width 0.2s ease;
+        }
+
+        .boot-text {
+            font-family: monospace; font-size: 11px; color: var(--text-muted);
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        /* Keyframes */
+        @keyframes spinX { 0% { transform: rotateX(70deg) rotateZ(0deg); } 100% { transform: rotateX(70deg) rotateZ(360deg); } }
+        @keyframes spinY { 0% { transform: rotateY(70deg) rotateZ(0deg); } 100% { transform: rotateY(70deg) rotateZ(360deg); } }
+        @keyframes spinZ { 0% { transform: rotateX(45deg) rotateY(45deg) rotateZ(0deg); } 100% { transform: rotateX(45deg) rotateY(45deg) rotateZ(360deg); } }
+        @keyframes pulseCore { 0% { transform: scale(0.8); opacity: 0.1; } 100% { transform: scale(1.1); opacity: 0.3; } }
+        @keyframes floatIcon { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        /* ==========================================
+           MOBILE RESTRICTION CARD
+        ========================================== */
+        #mobile-blocker {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(11, 17, 32, 0.98); 
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            z-index: 1000000; align-items: center; justify-content: center; padding: 24px;
+        }
+        
+        .mobile-card {
+            max-width: 420px; text-align: center; padding: 40px 24px;
+            border-top: 4px solid var(--warning); /* Professional warning indicator */
+            animation: viewReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        
+        .mobile-icon {
+            font-size: 56px; color: var(--text-muted); margin-bottom: 24px; position: relative; display: inline-block;
+        }
+        
+        .overlay-warn {
+            position: absolute; bottom: -5px; right: -15px; font-size: 28px; color: var(--warning);
+            background: var(--bg-base); border-radius: 50%; width: 34px; height: 34px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+        }
+        
+        .mobile-card h2 { font-size: 22px; margin-bottom: 16px; color: var(--text-main); letter-spacing: -0.5px;}
+        .mobile-card p { font-size: 14.5px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.6; }
+        .mobile-card p strong { color: var(--text-main); font-weight: 700; }
+        .mobile-actions { margin-top: 32px; display: flex; gap: 12px; }
+
+        /* Trigger the blocker only on mobile screens */
+        @media (max-width: 768px) {
+            #mobile-blocker { display: flex; }
+            body { overflow: hidden !important; } /* Prevents scrolling underneath the blocker */
+        }
         :root {
             --bg-base: #0b1120;
             --bg-gradient: linear-gradient(180deg, #0b1120 0%, #0f172a 100%);
@@ -68,13 +207,15 @@
         p { line-height: 1.5; }
 
         /* Sidebar (Desktop only) */
+   /* Sidebar (Responsive with Touch Scrolling) */
         .sidebar {
             width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0;
             padding: 24px 16px; display: none; flex-direction: column; gap: 4px;
-            z-index: 50; border-right: 1px solid var(--glass-border);
-            background: var(--glass-bg); backdrop-filter: blur(24px);
-            transition: var(--transition-smooth);
-            overflow-y: auto;
+            z-index: 2500; border-right: 1px solid var(--glass-border);
+            background: var(--bg-sidebar); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; /* Fixes the mobile scroll freeze */
+            -webkit-overflow-scrolling: touch; /* Ensures smooth kinetic scrolling on iOS */
         }
 
         .brand {
@@ -356,14 +497,7 @@
         .achievement-card i { font-size: 32px; margin-bottom: 12px; color: var(--warning); }
 
         /* AI Chat */
-        .ai-chat-btn {
-            position: fixed; bottom: calc(var(--bottom-nav-height) + 16px); right: 16px; width: 52px; height: 52px; border-radius: 50%;
-            background: linear-gradient(135deg, rgb(105, 105, 156), var(--accent)); color: white;
-            display: flex; align-items: center; justify-content: center; font-size: 22px;
-            cursor: pointer; box-shadow: 0 8px 20px rgba(59,130,246,0.35); z-index: 999; transition: transform 0.3s;
-            border: none;
-        }
-        .ai-chat-btn:active { transform: scale(0.9); }
+       
         .ai-chat-panel {
             position: fixed; bottom: calc(var(--bottom-nav-height) + 80px); right: 16px; width: calc(100% - 32px); max-width: 400px; height: 450px;
             background: var(--glass-bg); backdrop-filter: blur(24px); border: 1px solid var(--glass-border);
@@ -383,8 +517,30 @@
         .ai-chat-input { flex: 1; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: 20px; padding: 10px 14px; color: var(--text-main); outline: none; font-size: 14px; }
 
         /* CBT EXAM INTERFACE */
-        .exam-fullscreen-container { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-base); z-index: 2000; overflow: hidden; flex-direction: column; }
+
         
+       /* Update this existing class inside your <style> block */
+.exam-fullscreen-container { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: var(--bg-base); 
+    z-index: 3000; /* Raised from 2000 to safely cover the sidebar (2500) and floating dock (1000) */
+    overflow: hidden; 
+    flex-direction: column; 
+}
+
+/* Add this utility rule directly underneath it */
+body.exam-mode-active .sidebar,
+body.exam-mode-active .bottom-nav {
+    display: none !important;
+    pointer-events: none;
+}
+
+
         .cbt-header { height: 64px; background: var(--glass-bg); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; padding: 0 16px; backdrop-filter: blur(20px); z-index: 10; }
         .cbt-header-left { display: flex; align-items: center; gap: 12px; }
         .cbt-header-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -0.3px;}
@@ -492,6 +648,15 @@
             .modal.show .modal-content { transform: scale(1) translateY(0); }
         }
 
+
+        /* Fix for mobile keyboards and bottom safe areas */
+@media (max-width: 768px) {
+    .modal-content {
+        max-height: 85svh !important; /* svh prevents the keyboard from crushing the form */
+        padding-bottom: 40px !important; /* Ensures the bottom buttons aren't cut off */
+    }
+}
+
         .close-modal-btn { position: absolute; top: 16px; right: 16px; background: var(--glass-input); border: 1px solid var(--glass-border); color: var(--text-muted); width: 36px; height: 36px; border-radius: 10px; cursor: pointer; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 10;}
         .close-modal-btn:hover { color: var(--danger); border-color: var(--danger); background: rgba(239,68,68,0.1); }
 
@@ -570,14 +735,7 @@
         .calendar-day.partial { background: var(--warning); color: white; }
 
         /* Quick FAB */
-        .fab-quick { 
-            position: fixed; bottom: calc(var(--bottom-nav-height) + 80px); right: 16px; 
-            width: 48px; height: 48px; border-radius: 50%; background: var(--success); 
-            color: white; border: none; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; box-shadow: 0 6px 16px rgba(16,185,129,0.35); z-index: 998;
-            cursor: pointer; transition: transform 0.2s;
-        }
-        .fab-quick:active { transform: scale(0.9); }
+      
 
         /* Calculator Modal */
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -629,7 +787,6 @@
             #physics-canvas-container, #chem-canvas-container { height: 500px; }
             .ai-chat-panel { width: 400px; right: 24px; bottom: 100px; }
             .ai-chat-btn { bottom: 24px; right: 24px; width: 56px; height: 56px; }
-            .fab-quick { bottom: 90px; right: 24px; }
             .toast-container { bottom: 24px; width: auto; }
         }
 
@@ -720,7 +877,7 @@
     border: 1px solid rgba(14, 165, 233, 0.25);
     background-color: rgba(15, 23, 42, 0.75);
     text-align: center;
-    cursor: default;
+    cursor: pointer; /* Critical for iOS touch delegation */
     transition: box-shadow 0.3s, border 0.3s;
 }
 .pt-element:hover {
@@ -736,7 +893,6 @@
 .pt-element .details {
     position: absolute; bottom: 15px; left: 0px; right: 0px; font-size: 12px; color: var(--accent);
 }
-
 
 
 
@@ -820,9 +976,18 @@
 /* ==========================================
    PERIODIC TABLE MOBILE RESPONSIVENESS
 ========================================== */
-#pt-canvas-container {
-    /* Critical: Stops the page from scrolling when swiping the 3D model */
+
+
+/* ==========================================
+   PERIODIC TABLE MOBILE RESPONSIVENESS
+========================================== */
+#pt-canvas-container,
+#bio-canvas-container,
+#chem-canvas-container,
+#physics-canvas-container {
+    /* Critical: Stops the page from scrolling when swiping 3D models on mobile */
     touch-action: none; 
+    outline: none;
 }
 
 /* Make the header stack neatly on mobile */
@@ -865,7 +1030,18 @@
 .pt-element.halogen { border-color: #a78bfa; box-shadow: inset 0 0 20px rgba(167, 139, 250, 0.3); }
 
 
-
+/* --- 3D Chemistry & Biology Lab Styles --- */
+.chem-lab-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+}
+@media (min-width: 1024px) {
+    .chem-lab-layout {
+        grid-template-columns: 1fr 300px;
+    }
+}
+/* --- 3D Biology Lab Styles --- */
 /* --- 3D Biology Lab Styles --- */
 .bio-lab-layout {
     display: grid;
@@ -943,4 +1119,541 @@
     .bio-systems-menu { flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
     .bio-sys-btn { flex: 0 0 auto; white-space: nowrap; }
     .bio-info-panel { grid-column: span 1; }
+}
+/* --- Telegram-Inspired Modern Floating Layout Extensions --- */
+:root {
+    --telegram-blur: blur(28px);
+    --telegram-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    --bottom-nav-height: 84px;
+}
+
+body.light-mode {
+    --telegram-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* Transform the bottom nav into an elegant floating dock */
+.bottom-nav {
+    display: flex; 
+    position: fixed; 
+    bottom: 20px; 
+    left: 16px; 
+    width: calc(100% - 32px); 
+    height: 68px;
+    background: rgba(15, 23, 42, 0.75); 
+    backdrop-filter: var(--telegram-blur); 
+    -webkit-backdrop-filter: var(--telegram-blur);
+    border: 1px solid var(--glass-border); 
+    border-radius: 24px;
+    z-index: 1000;
+    justify-content: space-around; 
+    align-items: center;
+    padding: 0 12px;
+    box-shadow: var(--telegram-shadow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+}
+
+body.light-mode .bottom-nav { 
+    background: rgba(255, 255, 255, 0.8); 
+}
+
+/* Bottom nav bar dynamic items with spring scaling */
+.bottom-nav-item {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 4px;
+    color: var(--text-muted); 
+    text-decoration: none; 
+    font-size: 11px; 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+    padding: 8px; 
+    border-radius: 16px;
+    flex: 1; 
+    max-width: 64px; 
+    position: relative;
+}
+
+.bottom-nav-item i { 
+    font-size: 20px; 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+.bottom-nav-item.active { 
+    color: var(--primary); 
+}
+
+.bottom-nav-item.active i { 
+    transform: translateY(-4px) scale(1.15); 
+    color: var(--primary);
+}
+
+/* Contextual bubble background for the active tab indicator */
+.bottom-nav-item.active::before {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    width: 6px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+/* Adaptive Adaptive Top Header Layout */
+.top-header { 
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center; 
+    gap: var(--space-md);
+    margin-bottom: var(--space-md); 
+    background: rgba(15, 23, 42, 0.6); 
+    padding: 12px 16px;
+    border-radius: 20px; 
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--telegram-blur);
+    -webkit-backdrop-filter: var(--telegram-blur);
+    position: sticky; 
+    top: 12px; 
+    z-index: 999;
+    box-shadow: var(--telegram-shadow);
+    transition: var(--transition-smooth);
+}
+
+body.light-mode .top-header {
+    background: rgba(241, 245, 249, 0.75);
+}
+
+/* Contextual Navigation Search Interface Container */
+.header-search-container {
+    position: relative;
+    width: 100%;
+}
+
+.header-search-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: var(--glass-input);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 6px 12px;
+    width: 100%;
+    transition: var(--transition-smooth);
+}
+
+.header-search-input-wrapper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.header-search-input-wrapper input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    padding-left: 8px;
+}
+
+.header-search-input-wrapper input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Offset margins for floating nav clearance on smaller mobile viewports */
+@media (max-width: 768px) {
+        .main-wrapper { 
+            padding: var(--space-md) var(--space-md) calc(var(--bottom-nav-height) + 24px) !important;
+        }
+        .top-header {
+            margin: 0 2px var(--space-md) 4px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        /* --- Professional Element Properties Modal Interface --- */
+#element-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 9999; align-items: center; justify-content: center;
+    padding: var(--space-md);
+}
+.element-modal-backdrop {
+    position: absolute; width: 100%; height: 100%;
+    background: rgba(4, 7, 13, 0.8);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.element-modal-container {
+    position: relative; width: 100%; max-width: 780px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden; z-index: 2; color: var(--text-main);
+    animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalScaleIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.element-modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(255, 255, 255, 0.05); border: none;
+    color: var(--text-muted); font-size: 24px; cursor: pointer;
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 10;
+}
+.element-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2); color: #ef4444;
+}
+.element-modal-grid {
+    display: grid; grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+    .element-modal-grid { grid-template-columns: 1fr 1.2fr; }
+}
+.element-visual-section {
+    background: rgba(0, 0, 0, 0.2); padding: 24px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+@media (min-width: 768px) {
+    .element-visual-section {
+        border-bottom: none; border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+}
+.element-badge-header {
+    width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.element-atomic-num {
+    font-family: monospace; font-size: 18px; font-weight: bold; color: var(--accent-cyan);
+}
+.element-cat-tag {
+    font-size: 11px; text-transform: uppercase; padding: 4px 10px; border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05); font-weight: 600; letter-spacing: 0.5px;
+}
+#bohr-canvas-container {
+    width: 100%; display: flex; justify-content: center; align-items: center; min-height: 240px;
+    touch-action: none;
+}
+.element-info-section {
+    padding: 24px; display: flex; flex-direction: column; justify-content: center;
+}
+.element-title {
+    font-size: 28px; font-weight: 800; margin-bottom: 16px; color: #fff;
+    display: flex; align-items: center; gap: 8px;
+}
+.element-sym-inline {
+    color: var(--accent-cyan); font-weight: 400; font-size: 20px;
+}
+.info-data-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+}
+.info-data-card {
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px; border-radius: 12px;
+}
+.info-label {
+    display: block; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+}
+.info-value {
+    display: block; font-size: 15px; font-weight: bold; color: #fff;
+}
+.script-config {
+    font-family: monospace; color: #e0f2fe; font-size: 13px;
+}
+.element-summary-box {
+    background: rgba(14, 165, 233, 0.05); border-left: 3px solid var(--accent-cyan);
+    padding: 12px 16px; border-radius: 0 12px 12px 0;
+}
+.element-summary-box h3 {
+    font-size: 13px; margin: 0 0 4px 0; color: var(--accent-cyan); text-transform: uppercase;
+}
+.element-summary-box p {
+    margin: 0; font-size: 12.5px; color: var(--text-muted); line-height: 1.5;
+}
+        /* Removed the broken .btn-secondary override that was ruining buttons */
+    }
+
+
+/* ==========================================
+   ELEMENT MODAL & 3D ATOM ANIMATION
+========================================== */
+#element-modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(11, 17, 32, 0.85); z-index: 9999;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.3s ease; padding: 16px;
+}
+#element-modal.show { display: flex; opacity: 1; }
+
+.element-modal-content {
+    background: var(--bg-base); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl); width: 100%; max-width: 900px;
+    max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; 
+    position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05);
+    transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#element-modal.show .element-modal-content { transform: scale(1); }
+
+@media (min-width: 768px) { 
+    .element-modal-content { flex-direction: row; overflow: hidden; } 
+}
+
+.element-modal-close {
+    position: absolute; top: 16px; right: 16px; background: var(--glass-input); 
+    border: 1px solid var(--glass-border); color: var(--text-muted); 
+    width: 36px; height: 36px; border-radius: 50%; cursor: pointer; z-index: 10; 
+    display:flex; align-items:center; justify-content:center; transition: var(--transition-smooth);
+}
+.element-modal-close:hover { color: var(--danger); background: rgba(239, 68, 68, 0.1); border-color: var(--danger); transform: rotate(90deg); }
+
+/* Data Panel */
+.element-data-panel { padding: 32px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 24px; }
+.data-box { background: var(--glass-input); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); text-align: center; }
+.data-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+.data-value { font-size: 18px; font-weight: 800; color: var(--text-main); }
+
+/* Atom 3D Viewport */
+/* Atom 3D Viewport */
+.atom-container {
+    width: 100%; 
+    height: 280px; 
+    min-height: 280px; /* Forces the height on mobile */
+    flex-shrink: 0;    /* Prevents the flex container from squishing it */
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    perspective: 1000px; 
+    background: radial-gradient(circle at center, #1e293b 0%, #0b1120 100%);
+    position: relative; 
+    border-bottom: 1px solid var(--glass-border); 
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .atom-container { 
+        width: 45%; 
+        height: auto; 
+        min-height: 400px;
+        padding: 0; /* Adjusted so it doesn't break desktop */
+        border-bottom: none; 
+        border-right: 1px solid var(--glass-border); 
+    }
+}
+
+.atom-nucleus {
+    width: 30px; height: 30px; border-radius: 50%; position: absolute;
+    background: radial-gradient(circle at 30% 30%, #fff, var(--primary));
+    box-shadow: 0 0 30px var(--primary), 0 0 60px var(--accent); z-index: 5;
+    animation: pulseGlow 2s infinite alternate;
+}
+
+.atom-orbit {
+    position: absolute; border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 50%;
+    transform-style: preserve-3d; animation: spinOrbit linear infinite;
+    top: 50%; left: 50%;
+}
+
+.atom-electron {
+    position: absolute; width: 6px; height: 6px; background: #fff; border-radius: 50%;
+    box-shadow: 0 0 10px #fff, 0 0 20px var(--accent);
+    top: -3px; left: 50%; margin-left: -3px;
+}
+
+@keyframes spinOrbit { 
+    0% { transform: translate(-50%, -50%) rotate3d(var(--rx), var(--ry), var(--rz), 0deg); } 
+    100% { transform: translate(-50%, -50%) rotate3d(var(--rx), var(--ry), var(--rz), 360deg); } 
+}
+@keyframes pulseGlow { 
+    from { box-shadow: 0 0 20px var(--primary); transform: scale(1); } 
+    to { box-shadow: 0 0 40px var(--accent); transform: scale(1.1); } 
+}
+/* ==========================================
+   PERIODIC TABLE MOBILE RESPONSIVENESS
+========================================== */
+#pt-canvas-container {
+    /* Critical: Stops the page from scrolling when swiping the 3D model */
+    touch-action: none; 
+}
+#pt-canvas-container {
+    width: 100%;
+    /* Ensure the container has height on mobile */
+    height: 60vh; 
+    min-height: 400px;
+    position: relative;
+    overflow: hidden;
+    background: #000; /* Optional: adds a background for visibility */
+}
+
+
+
+/* ==========================================
+   UPGRADED FLOATING ACTION BUTTONS
+========================================== */
+
+/* Main AI Chat Button */
+.ai-chat-btn {
+    position: fixed; 
+    bottom: 110px; /* Safely clears the new floating bottom nav dock */
+    right: 20px; 
+    width: 58px; 
+    height: 58px; 
+    border-radius: 20px; /* Modern squircle shape */
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(14, 165, 233, 0.9)); 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: white; 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+    cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); 
+    z-index: 1500; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: floatIdle 3s ease-in-out infinite;
+}
+
+.ai-chat-btn:hover { 
+    transform: translateY(-4px) scale(1.08); 
+    box-shadow: 0 14px 30px rgba(59, 130, 246, 0.6); 
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.ai-chat-btn:active { 
+    transform: scale(0.9); 
+}
+
+/* Icon Interactivity */
+.ai-chat-btn i { 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+.ai-chat-btn:hover i { 
+    transform: scale(1.15) rotate(10deg); 
+}
+
+
+/* Secondary Calculator / Quick Action Button */
+.fab-quick { 
+    position: fixed; 
+    bottom: 180px; /* Neatly stacked directly above the AI button */
+    right: 24px; /* Slightly offset inwards for a hierarchical look */
+    width: 48px; 
+    height: 48px; 
+    border-radius: 16px; 
+    background: rgba(15, 23, 42, 0.75); 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: var(--success); 
+    border: 1px solid rgba(16, 185, 129, 0.3); 
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); 
+    z-index: 1499; cursor: pointer; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body.light-mode .fab-quick {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.fab-quick:hover { 
+    background: rgba(16, 185, 129, 0.15); 
+    border-color: var(--success);
+    transform: translateY(-4px) scale(1.1); 
+    box-shadow: 0 12px 25px rgba(16, 185, 129, 0.3);
+}
+
+.fab-quick:active { 
+    transform: scale(0.9); 
+}
+
+.fab-quick i { 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+.fab-quick:hover i { 
+    transform: rotate(15deg); 
+}
+
+
+
+
+
+
+
+
+
+/* Start buttons hidden and shrunk */
+.ai-chat-btn, .fab-quick {
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    pointer-events: none; /* Prevents invisible clicking */
+}
+
+/* Telegram-style pop-in class */
+.ai-chat-btn.show-on-scroll, .fab-quick.show-on-scroll {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Ensure the hover animations don't conflict with the scroll state */
+.ai-chat-btn.show-on-scroll:hover {
+    transform: translateY(-4px) scale(1.08); 
+}
+.fab-quick.show-on-scroll:hover {
+    transform: translateY(-4px) scale(1.1); 
+}
+
+
+
+
+
+
+
+
+/* Idle Floating Animation for AI Button */
+@keyframes floatIdle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+/* Reset placement for Desktop Screens */
+@media (min-width: 769px) {
+    .ai-chat-btn { bottom: 32px; right: 32px; width: 64px; height: 64px; animation: none; }
+    .fab-quick { bottom: 110px; right: 40px; }
+}
+
+/* Styling for 3D Molecule Viewer */
+.bond-cylinder {
+    /* Ensures the bond cylinders are rendered with a metallic/chemical look */
+    filter: brightness(1.1) contrast(1.1);
+}
+
+.atom-sphere {
+    /* Adds a subtle reflection to the atoms */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure the chemistry container is high-contrast and clear */
+#chem-canvas-container canvas {
+    border-radius: var(--radius-xl);
+    background: #000;
+}
+
+/* UI overlay styling for the chemical data */
+.chem-info-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    max-width: 250px;
+    z-index: 10;
 }
