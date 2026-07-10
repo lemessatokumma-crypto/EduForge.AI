@@ -24,6 +24,11 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
 
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -37,23 +42,110 @@
         });
     });
 </script>
+     <style>
+       
     
+    </style>
 </head>
 <body>
 
-    <div id="welcome-modal" class="modal">
-        <div class="modal-content text-center">
-            <div style="font-size:48px;margin-bottom:16px;">👋</div>
-            <h1 class="mb-2" style="font-size:24px;">Welcome to Exam_Forge</h1>
-            <p class="mb-3" style="color:var(--text-muted); font-size: 14px;">Your AI-powered Ethiopian Grade 12 National Exam prep platform.</p>
+<!-- 1. Futuristic Splash Screen -->
+ <div id="splash-screen" class="modern-splash">
+        <div class="splash-overlay-scanline"></div>
+        <div class="splash-content">
+            <div class="forge-logo-container">
+                <div class="glowing-core"></div>
+                <div class="orbit-ring orbit-x"></div>
+                <div class="orbit-ring orbit-y"></div>
+                <div class="orbit-ring orbit-z"></div>
+                <i class="fa-solid fa-graduation-cap forge-icon"></i>
+            </div>
             
-            <div class="form-group" style="text-align: left;"><label>Your Name</label><input type="text" id="onboard-name" placeholder="e.g. Abebe"></div>
-            <div class="form-group" style="text-align: left;"><label>Target Score (out of 600)</label><input type="number" id="onboard-target" value="520" min="0" max="600"></div>
-            <div class="form-group" style="text-align: left;"><label>Exam Date</label><input type="date" id="onboard-date" value="2026-06-20"></div>
+            <div class="splash-text-container">
+                <h1 class="splash-title">ExamForge</h1>
+                <div class="splash-badge">PREMIUM ENGINE</div>
+            </div>
             
-            <button onclick="completeOnboarding()" class="btn-primary w-100" style="padding: 16px; font-size: 16px; border-radius: var(--radius-lg);">Initialize Workspace <i class="fa-solid fa-rocket"></i></button>
+            <div class="boot-sequence">
+                <div class="progress-track">
+                    <div class="progress-fill" id="splash-progress"></div>
+                </div>
+                <div class="boot-text" id="boot-text">Initializing AI Core...</div>
+            </div>
         </div>
     </div>
+
+    <!-- 2. Mobile Detection Card -->
+    <div id="mobile-blocker">
+        <div class="mobile-card glass-panel">
+            <div class="mobile-icon">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <i class="fa-solid fa-triangle-exclamation overlay-warn"></i>
+            </div>
+            <h2>Mobile View Unavailable</h2>
+            <p>We sincerely apologize for the inconvenience. Our mobile experience is currently undergoing maintenance to resolve display inconsistencies and ensure the highest quality standards.</p>
+            <p>Until this is resolved, please access ExamForge Premium using a <strong>PC, Laptop, or Tablet</strong> for the optimal experience.</p>
+            
+            <div class="mobile-actions">
+                <a href="mailto:support@examforge.com" class="btn-primary w-100">
+                    <i class="fa-solid fa-headset"></i> Contact Support
+                </a>
+            </div>
+            <button onclick="document.getElementById('mobile-blocker').style.display='none'" class="btn-ghost" style="margin-top: 16px; width: 100%; border: none; font-size: 12px;">
+                I am on a tablet (Dismiss)
+            </button>
+        </div>
+    </div>
+
+
+
+
+
+    <div id="welcome-modal" class="modal">
+<div class="modal-content text-center">
+    <div style="font-size:48px;margin-bottom:16px;">👋</div>
+    <h1 class="mb-2" style="font-size:24px;">Welcome to ExamForge</h1>
+    <p class="mb-3" style="color:var(--text-muted); font-size: 14px;">Your AI-powered Grade 12 National Exam prep platform.</p>
+    
+    <div class="form-group" style="text-align: left;"><label>Your Name</label><input type="text" id="onboard-name" placeholder="e.g. Abebe"></div>
+    <div class="form-group" style="text-align: left;"><label>Email</label><input type="email" id="onboard-email" placeholder="abebe@example.com"></div>
+    <div class="form-group" style="text-align: left;"><label>Password</label><input type="password" id="onboard-password" placeholder="Min 6 characters"></div>
+    
+    <div style="display:flex; gap:10px;">
+        <div class="form-group" style="text-align: left; flex: 1;"><label>Target Score</label><input type="number" id="onboard-target" value="520" min="0" max="600"></div>
+        <div class="form-group" style="text-align: left; flex: 1;"><label>Exam Date</label><input type="date" id="onboard-date" value="2026-06-20"></div>
+    </div>
+    
+    <button onclick="completeOnboarding()" class="btn-primary w-100" id="btn-register" style="padding: 16px; font-size: 16px; border-radius: var(--radius-lg);">Initialize Workspace <i class="fa-solid fa-rocket"></i></button>
+    
+    <div style="margin-top: 16px; font-size: 14px; color: var(--text-muted);">
+        Already have an account? <span style="color: var(--primary); cursor: pointer; font-weight: bold;" onclick="showLoginModal()">Sign in here</span>
+    </div>
+</div>
+    </div>
+
+    <div id="login-modal" class="modal">
+    <div class="modal-content text-center">
+        <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+        <h1 class="mb-2" style="font-size:24px;">Welcome Back</h1>
+        <p class="mb-3" style="color:var(--text-muted); font-size: 14px;">Sign in to sync your ExamForge progress.</p>
+        
+        <div class="form-group" style="text-align: left;">
+            <label>Email / Username</label>
+            <input type="text" id="login-username" placeholder="Enter your username">
+        </div>
+        <div class="form-group" style="text-align: left;">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="••••••••">
+        </div>
+        
+        <button onclick="performLogin()" class="btn-primary w-100" style="padding: 16px; font-size: 16px; border-radius: var(--radius-lg);">Sign In <i class="fa-solid fa-right-to-bracket"></i></button>
+        
+        <div style="margin-top: 16px; font-size: 14px; color: var(--text-muted);">
+            New to ExamForge? <span style="color: var(--primary); cursor: pointer; font-weight: bold;" onclick="showRegisterModal()">Create account</span>
+        </div>
+    </div>
+</div>
 
 <nav class="sidebar" id="sidebar">
         <div class="brand"><i class="fa-solid fa-graduation-cap"></i> ExamForge</div>
@@ -91,9 +183,7 @@
     <main class="main-wrapper">
         <header class="top-header">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="hamburger-menu" id="mobile-menu-btn" onclick="toggleSidebar(event)">
-                    <span></span><span></span><span></span>
-                </div>
+              
                 <div style="color: var(--text-muted); font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; letter-spacing: 0.3px;">
                     <i class="fa-regular fa-clock"></i> <span id="current-time">--:--</span>
                     <span style="opacity: 0.3;">|</span>
@@ -102,13 +192,13 @@
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button onclick="toggleGlobalSearch()" class="btn-secondary" style="padding:8px 12px; min-height:36px;"><i class="fa-solid fa-magnifying-glass"></i></button>
-                <div class="gamification-bar">
+<input placeholder="Search" onclick="toggleGlobalSearch()" class="btn-secondary" style="padding:8px 10px; width: 100%; max-width: 530px; flex: 1; min-height:36px; cursor: pointer;">                <div class="gamification-bar">
                     <div class="badge streak-badge" title="Daily Streak"><i class="fa-solid fa-fire"></i> <span id="streak-count">1</span></div>
                     <div class="badge xp-badge" title="Total Experience Points" onclick="switchTab('achievements', document.querySelectorAll('.nav-item')[6])"><i class="fa-solid fa-star"></i> <span id="xp-points">0</span> XP <span style="opacity:0.5; margin:0 4px;">|</span> Lv. <span id="level">1</span></div>
                 </div>
                 <button onclick="toggleNotesPanel()" class="btn-secondary" style="padding:8px 12px; min-height:36px;"><i class="fa-solid fa-note-sticky"></i></button>
             </div>
+            
         </header>
 
         <div id="view-dashboard" class="view active">
@@ -478,22 +568,35 @@
         </div>
 
         <div id="view-chemistry3d" class="view">
-            <div style="margin-bottom: 12px;">
-                <h2 style="font-size:24px; margin-bottom: 4px; letter-spacing:-0.5px;">Molecular Viewer</h2>
-                <p style="color:var(--text-muted); font-size: 13px;">Drag to rotate molecules in 3D space.</p>
-            </div>
-            <div id="chem-canvas-container">
-                <div class="chem-overlay">
-                    <h2>Molecular Viewer</h2>
-                    <p>Three.js</p>
-                </div>
-                <div class="chem-controls">
-                    <button class="btn-primary" style="font-size:12px; padding:8px 10px;" onclick="spawnMolecule('H2O')"><i class="fa-solid fa-droplet"></i> H₂O</button>
-                    <button class="btn-primary" style="background:var(--accent); font-size:12px; padding:8px 10px;" onclick="spawnMolecule('CH4')"><i class="fa-solid fa-fire-flame-simple"></i> CH₄</button>
-                    <button class="btn-primary" style="background:var(--success); font-size:12px; padding:8px 10px;" onclick="spawnMolecule('NH3')"><i class="fa-solid fa-flask"></i> NH₃</button>
-                    <button class="btn-secondary" style="font-size:12px; padding:8px 10px;" onclick="spawnMolecule('CO2')">CO₂</button>
-                </div>
-            </div>
+            <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom: 12px;">
+    <div>
+        <h2 style="font-size:24px; margin-bottom: 4px; letter-spacing:-0.5px;">Molecular Viewer</h2>
+        <p style="color:var(--text-muted); font-size: 13px;">Explore VSEPR geometries or ask AI to build any compound.</p>
+    </div>
+    <div style="display:flex; gap:8px;">
+<input type="text" id="ai-molecule-input" placeholder="e.g., C6H12O6 or Aspirin..." class="form-group" style="margin:0; padding:10px; border-radius:10px; border:1px solid var(--glass-border); background:var(--glass-input); color:var(--text-main); font-size:13px; flex: 1; min-width: 140px;">        <button class="btn-primary" style="padding:10px 16px; font-size:13px;" onclick="fetchAIMolecule()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Build
+        </button>
+    </div>
+</div>
+<div class="chem-lab-layout">
+    <div id="chem-canvas-container" style="position: relative;">
+    
+</div>
+    
+    <div class="glass-panel" style="padding: 20px; display: flex; flex-direction: column;">
+        <h3 id="chem-info-name" style="font-size: 20px; color: var(--accent); margin-bottom: 4px;">Water</h3>
+        <div style="font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 16px;" id="chem-info-formula">H₂O</div>
+        
+        <div class="card-header" style="font-size: 14px;"><i class="fa-solid fa-shapes"></i> Geometry</div>
+        <div id="chem-info-geo" style="font-size: 16px; font-weight: 800; margin-bottom: 16px;">Bent (V-shaped)</div>
+        
+        <div class="card-header" style="font-size: 14px;"><i class="fa-solid fa-book-open"></i> Concept</div>
+        <p id="chem-info-desc" style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+            Due to the two lone pairs of electrons on the oxygen atom, the hydrogen atoms are pushed downward, creating a bent shape with an angle of 104.5°.
+        </p>
+    </div>
+</div>
         </div>
 
 
@@ -689,7 +792,7 @@
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
             <i class="fa-solid fa-magnifying-glass" style="font-size:20px; color:var(--text-muted);"></i>
             <input type="text" class="search-input-lg" id="global-search-input" placeholder="Search formulas, topics, pages..." oninput="performGlobalSearch(this.value)" onkeydown="if(event.key==='Escape')toggleGlobalSearch()">
-            <button onclick="toggleGlobalSearch()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;">✕</button>
+            <button onclick="toggleGlobalSearch()" style="background:none; border:none; color:var(--text-muted); font-size:24px; cursor:pointer; top: -10px; position: relative;">✕</button>
         </div>
         <div class="search-results" id="global-search-results"></div>
     </div>
@@ -816,6 +919,11 @@
                 </div>
                 
                 <button onclick="clearData()" class="btn-danger w-100" style="justify-content:center; padding: 14px; margin-top: 6px;"><i class="fa-solid fa-triangle-exclamation"></i> Factory Reset</button>
+            
+            <button onclick="signOut()" class="btn-danger w-100" style="justify-content:center; padding: 14px; margin-top: 12px; background: transparent; border: 1px solid var(--danger); color: var(--danger);">
+    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out / Switch Account
+</button>
+            
             </div>
         </div>
     </div>
@@ -823,6 +931,12 @@
     <div id="toast-container" class="toast-container"></div>
 
     
+    <script>
+
+
+    </script>
+
+
 <div id="element-modal" onclick="closeElementModal(event)">
     <div class="element-modal-content" onclick="event.stopPropagation()">
         <button class="element-modal-close" onclick="closeElementModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -861,10 +975,25 @@
                     <div class="data-label">State at STP</div>
                     <div class="data-value" id="modal-el-state">Solid</div>
                 </div>
+                <div class="data-box">
+    <div class="data-label">Electron Config</div>
+    <div class="data-value" id="modal-el-config" style="font-size: 14px;">[He] 2s² 2p²</div>
+</div>
+<div class="data-box">
+    <div class="data-label">Electronegativity</div>
+    <div class="data-value" id="modal-el-electro">2.55</div>
+</div>
+<div class="data-box">
+    <div class="data-label">Common Oxidation</div>
+    <div class="data-value" id="modal-el-ox" style="font-size: 14px;">+4, +2, -4</div>
+</div>
             </div>
         </div>
     </div>
 </div>
-<script src="script.js"></script>
+
+<script src="script.js">
+      
+    </script>
 </body>
 </html>
