@@ -41,7 +41,7 @@ const db = firebase.firestore();
         // ==========================================
         // CONSTANTS & CONFIG
         // ==========================================
-        const GROQ_API_KEY = "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";
+        const GROQ_API_KEY = "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";
 
         const CORE_SUBJECTS = {
             "Mathematics": ["Algebra", "Calculus", "Geometry", "Trigonometry", "Probability", "Statistics", "Vectors", "Matrices"],
